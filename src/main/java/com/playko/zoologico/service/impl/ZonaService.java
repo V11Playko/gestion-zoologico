@@ -5,8 +5,8 @@ import com.playko.zoologico.dto.response.ZonaResponseDto;
 import com.playko.zoologico.entity.Especie;
 import com.playko.zoologico.entity.Zona;
 import com.playko.zoologico.exception.NoDataFoundException;
-import com.playko.zoologico.exception.ZonaAlreadyExistsException;
-import com.playko.zoologico.exception.ZonaNotFoundException;
+import com.playko.zoologico.exception.zona.ZonaAlreadyExistsException;
+import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.IZonaService;
 import jakarta.transaction.Transactional;
@@ -79,7 +79,7 @@ public class ZonaService implements IZonaService {
         dto.setNombre(zona.getNombre());
         List<String> nombresEspecies = zona.getEspecies()
                 .stream()
-                .map(Especie::getNombreComun)
+                .map(Especie::getNombre)
                 .toList();
         dto.setEspecies(nombresEspecies);
         return dto;

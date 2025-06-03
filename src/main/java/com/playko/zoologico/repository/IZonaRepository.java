@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface IZonaRepository extends JpaRepository<Zona, Long> {
     boolean existsByNombreIgnoreCase(String nombre);
+    Optional<Zona> findByNombreIgnoreCase(String nombre);
 }

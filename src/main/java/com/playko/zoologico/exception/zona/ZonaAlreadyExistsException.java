@@ -1,4 +1,4 @@
-package com.playko.zoologico.exception;
+package com.playko.zoologico.exception.zona;
 
 public class ZonaAlreadyExistsException extends RuntimeException{
     public ZonaAlreadyExistsException() {
