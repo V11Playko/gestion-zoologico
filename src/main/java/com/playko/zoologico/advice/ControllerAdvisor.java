@@ -1,6 +1,7 @@
 package com.playko.zoologico.advice;
 
 import com.playko.zoologico.exception.NoDataFoundException;
+import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.especie.EspecieAlreadyExistsException;
 import com.playko.zoologico.exception.especie.EspecieConAnimalesException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.playko.zoologico.configuration.Constants.ANIMAL_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_CON_ANIMALES_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_NOT_FOUND_MESSAGE;
@@ -112,5 +114,12 @@ public class ControllerAdvisor {
             EspecieNotFoundException especieNotFoundException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ESPECIE_NOT_FOUND_MESSAGE));
+    }
+
+    @ExceptionHandler(AnimalNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleAnimalNotFoundException(
+            AnimalNotFoundException animalNotFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ANIMAL_NOT_FOUND_MESSAGE));
     }
 }

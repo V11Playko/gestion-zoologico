@@ -29,6 +29,12 @@ public class Constants {
     public static final String ESPECIE_CREATED_MESSAGE = "Especie creada correctamente.";
     public static final String ESPECIE_UPDATED_MESSAGE = "Especie actualizada correctamente.";
     public static final String ESPECIE_DELETED_MESSAGE = "Especie eliminada correctamente.";
+    /**
+     * Mensajes de éxito para Animal
+     */
+    public static final String ANIMAL_CREATED_MESSAGE = "Animal creado correctamente.";
+    public static final String ANIMAL_UPDATED_MESSAGE = "Animal actualizado correctamente.";
+    public static final String ANIMAL_DELETED_MESSAGE = "Animal eliminado correctamente.";
 
     /**
      * Mensajes de excepciones
@@ -39,4 +45,5 @@ public class Constants {
     public static final String ESPECIE_ALREADY_EXISTS_MESSAGE = "Ya existe una especie con ese nombre.";
     public static final String ESPECIE_CON_ANIMALES_MESSAGE = "No se puede eliminar la especie porque tiene animales asociados.";
     public static final String ESPECIE_NOT_FOUND_MESSAGE = "Esta especie no existe.";
+    public static final String ANIMAL_NOT_FOUND_MESSAGE = "Este animal no existe.";
 }
