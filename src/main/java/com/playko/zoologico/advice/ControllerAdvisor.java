@@ -1,8 +1,11 @@
 package com.playko.zoologico.advice;
 
 import com.playko.zoologico.exception.NoDataFoundException;
-import com.playko.zoologico.exception.ZonaAlreadyExistsException;
-import com.playko.zoologico.exception.ZonaNotFoundException;
+import com.playko.zoologico.exception.especie.EspecieAlreadyExistsException;
+import com.playko.zoologico.exception.especie.EspecieConAnimalesException;
+import com.playko.zoologico.exception.especie.EspecieNotFoundException;
+import com.playko.zoologico.exception.zona.ZonaAlreadyExistsException;
+import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.playko.zoologico.configuration.Constants.ESPECIE_ALREADY_EXISTS_MESSAGE;
+import static com.playko.zoologico.configuration.Constants.ESPECIE_CON_ANIMALES_MESSAGE;
+import static com.playko.zoologico.configuration.Constants.ESPECIE_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.NO_DATA_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.RESPONSE_MESSAGE_KEY;
 import static com.playko.zoologico.configuration.Constants.ZONA_ALREADY_EXISTS;
@@ -85,5 +91,26 @@ public class ControllerAdvisor {
             ZonaAlreadyExistsException ZonaAlreadyExistsException) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ZONA_ALREADY_EXISTS));
+    }
+
+    @ExceptionHandler(EspecieAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleEspecieAlreadyExistsException(
+            EspecieAlreadyExistsException especieAlreadyExistsException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ESPECIE_ALREADY_EXISTS_MESSAGE));
+    }
+
+    @ExceptionHandler(EspecieConAnimalesException.class)
+    public ResponseEntity<Map<String, String>> handleEspecieConAnimalesException(
+            EspecieConAnimalesException especieConAnimalesException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ESPECIE_CON_ANIMALES_MESSAGE));
+    }
+
+    @ExceptionHandler(EspecieNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleEspecieNotFoundException(
+            EspecieNotFoundException especieNotFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ESPECIE_NOT_FOUND_MESSAGE));
     }
 }
