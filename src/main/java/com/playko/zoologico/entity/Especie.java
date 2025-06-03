@@ -31,10 +31,7 @@ public class Especie {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String nombreComun;
-
-    @Column(nullable = false)
-    private String nombreCientifico;
+    private String nombre;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "zona_id", nullable = false)
