@@ -1,0 +1,28 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: gestion-zoologico
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gestion-zoologico
+    username: ${USER}
+    password: ${PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+jwt:
+  secret: ${KEYSECRET_SECURITY:eyTJhbGcdiOiJIUzUxMiIsInR5cCI6IkpaXVCJ9.eyJzdWIiOiIxMjM0NTY3sdODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.nZU_gPcMXkWpkCUpJceSxS7lSickF0tTImHhAR949Z-Nt69LgW8G6lid-mqd9B579tYM8C4FN2jdhR2VRMsjtA}
+  expiration: ${EXPIRE_DAYS_SECURITY:86400000}
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+appDescription: "gestion-zoologico"
+appVersion: "1.0.0"
