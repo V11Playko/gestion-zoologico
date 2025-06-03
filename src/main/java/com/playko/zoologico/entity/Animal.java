@@ -34,7 +34,7 @@ public class Animal {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(name = "fecha_ingreso", nullable = false)
+    @Column(name = "fecha_ingreso")
     private LocalDateTime fechaIngreso;
 
     @ManyToOne(fetch = FetchType.LAZY)
