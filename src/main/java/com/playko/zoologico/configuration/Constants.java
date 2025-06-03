@@ -23,6 +23,12 @@ public class Constants {
     public static final String ZONA_CREATED_MESSAGE = "Zona creada exitosamente.";
     public static final String ZONA_UPDATED_MESSAGE = "Zona actualizada exitosamente.";
     public static final String ZONA_DELETED_MESSAGE = "Zona eliminada exitosamente.";
+    /**
+     * Mensajes de éxito para Especie
+     */
+    public static final String ESPECIE_CREATED_MESSAGE = "Especie creada correctamente.";
+    public static final String ESPECIE_UPDATED_MESSAGE = "Especie actualizada correctamente.";
+    public static final String ESPECIE_DELETED_MESSAGE = "Especie eliminada correctamente.";
 
     /**
      * Mensajes de excepciones
@@ -30,4 +36,7 @@ public class Constants {
     public static final String ZONA_NOT_FOUND_MESSAGE = "Esta zona no existe.";
     public static final String NO_DATA_FOUND_MESSAGE = "Datos no encontrados";
     public static final String ZONA_ALREADY_EXISTS = "Ya existe una zona con ese nombre.";
+    public static final String ESPECIE_ALREADY_EXISTS_MESSAGE = "Ya existe una especie con ese nombre.";
+    public static final String ESPECIE_CON_ANIMALES_MESSAGE = "No se puede eliminar la especie porque tiene animales asociados.";
+    public static final String ESPECIE_NOT_FOUND_MESSAGE = "Esta especie no existe.";
 }
