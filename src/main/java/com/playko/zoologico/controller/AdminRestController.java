@@ -1,8 +1,11 @@
 package com.playko.zoologico.controller;
 
 import com.playko.zoologico.configuration.Constants;
+import com.playko.zoologico.dto.request.EspecieRequestDto;
 import com.playko.zoologico.dto.request.ZonaRequestDto;
+import com.playko.zoologico.dto.response.EspecieResponseDto;
 import com.playko.zoologico.dto.response.ZonaResponseDto;
+import com.playko.zoologico.service.IEspecieService;
 import com.playko.zoologico.service.IZonaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,10 +35,14 @@ import java.util.Map;
 public class AdminRestController {
 
     private final IZonaService zonaService;
+    private final IEspecieService especieService;
 
     /**
+     *
      * Endpoints para ZONA
+     *
      */
+
     @Operation(summary = "Obtener una zona por su ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Zona encontrada", content = @Content),
@@ -98,4 +105,76 @@ public class AdminRestController {
         return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ZONA_DELETED_MESSAGE));
     }
 
+
+    /**
+     *
+     * Endpoints para ESPECIE
+     *
+     */
+
+    @Operation(summary = "Obtener una especie por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Especie encontrada", content = @Content),
+            @ApiResponse(responseCode = "404", description = Constants.ESPECIE_NOT_FOUND_MESSAGE, content = @Content)
+    })
+    @GetMapping("/especie/{id}")
+    public ResponseEntity<EspecieResponseDto> obtenerEspeciePorId(@PathVariable Long id) {
+        return ResponseEntity.ok(especieService.obtenerEspeciePorId(id));
+    }
+
+    @Operation(summary = "Obtener todas las especies")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listado de especies obtenido", content = @Content),
+            @ApiResponse(responseCode = "404", description = Constants.NO_DATA_FOUND_MESSAGE, content = @Content)
+    })
+    @GetMapping("/especies")
+    public ResponseEntity<List<EspecieResponseDto>> obtenerTodasLasEspecies() {
+        return ResponseEntity.ok(especieService.obtenerTodasLasEspecies());
+    }
+
+    @Operation(summary = "Crear una nueva especie")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Especie creada correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Map"))),
+            @ApiResponse(responseCode = "409", description = Constants.ESPECIE_ALREADY_EXISTS_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+            @ApiResponse(responseCode = "404", description = Constants.ZONA_NOT_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+    })
+    @PostMapping("/especie")
+    public ResponseEntity<Map<String, String>> crearEspecie(@Valid @RequestBody EspecieRequestDto dto) {
+        especieService.crearEspecie(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ESPECIE_CREATED_MESSAGE));
+    }
+
+    @Operation(summary = "Editar una especie existente")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Especie editada correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Map"))),
+            @ApiResponse(responseCode = "404", description = Constants.ESPECIE_NOT_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+            @ApiResponse(responseCode = "409", description = Constants.ESPECIE_ALREADY_EXISTS_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+    })
+    @PutMapping("/especie/{id}")
+    public ResponseEntity<Map<String, String>> editarEspecie(@PathVariable Long id, @Valid @RequestBody EspecieRequestDto dto) {
+        especieService.editarEspecie(id, dto);
+        return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ESPECIE_UPDATED_MESSAGE));
+    }
+
+    @Operation(summary = "Eliminar una especie")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Especie eliminada correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Map"))),
+            @ApiResponse(responseCode = "404", description = Constants.ESPECIE_NOT_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+            @ApiResponse(responseCode = "409", description = Constants.ESPECIE_CON_ANIMALES_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+    })
+    @DeleteMapping("/especie/{id}")
+    public ResponseEntity<Map<String, String>> eliminarEspecie(@PathVariable Long id) {
+        especieService.eliminarEspecie(id);
+        return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ESPECIE_DELETED_MESSAGE));
+    }
 }
