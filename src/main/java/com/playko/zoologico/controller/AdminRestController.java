@@ -2,14 +2,17 @@ package com.playko.zoologico.controller;
 
 import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.AnimalRequestDto;
+import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.request.EspecieRequestDto;
 import com.playko.zoologico.dto.request.UsuarioRequestDto;
 import com.playko.zoologico.dto.request.ZonaRequestDto;
 import com.playko.zoologico.dto.response.AnimalResponseDto;
+import com.playko.zoologico.dto.response.ComentarioResponseDto;
 import com.playko.zoologico.dto.response.EspecieResponseDto;
 import com.playko.zoologico.dto.response.UsuarioResponseDto;
 import com.playko.zoologico.dto.response.ZonaResponseDto;
 import com.playko.zoologico.service.IAnimalService;
+import com.playko.zoologico.service.IComentarioService;
 import com.playko.zoologico.service.IEspecieService;
 import com.playko.zoologico.service.IUsuarioService;
 import com.playko.zoologico.service.IZonaService;
@@ -41,9 +44,14 @@ import java.util.Map;
 public class AdminRestController {
 
     private final IZonaService zonaService;
+
     private final IEspecieService especieService;
+
     private final IAnimalService animalService;
+
     private final IUsuarioService usuarioService;
+
+    private final IComentarioService comentarioService;
 
     /**
      * Endpoints para USUARIO
@@ -77,9 +85,7 @@ public class AdminRestController {
 
 
     /**
-     *
      * Endpoints para ZONA
-     *
      */
 
     @Operation(summary = "Obtener una zona por su ID")
@@ -146,9 +152,7 @@ public class AdminRestController {
 
 
     /**
-     *
      * Endpoints para ESPECIE
-     *
      */
 
     @Operation(summary = "Obtener una especie por su ID")
@@ -284,5 +288,29 @@ public class AdminRestController {
         return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ANIMAL_DELETED_MESSAGE));
     }
 
+    @Operation(summary = "Agregar un nuevo comentario a un animal")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Comentario agregado correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Map"))),
+            @ApiResponse(responseCode = "404", description = Constants.ANIMAL_NOT_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+            @ApiResponse(responseCode = "404", description = Constants.COMENTARIO_PADRE_NOT_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+    })
+    @PostMapping("/comentario")
+    public ResponseEntity<Map<String, String>> agregarComentario(@Valid @RequestBody ComentarioRequestDto dto) {
+        comentarioService.agregarComentario(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.COMENTARIO_AGREGADO_MESSAGE));
+    }
 
+    @Operation(summary = "Obtener muro de comentarios de un animal")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Muro de comentarios obtenido", content = @Content),
+            @ApiResponse(responseCode = "404", description = Constants.ANIMAL_NOT_FOUND_MESSAGE, content = @Content)
+    })
+    @GetMapping("/comentarios/muro/{animalNombre}")
+    public ResponseEntity<List<ComentarioResponseDto>> obtenerMuroDeAnimal(@PathVariable String animalNombre) {
+        return ResponseEntity.ok(comentarioService.obtenerMuroDeAnimal(animalNombre));
+    }
 }
