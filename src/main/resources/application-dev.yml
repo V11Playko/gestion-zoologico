@@ -15,8 +15,8 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 jwt:
-  secret: ${KEYSECRET_SECURITY:eyTJhbGcdiOiJIUzUxMiIsInR5cCI6IkpaXVCJ9.eyJzdWIiOiIxMjM0NTY3sdODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.nZU_gPcMXkWpkCUpJceSxS7lSickF0tTImHhAR949Z-Nt69LgW8G6lid-mqd9B579tYM8C4FN2jdhR2VRMsjtA}
-  expiration: ${EXPIRE_DAYS_SECURITY:86400000}
+  secret: ${KEYSECRET_SECURITY}
+  expiration: ${EXPIRE_MS_SECURITY}
 
 
 management:
