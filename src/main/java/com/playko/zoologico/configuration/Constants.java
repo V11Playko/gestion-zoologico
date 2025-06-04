@@ -73,6 +73,11 @@ public class Constants {
 
     public static final String COMENTARIO_PADRE_NOT_FOUND_MESSAGE = "Comentario padre no encontrado.";
 
+    public static final String ZONA_CON_ANIMALES_MESSAGE = "Esta zona tiene animales, no se puede eliminar.";
+    public static final String USER_NOT_FOUND_MESSAGE = "Usuario no encontrado";
+    public static final String ZONA_ESPECIE_MISMATCH_MESSAGE = "La zona asignada al animal no coincide con la zona de su especie.";
+    public static final String COMENTARIO_ANIMAL_MISMATCH_MESSAGE = "El comentario padre pertenece a un animal diferente.";
+    public static final String ANIMAL_SIN_COMENTARIOS_MESSAGE = "Este animal aún no tiene comentarios.";
     private Constants() {
         throw new IllegalStateException("Utility class");
     }
