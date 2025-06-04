@@ -15,4 +15,5 @@ public class ZonaResponseDto {
     private Long id;
     private String nombre;
     private List<String> especies;
+    private List<String> nameAnimales;
 }

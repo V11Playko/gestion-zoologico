@@ -5,11 +5,15 @@ import com.playko.zoologico.dto.response.AnimalResponseDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
 import com.playko.zoologico.entity.Especie;
+import com.playko.zoologico.entity.Zona;
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
+import com.playko.zoologico.exception.zona.ZonaEspecieMismatchException;
+import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IEspecieRepository;
+import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.IAnimalService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,7 @@ import java.util.stream.Collectors;
 public class AnimalService implements IAnimalService {
     private final IAnimalRepository animalRepository;
     private final IEspecieRepository especieRepository;
+    private final IZonaRepository zonaRepository;
 
     @Override
     public AnimalResponseDto obtenerAnimalPorId(Long id) {
@@ -49,6 +54,13 @@ public class AnimalService implements IAnimalService {
     public void crearAnimal(AnimalRequestDto dto) {
         Especie especie = especieRepository.findByNombreIgnoreCase(dto.getEspecieName())
                 .orElseThrow(EspecieNotFoundException::new);
+
+        Zona zona = zonaRepository.findByNombreIgnoreCase(especie.getZona().getNombre())
+                .orElseThrow(ZonaNotFoundException::new);
+
+        if (especie.getZona() == null || !especie.getZona().getId().equals(zona.getId())) {
+            throw new ZonaEspecieMismatchException();
+        }
 
         Animal animal = new Animal();
         animal.setNombre(dto.getNombre().trim());
