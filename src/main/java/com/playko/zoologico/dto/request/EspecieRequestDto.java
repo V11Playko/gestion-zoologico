@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EspecieRequestDto {
+public class EditarEspecieRequestDto {
     private String nombre;
     private String zonaName;
 }
