@@ -5,6 +5,8 @@ import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.especie.EspecieAlreadyExistsException;
 import com.playko.zoologico.exception.especie.EspecieConAnimalesException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
+import com.playko.zoologico.exception.usuario.EmailAlreadyExistsException;
+import com.playko.zoologico.exception.usuario.RoleNotFoundException;
 import com.playko.zoologico.exception.zona.ZonaAlreadyExistsException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -23,11 +25,13 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.playko.zoologico.configuration.Constants.ANIMAL_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.configuration.Constants.EMAIL_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_CON_ANIMALES_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.NO_DATA_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.RESPONSE_MESSAGE_KEY;
+import static com.playko.zoologico.configuration.Constants.ROLE_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ZONA_ALREADY_EXISTS;
 import static com.playko.zoologico.configuration.Constants.ZONA_NOT_FOUND_MESSAGE;
 
@@ -121,5 +125,19 @@ public class ControllerAdvisor {
             AnimalNotFoundException animalNotFoundException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ANIMAL_NOT_FOUND_MESSAGE));
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleEmailAlreadyExistsException(
+            EmailAlreadyExistsException emailAlreadyExistsException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, EMAIL_ALREADY_EXISTS_MESSAGE));
+    }
+
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleRoleNotFoundException(
+            RoleNotFoundException roleNotFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ROLE_NOT_FOUND_MESSAGE));
     }
 }
