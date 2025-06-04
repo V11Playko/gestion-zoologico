@@ -27,6 +27,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
@@ -60,9 +61,7 @@ public class WebSecurityConfig {
         http.cors().configurationSource(corsConfigurationSource()).and().csrf().disable()
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/v1/empleado/**").hasRole("EMPLEADO")
+                        .requestMatchers(HttpMethod.GET, "/swagger-ui/*", "/v3/api-docs/*").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin().disable()
