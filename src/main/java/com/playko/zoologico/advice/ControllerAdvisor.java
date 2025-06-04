@@ -2,13 +2,18 @@ package com.playko.zoologico.advice;
 
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
+import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
+import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
+import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
 import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
 import com.playko.zoologico.exception.especie.EspecieAlreadyExistsException;
 import com.playko.zoologico.exception.especie.EspecieConAnimalesException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
 import com.playko.zoologico.exception.usuario.EmailAlreadyExistsException;
 import com.playko.zoologico.exception.usuario.RoleNotFoundException;
+import com.playko.zoologico.exception.usuario.UsuarioNotFoundException;
 import com.playko.zoologico.exception.zona.ZonaAlreadyExistsException;
+import com.playko.zoologico.exception.zona.ZonaEspecieMismatchException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -26,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.playko.zoologico.configuration.Constants.ANIMAL_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.configuration.Constants.ANIMAL_SIN_COMENTARIOS_MESSAGE;
+import static com.playko.zoologico.configuration.Constants.COMENTARIO_ANIMAL_MISMATCH_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.COMENTARIO_PADRE_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.EMAIL_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_ALREADY_EXISTS_MESSAGE;
@@ -34,7 +41,10 @@ import static com.playko.zoologico.configuration.Constants.ESPECIE_NOT_FOUND_MES
 import static com.playko.zoologico.configuration.Constants.NO_DATA_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.RESPONSE_MESSAGE_KEY;
 import static com.playko.zoologico.configuration.Constants.ROLE_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.configuration.Constants.USER_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ZONA_ALREADY_EXISTS;
+import static com.playko.zoologico.configuration.Constants.ZONA_CON_ANIMALES_MESSAGE;
+import static com.playko.zoologico.configuration.Constants.ZONA_ESPECIE_MISMATCH_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ZONA_NOT_FOUND_MESSAGE;
 
 @ControllerAdvice
@@ -148,5 +158,40 @@ public class ControllerAdvisor {
             ComentarioPadreNotFoundException comentarioPadreNotFoundException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, COMENTARIO_PADRE_NOT_FOUND_MESSAGE));
+    }
+
+    @ExceptionHandler(ZonaConAnimalesException.class)
+    public ResponseEntity<Map<String, String>> handleZonaConAnimalesException(
+            ZonaConAnimalesException zonaConAnimalesException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ZONA_CON_ANIMALES_MESSAGE));
+    }
+
+    @ExceptionHandler(UsuarioNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleUsuarioNotFoundException(
+            UsuarioNotFoundException usuarioNotFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, USER_NOT_FOUND_MESSAGE));
+    }
+
+    @ExceptionHandler(ZonaEspecieMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleZonaEspecieMismatchException(
+            ZonaEspecieMismatchException zonaEspecieMismatchException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ZONA_ESPECIE_MISMATCH_MESSAGE));
+    }
+
+    @ExceptionHandler(AnimalSinComentariosException.class)
+    public ResponseEntity<Map<String, String>> handleAnimalSinComentariosException(
+            AnimalSinComentariosException animalSinComentariosException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ANIMAL_SIN_COMENTARIOS_MESSAGE));
+    }
+
+    @ExceptionHandler(ComentarioAnimalMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleComentarioAnimalMismatchException(
+            ComentarioAnimalMismatchException comentarioAnimalMismatchException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, COMENTARIO_ANIMAL_MISMATCH_MESSAGE));
     }
 }
