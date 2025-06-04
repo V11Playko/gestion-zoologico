@@ -6,6 +6,8 @@ public class Constants {
     }
 
     public static final String RESPONSE_MESSAGE_KEY = "Mensaje";
+    public static final String USUARIO_CREATED_MESSAGE = "Usuario empleado creado correctamente.";
+
 
     /**
      * Mensajes de Swagger
@@ -46,4 +48,7 @@ public class Constants {
     public static final String ESPECIE_CON_ANIMALES_MESSAGE = "No se puede eliminar la especie porque tiene animales asociados.";
     public static final String ESPECIE_NOT_FOUND_MESSAGE = "Esta especie no existe.";
     public static final String ANIMAL_NOT_FOUND_MESSAGE = "Este animal no existe.";
+    public static final String EMAIL_ALREADY_EXISTS_MESSAGE = "Ya existe este correo.";
+    public static final String ROLE_NOT_FOUND_MESSAGE = "Este role no existe.";
+
 }
