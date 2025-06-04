@@ -10,6 +10,7 @@ import com.playko.zoologico.exception.especie.EspecieAlreadyExistsException;
 import com.playko.zoologico.exception.especie.EspecieConAnimalesException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
+import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IEspecieRepository;
 import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.IEspecieService;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class EspecieService implements IEspecieService {
     private final IEspecieRepository especieRepository;
     private final IZonaRepository zonaRepository;
+    private final IAnimalRepository animalRepository;
 
     @Override
     public EspecieResponseDto obtenerEspeciePorId(Long id) {
@@ -87,7 +89,8 @@ public class EspecieService implements IEspecieService {
         Especie especie = especieRepository.findById(id)
                 .orElseThrow(EspecieNotFoundException::new);
 
-        if (especie.getAnimales() != null && !especie.getAnimales().isEmpty()) {
+        boolean tieneAnimales = animalRepository.existsByEspecie(especie);
+        if (tieneAnimales) {
             throw new EspecieConAnimalesException();
         }
 
