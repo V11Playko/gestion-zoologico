@@ -2,6 +2,7 @@ package com.playko.zoologico.advice;
 
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
+import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
 import com.playko.zoologico.exception.especie.EspecieAlreadyExistsException;
 import com.playko.zoologico.exception.especie.EspecieConAnimalesException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.playko.zoologico.configuration.Constants.ANIMAL_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.configuration.Constants.COMENTARIO_PADRE_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.EMAIL_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.configuration.Constants.ESPECIE_CON_ANIMALES_MESSAGE;
@@ -139,5 +141,12 @@ public class ControllerAdvisor {
             RoleNotFoundException roleNotFoundException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ROLE_NOT_FOUND_MESSAGE));
+    }
+
+    @ExceptionHandler(ComentarioPadreNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleComentarioPadreNotFoundException(
+            ComentarioPadreNotFoundException comentarioPadreNotFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, COMENTARIO_PADRE_NOT_FOUND_MESSAGE));
     }
 }
