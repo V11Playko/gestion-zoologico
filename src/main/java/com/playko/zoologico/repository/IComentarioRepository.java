@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface IComentarioRepository extends JpaRepository<Comentario, Long> {
     List<Comentario> findByAnimalAndPadreIsNullOrderByFechaAsc(Animal animal);
-    List<Comentario> findByPadreIdOrderByFechaAsc(Long padreId);
+    boolean existsByAnimal_Id(Long animalId);
 }
