@@ -61,7 +61,12 @@ public class WebSecurityConfig {
         http.cors().configurationSource(corsConfigurationSource()).and().csrf().disable()
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/swagger-ui/*", "/v3/api-docs/*").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin().disable()
