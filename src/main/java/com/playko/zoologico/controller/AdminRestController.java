@@ -3,12 +3,15 @@ package com.playko.zoologico.controller;
 import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.AnimalRequestDto;
 import com.playko.zoologico.dto.request.EspecieRequestDto;
+import com.playko.zoologico.dto.request.UsuarioRequestDto;
 import com.playko.zoologico.dto.request.ZonaRequestDto;
 import com.playko.zoologico.dto.response.AnimalResponseDto;
 import com.playko.zoologico.dto.response.EspecieResponseDto;
+import com.playko.zoologico.dto.response.UsuarioResponseDto;
 import com.playko.zoologico.dto.response.ZonaResponseDto;
 import com.playko.zoologico.service.IAnimalService;
 import com.playko.zoologico.service.IEspecieService;
+import com.playko.zoologico.service.IUsuarioService;
 import com.playko.zoologico.service.IZonaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,6 +43,38 @@ public class AdminRestController {
     private final IZonaService zonaService;
     private final IEspecieService especieService;
     private final IAnimalService animalService;
+    private final IUsuarioService usuarioService;
+
+    /**
+     * Endpoints para USUARIO
+     */
+    @Operation(summary = "Listar todos los usuarios")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listado de usuarios obtenido", content = @Content),
+            @ApiResponse(responseCode = "404", description = Constants.NO_DATA_FOUND_MESSAGE, content = @Content)
+    })
+    @GetMapping("/usuarios")
+    public ResponseEntity<List<UsuarioResponseDto>> listarUsuarios() {
+        List<UsuarioResponseDto> usuarios = usuarioService.listarUsuarios();
+        return ResponseEntity.ok(usuarios);
+    }
+
+    @Operation(summary = "Crear un nuevo usuario empleado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Usuario empleado creado correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Map"))),
+            @ApiResponse(responseCode = "409", description = Constants.EMAIL_ALREADY_EXISTS_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+            @ApiResponse(responseCode = "404", description = Constants.ROLE_NOT_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+    })
+    @PostMapping("/usuario")
+    public ResponseEntity<Map<String, String>> crearUsuarioEmpleado(@Valid @RequestBody UsuarioRequestDto dto) {
+        usuarioService.crearUsuarioEmpleado(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.USUARIO_CREATED_MESSAGE));
+    }
+
 
     /**
      *
