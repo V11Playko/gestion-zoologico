@@ -7,113 +7,6 @@
 	},
 	"item": [
 		{
-			"name": "Empleado",
-			"item": [
-				{
-					"name": "Zona",
-					"item": [
-						{
-							"name": "All Zonas",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token_empleado}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/v1/empleado/zonas",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"v1",
-										"empleado",
-										"zonas"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Especie",
-					"item": [
-						{
-							"name": "All Especies",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token_empleado}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/v1/empleado/especies",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"v1",
-										"empleado",
-										"especies"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Animal",
-					"item": [
-						{
-							"name": "All Animales",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token_empleado}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/v1/empleado/animales",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"v1",
-										"empleado",
-										"animales"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				}
-			]
-		},
-		{
 			"name": "Zona",
 			"item": [
 				{
@@ -132,16 +25,17 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/zonas/4",
+							"raw": "{{base_url}}/api/zonas/1",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"zonas",
-								"4"
+								"1"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint\n\n## Descripción\n\nEste endpoint permite obtener información sobre una zona específica en el sistema. Al realizar una solicitud GET a este endpoint, se devuelve un objeto JSON que contiene los detalles de la zona solicitada.\n\n## Método HTTP\n\n`GET`\n\n## URL\n\n`{{base_url}}/api/zonas/1`\n\n## Formato del Cuerpo de la Solicitud\n\nNo se requiere cuerpo de solicitud para este endpoint.\n\n## Parámetros Necesarios\n\n- **ID de la zona**: En la URL, el número `1` representa el ID de la zona que se desea consultar. Este parámetro es obligatorio.\n    \n\n## Ejemplo de Solicitud\n\n``` http\nGET {{base_url}}/api/zonas/1\n\n ```\n\n## Ejemplo de Respuesta\n\n``` json\n{\n  \"id\": 0,\n  \"nombre\": \"\",\n  \"especies\": [\"\"],\n  \"nameAnimales\": [\"\"]\n}\n\n ```\n\n## Notas Relevantes sobre Seguridad y Manejo del Token JWT\n\n- Este endpoint puede requerir un token JWT para la autenticación. Asegúrese de incluir el token en los encabezados de la solicitud si es necesario.\n    \n- Authorization: Bearer {su_token_jwt}\n    \n\nAsegúrese de manejar el token de manera segura y no compartirlo públicamente."
 					},
 					"response": []
 				},
@@ -169,7 +63,8 @@
 								"api",
 								"zonas"
 							]
-						}
+						},
+						"description": "## Descripción del Endpoint\n\nEste endpoint permite obtener una lista de zonas junto con sus respectivas especies y nombres de animales asociados.\n\n### 1\\. **Método HTTP**\n\n- **GET**\n    \n\n### 2\\. **URL**\n\n- `{{base_url}}/api/zonas`\n    \n\n### 3\\. **Formato del cuerpo de la solicitud**\n\n- Este endpoint no requiere un cuerpo de solicitud, ya que es un método GET.\n    \n\n### 4\\. **Parámetros necesarios**\n\n- No se requieren parámetros en la solicitud.\n    \n\n### 5\\. **Ejemplos de solicitud y respuesta**\n\n**Ejemplo de Solicitud:**\n\n``` http\nGET {{base_url}}/api/zonas\n\n ```\n\n**Ejemplo de Respuesta:**\n\n``` json\n[\n    {\n        \"id\": 0,\n        \"nombre\": \"\",\n        \"especies\": [\"\"],\n        \"nameAnimales\": [\"\"]\n    }\n]\n\n ```\n\n### 6\\. **Notas relevantes sobre seguridad**\n\n- Asegúrese de manejar el token JWT adecuadamente en la cabecera de autorización para acceder a este endpoint. La falta de un token válido puede resultar en un error de autorización."
 					},
 					"response": []
 				},
@@ -190,7 +85,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"nombre\": \"Zona de osos\"\r\n}",
+							"raw": "{\r\n  \"nombre\": \"Zona de ranas\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -206,7 +101,8 @@
 								"api",
 								"zonas"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint: Crear Zona\n\n## Método HTTP\n\n**POST**\n\n## URL\n\n`{{base_url}}/api/zonas`\n\n## Formato del Cuerpo de la Solicitud\n\nEl cuerpo de la solicitud debe estar estructurado en formato JSON y debe incluir el siguiente campo:\n\n- **nombre** (string, obligatorio): El nombre de la zona que se desea crear.\n    \n\n### Ejemplo de Cuerpo de Solicitud\n\n``` json\n{\n  \"nombre\": \"Zona de ranas\"\n}\n\n ```\n\n## Parámetros Necesarios\n\n- **nombre**: (obligatorio) El nombre de la nueva zona.\n    \n\n## Ejemplo de Respuesta\n\n### Respuesta Exitosa\n\n- **Código de Estado**: 201\n    \n- {\"Mensaje\": \"Zona creada exitosamente.\"}\n    \n\n## Notas Relevantes sobre Seguridad\n\n- Authorization: Bearer {token}\n    \n- Mantenga el token seguro y no lo comparta públicamente."
 					},
 					"response": []
 				},
@@ -244,7 +140,8 @@
 								"zonas",
 								"1"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint\n\nEste endpoint permite actualizar la información de una zona específica en el sistema.\n\n## Método HTTP\n\n**PUT**\n\n## URL\n\n`{{base_url}}/api/zonas/1`\n\n## Formato del cuerpo de la solicitud\n\nEl cuerpo de la solicitud debe estar en formato JSON y debe contener el siguiente campo:\n\n- **nombre** (string): El nombre de la zona que se desea actualizar.\n    \n\n### Ejemplo de solicitud\n\n``` json\n{\n  \"nombre\": \"Zona de aves / aviario\"\n}\n\n ```\n\n## Ejemplo de respuesta\n\nLa respuesta de una solicitud exitosa tendrá el siguiente formato:\n\n``` json\n{\n  \"Mensaje\": \"Zona actualizada exitosamente.\"\n}\n\n ```\n\n## Notas relevantes sobre seguridad\n\nSe requiere un token JWT en el encabezado de autorización para acceder a este endpoint. Asegúrate de que el token sea válido y no haya expirado."
 					},
 					"response": []
 				},
@@ -273,7 +170,8 @@
 								"zonas",
 								"5"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint\n\nEste endpoint permite eliminar una zona específica identificada por su ID.\n\n## Método HTTP\n\nDELETE\n\n## URL\n\n{{base_url}}/api/zonas/{id}\n\n## Parámetros de la Solicitud\n\n- **id** (integer): El identificador único de la zona que se desea eliminar.\n    \n\n## Ejemplo de Solicitud\n\n``` http\nDELETE {{base_url}}/api/zonas/5\n\n ```\n\n## Ejemplo de Respuesta\n\n``` json\n{\n  \"Mensaje\": \"Zona eliminada exitosamente.\"\n}\n\n ```\n\n## Notas Relevantes sobre Seguridad\n\nSe requiere un token JWT en el encabezado de autorización para acceder a este endpoint. Asegúrate de que el token sea válido y no haya expirado."
 					},
 					"response": []
 				}
@@ -307,7 +205,8 @@
 								"especies",
 								"1"
 							]
-						}
+						},
+						"description": "# 📘 Endpoint: Obtener Detalles de una Especie\n\nEste endpoint permite obtener la información detallada de una especie específica identificada por su ID.\n\n## 🧭 Método HTTP\n\n`GET`\n\n## 🌐 URL de Solicitud\n\n{{base_url}}/api/especies/1\n\n## 🔢 Parámetros de Ruta\n\n- `1`: ID de la especie que se desea consultar. En este caso, el ID es `1`.\n    \n\n## 📤 Cuerpo de la Solicitud\n\nNo se requiere cuerpo para esta solicitud `GET`.\n\n---\n\n## 📥 Respuesta\n\nLa respuesta será en formato **JSON** e incluirá los siguientes campos:\n\n- `id` (entero): El identificador único de la especie.\n    \n- `nombre` (cadena): El nombre de la especie.\n    \n- `zonaName` (cadena): El nombre de la zona a la que pertenece la especie.\n    \n- `nameAnimales` (arreglo): Una lista de nombres de animales asociados a la especie. Puede estar vacía si no hay animales registrados para esta especie.\n    \n\n### 🧪 Ejemplo de Respuesta\n\n``` json\n{\n    \"id\": 1,\n    \"nombre\": \"Guepardo amarillo\",\n    \"zonaName\": \"Zona de panteras\",\n    \"nameAnimales\": []\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -335,7 +234,8 @@
 								"api",
 								"especies"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint: Obtener Especies\n\nEste endpoint permite recuperar una lista de especies disponibles en el sistema.\n\n## Método HTTP\n\n`GET`\n\n## URL\n\n`{{base_url}}/api/especies`\n\n## Formato del cuerpo de la solicitud\n\nNo se requiere cuerpo en la solicitud.\n\n## Parámetros necesarios\n\nNo se requieren parámetros en la solicitud.\n\n## Ejemplo de solicitud\n\n``` http\nGET {{base_url}}/api/especies\n\n ```\n\n## Ejemplo de respuesta\n\n``` json\n[\n    {\n        \"id\": 0,\n        \"nombre\": \"\",\n        \"zonaName\": \"\",\n        \"nameAnimales\": []\n    }\n]\n\n ```\n\n## Notas sobre seguridad\n\nEste endpoint no requiere autenticación. Sin embargo, se recomienda implementar el manejo de tokens JWT en otros endpoints que modifiquen datos para asegurar la integridad y seguridad de la información."
 					},
 					"response": []
 				},
@@ -356,7 +256,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"nombre\": \"Gaviota reidorsadadsa \",\r\n  \"zonaName\": \"Zona de aves / aviario\"\r\n}",
+							"raw": "{\r\n  \"nombre\": \"Rana verde\",\r\n  \"zonaName\": \"Zona de ranas\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -372,7 +272,8 @@
 								"api",
 								"especies"
 							]
-						}
+						},
+						"description": "# Documentación del API para el Endpoint de Especies\n\n## Método HTTP\n\n**POST**\n\n## URL\n\n`{{base_url}}/api/especies`\n\n## Formato del cuerpo de la solicitud\n\nEl cuerpo de la solicitud debe estar estructurado en formato JSON. Asegúrate de que el tipo de contenido de la solicitud sea `application/json`.\n\n## Parámetros necesarios\n\n- **nombre** (string): El nombre de la especie que se desea agregar.\n    \n- **zonaName** (string): El nombre de la zona donde se encuentra la especie.\n    \n\n## Ejemplo de solicitud\n\n``` json\n{\n  \"nombre\": \"Rana verde\",\n  \"zonaName\": \"Zona de ranas\"\n}\n\n ```\n\n## Ejemplo de respuesta\n\n``` json\n{\n    \"id\": 1,\n    \"nombre\": \"Rana verde\",\n    \"zonaName\": \"Zona de ranas\"\n}\n\n ```\n\n## Notas relevantes sobre seguridad y manejo del token JWT\n\nEs importante manejar el token JWT de manera segura."
 					},
 					"response": []
 				},
@@ -393,7 +294,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"Gaviota rei\",\r\n    \"zonaName\": \"Zona de aves / aviario\"\r\n}",
+							"raw": "{\r\n    \"nombre\": \"Guepardo carbon\",\r\n    \"zonaName\": \"Zona de panteras\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -401,16 +302,17 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/especies/6",
+							"raw": "{{base_url}}/api/especies/2",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"especies",
-								"6"
+								"2"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint\n\n## Método HTTP\n\n**PUT**\n\n## URL\n\n`{{base_url}}/api/especies/2`\n\n## Formato del cuerpo de la solicitud\n\nEl cuerpo de la solicitud debe estar en formato **JSON**.\n\n## Parámetros necesarios\n\n- **nombre** (string, requerido): El nombre de la especie.\n    \n- **zonaName** (string, requerido): El nombre de la zona asociada a la especie.\n    \n\n## Ejemplos de solicitud\n\n``` json\n{\n  \"nombre\": \"Guepardo carbon\",\n  \"zonaName\": \"Zona de panteras\"\n}\n\n ```\n\n## Ejemplos de respuesta\n\n### Respuesta exitosa\n\n``` json\n{\n    \"Mensaje\": \"Especie actualizada correctamente.\"\n}\n\n ```\n\n### Respuesta de error\n\n``` json\n{\n  \"error\": \"No se encontró la especie con el ID proporcionado.\"\n}\n\n ```\n\n## Notas relevantes sobre seguridad\n\n- Este endpoint requiere un **token JWT** válido en el encabezado de autorización para garantizar que solo los usuarios autenticados puedan realizar modificaciones.\n    \n- Asegúrese de manejar el token de manera segura y de no exponerlo en el cliente."
 					},
 					"response": []
 				},
@@ -430,16 +332,17 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/especies/6",
+							"raw": "{{base_url}}/api/especies/2",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"especies",
-								"6"
+								"2"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint DELETE\n\nEste endpoint se utiliza para eliminar un recurso específico en el sistema, identificado por su ID.\n\n## Método HTTP\n\n**DELETE**\n\n## URL\n\n`{{base_url}}/api/especies/2`\n\n## Formato del cuerpo de la solicitud\n\nNo se requiere cuerpo en la solicitud para este endpoint.\n\n## Parámetros necesarios\n\n- **ID**: El ID del recurso que se desea eliminar (en este caso, `2`).\n    \n\n## Ejemplos de solicitud\n\n``` http\nDELETE {{base_url}}/api/especies/2\n\n ```\n\n## Ejemplos de respuesta\n\n- **Código de estado**: 200\n    \n- {\"Mensaje\": \"Especie eliminada correctamente.\"}\n    \n\n## Notas relevantes sobre seguridad\n\nEs importante manejar adecuadamente el token JWT en las solicitudes para garantizar la autenticación y autorización del usuario. Asegúrese de incluir el token en el encabezado de la solicitud para acceder a este endpoint de manera segura."
 					},
 					"response": []
 				}
@@ -473,7 +376,8 @@
 								"animales",
 								"1"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint\n\nEste endpoint permite obtener información sobre un animal específico utilizando su ID.\n\n## Método HTTP\n\n`GET`\n\n## URL del Endpoint\n\n`{{base_url}}/api/animales/1`\n\n## Formato del Cuerpo de la Solicitud\n\nNo se requiere un cuerpo de solicitud para este método.\n\n## Parámetros Necesarios\n\n- **ID**: El identificador único del animal que se desea consultar. En este caso, el ID es `1`.\n    \n\n## Ejemplo de Solicitud\n\n``` json\nGET {{base_url}}/api/animales/1\n\n ```\n\n## Ejemplo de Respuesta\n\n``` json\n{\n  \"id\": 0,\n  \"nombre\": \"\",\n  \"fechaIngreso\": \"\",\n  \"especieName\": \"\",\n  \"comentarios\": []\n}\n\n ```\n\n### Descripción de la Respuesta\n\n- **id**: El identificador del animal.\n    \n- **nombre**: El nombre del animal.\n    \n- **fechaIngreso**: La fecha en que el animal fue ingresado.\n    \n- **especieName**: El nombre de la especie del animal.\n    \n- **comentarios**: Una lista de comentarios relacionados con el animal.\n    \n\n## Notas Relevantes sobre Seguridad\n\n- Authorization: Bearer\n    \n- Asegúrese de que el token esté vigente y tenga los permisos necesarios para acceder a la información del animal.\n    \n\nEsta documentación está diseñada para facilitar el uso del API a desarrolladores hispanohablantes, asegurando que comprendan cómo interactuar con el endpoint de manera efectiva."
 					},
 					"response": []
 				},
@@ -501,7 +405,8 @@
 								"api",
 								"animales"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint: Obtener Animales\n\nEste endpoint permite obtener una lista de animales registrados en el sistema.\n\n## Método HTTP\n\n`GET`\n\n## URL\n\n`{{base_url}}/api/animales`\n\n## Formato del cuerpo de la solicitud\n\nEste endpoint no requiere un cuerpo de solicitud, ya que se utiliza el método GET para recuperar datos.\n\n## Parámetros necesarios\n\nNo se requieren parámetros en la solicitud.\n\n## Ejemplo de solicitud\n\n``` http\nGET {{base_url}}/api/animales\n\n ```\n\n## Ejemplo de respuesta\n\n``` json\n[\n    {\n        \"id\": 0,\n        \"nombre\": \"\",\n        \"fechaIngreso\": \"\",\n        \"especieName\": \"\",\n        \"comentarios\": []\n    }\n]\n\n ```\n\n## Notas relevantes sobre seguridad\n\n- Asegúrese de manejar el token JWT adecuadamente, ya que este endpoint puede requerir autenticación para acceder a los datos.\n    \n- Se recomienda utilizar HTTPS para proteger la información durante la transmisión."
 					},
 					"response": []
 				},
@@ -522,7 +427,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"nombre\": \"Kelo\",\r\n  \"especieName\": \"Paloma bravía\"\r\n}",
+							"raw": "{\r\n  \"nombre\": \"Magar\",\r\n  \"especieName\": \"oso pardo\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -538,7 +443,8 @@
 								"api",
 								"animales"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint: Agregar Animales\n\n## Método HTTP\n\n**POST**\n\n## URL\n\n`{{base_url}}/api/animales`\n\n## Formato del Cuerpo de la Solicitud\n\nEl cuerpo de la solicitud debe estar en formato **JSON**.\n\n## Parámetros Necesarios\n\n- `nombre` (string): El nombre del animal que se desea agregar.\n    \n- `especieName` (string): El nombre de la especie del animal.\n    \n\n## Ejemplo de Solicitud\n\n``` json\n{\n  \"nombre\": \"Magar\",\n  \"especieName\": \"oso pardo\"\n}\n\n ```\n\n## Ejemplo de Respuesta\n\n### Respuesta Exitosa (201 Created)\n\n``` json\n{\n    \"Mensaje\": \"Animal creado correctamente.\"\n}\n\n ```\n\n## Notas Relevantes sobre Seguridad\n\n- Se requiere un **token JWT** para autenticar la solicitud. Asegúrese de incluir el token en los encabezados de la solicitud.\n    \n- Revise las políticas de acceso y autorización para garantizar que solo los usuarios autorizados puedan agregar animales."
 					},
 					"response": []
 				},
@@ -559,7 +465,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n        \"nombre\": \"Kanelo\",\r\n        \"especieName\": \"Paloma bravía\"\r\n}",
+							"raw": "{\r\n  \"nombre\": \"Magarolu\",\r\n  \"especieName\": \"oso pardo\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -576,7 +482,8 @@
 								"animales",
 								"6"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint\n\n## Método HTTP\n\n`PUT`\n\n## URL\n\n`{{base_url}}/api/animales/6`\n\n## Formato del cuerpo de la solicitud\n\nEl cuerpo de la solicitud debe estar en formato JSON y debe incluir los siguientes parámetros:\n\n``` json\n{\n  \"nombre\": \"string\",        // Nombre del animal (ejemplo: \"Magarolu\")\n  \"especieName\": \"string\"   // Nombre de la especie (ejemplo: \"oso pardo\")\n}\n\n ```\n\n## Parámetros necesarios\n\n- **nombre**: (string) El nombre del animal que se está actualizando.\n    \n- **especieName**: (string) El nombre de la especie del animal que se está actualizando.\n    \n\n## Ejemplos de solicitud\n\n``` json\n{\n  \"nombre\": \"Magarolu\",\n  \"especieName\": \"oso pardo\"\n}\n\n ```\n\n## Ejemplos de respuesta\n\n### Respuesta exitosa\n\n``` json\n{\n  \"Mensaje\": \"Animal actualizado correctamente.\"\n}\n\n ```\n\n## Notas relevantes sobre seguridad y manejo del token JWT\n\nAsegúrese de incluir un token JWT válido en el encabezado de la solicitud para autenticar la operación.\n\nEs importante manejar el token de manera segura y no exponerlo en el cliente o en registros de acceso. Revise la documentación de seguridad de su API para obtener más detalles sobre cómo gestionar y proteger el token JWT."
 					},
 					"response": []
 				},
@@ -596,16 +503,17 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/animales/6",
+							"raw": "{{base_url}}/api/animales/5",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"animales",
-								"6"
+								"5"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint\n\n## Descripción\n\nEste endpoint permite eliminar un recurso específico en la colección de animales utilizando su identificador único.\n\n## Método HTTP\n\n**DELETE**\n\n## URL\n\n`{{base_url}}/api/animales/{id}`\n\n## Formato del cuerpo de la solicitud\n\nNo se requiere un cuerpo de solicitud para esta operación. La eliminación se realiza mediante el identificador del recurso en la URL.\n\n## Parámetros necesarios\n\n- `id` (path parameter): El identificador único del animal que se desea eliminar. En este caso, el valor de `id` es `5`.\n    \n\n## Ejemplo de solicitud\n\n``` http\nDELETE {{base_url}}/api/animales/5\n\n ```\n\n## Ejemplo de respuesta\n\n``` json\n{\n  \"Mensaje\": \"Animal eliminado correctamente.\"\n}\n\n ```\n\n**Status:** 200\n\n## Notas relevantes sobre seguridad\n\n- Se recomienda incluir un token JWT en los encabezados de la solicitud para autenticar al usuario que realiza la eliminación. Asegúrese de que el token sea válido y tenga los permisos necesarios para realizar esta operación.\n    \n- Revise las políticas de seguridad de su aplicación para evitar la eliminación no autorizada de recursos."
 					},
 					"response": []
 				}
@@ -638,7 +546,8 @@
 								"api",
 								"usuarios"
 							]
-						}
+						},
+						"description": "# Documentación del Endpoint: Obtener Usuarios\n\nEste endpoint permite recuperar una lista de usuarios registrados en el sistema.\n\n## Método HTTP\n\n**GET**\n\n## URL\n\n`{{base_url}}/api/usuarios`\n\n## Formato del cuerpo de la solicitud\n\nNo se requiere cuerpo en la solicitud para este endpoint.\n\n## Parámetros necesarios\n\nNo se requieren parámetros en la solicitud.\n\n## Ejemplo de solicitud\n\n``` http\nGET {{base_url}}/api/usuarios\n\n ```\n\n## Ejemplo de respuesta\n\n### Respuesta exitosa\n\n``` json\n[\n    {\n        \"id\": 0,\n        \"nombre\": \"\",\n        \"email\": \"\",\n        \"roleName\": \"\"\n    }\n]\n\n ```\n\n### Respuesta de error\n\n``` json\n{\n    \"error\": \"No autorizado\"\n}\n\n ```\n\n## Notas relevantes sobre seguridad\n\n- Authorization: Bearer\n    \n- Es importante validar el token en el servidor para garantizar que solo los usuarios autenticados puedan acceder a esta información."
 					},
 					"response": []
 				},
@@ -659,7 +568,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"nombre\": \"Canelo\",\r\n  \"email\": \"canelo@gmail.com\",\r\n  \"password\": \"string\"\r\n}",
+							"raw": "{\r\n  \"nombre\": \"juan\",\r\n  \"email\": \"juan@gmail.com\",\r\n  \"password\": \"string\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -675,7 +584,8 @@
 								"api",
 								"usuarios"
 							]
-						}
+						},
+						"description": "## Endpoint: Crear Usuario\n\nEste endpoint permite registrar un nuevo usuario en el sistema. Se debe enviar un cuerpo en formato JSON con los datos necesarios para crear la cuenta. Tras una creación exitosa, el servidor responderá con un mensaje de confirmación.\n\n### Método HTTP\n\n`POST`\n\n### URL de Solicitud\n\n`{{base_url}}/api/usuarios`\n\n### Cuerpo de la Solicitud\n\nEl cuerpo debe enviarse en formato JSON e incluir los siguientes campos obligatorios:\n\n- **nombre** (string): El nombre del nuevo usuario.\n    \n- **email** (string): El correo electrónico del usuario. Debe ser una dirección válida.\n    \n- **password** (string): La contraseña del usuario.\n    \n\n#### Ejemplo de Cuerpo de Solicitud\n\n``` json\n{\n  \"nombre\": \"juan\",\n  \"email\": \"juan@gmail.com\",\n  \"password\": \"string\"\n}\n\n ```\n\n### Respuesta\n\nLa respuesta será en formato JSON e incluirá un mensaje confirmando la creación del usuario.\n\n#### Ejemplo de Respuesta Exitosa\n\n``` json\n{\n  \"Mensaje\": \"Usuario empleado creado correctamente.\"\n}\n\n ```\n\n### Notas\n\n- Asegúrate de que el correo electrónico no esté ya registrado en el sistema, ya que esto podría causar un error de duplicación."
 					},
 					"response": []
 				}
@@ -700,7 +610,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/comentarios/muro/Alana",
+							"raw": "{{base_url}}/api/comentarios/muro/hako",
 							"host": [
 								"{{base_url}}"
 							],
@@ -708,9 +618,10 @@
 								"api",
 								"comentarios",
 								"muro",
-								"Alana"
+								"hako"
 							]
-						}
+						},
+						"description": "## Endpoint: Obtener Comentarios del Muro de un Animal\n\nEste endpoint permite obtener todos los comentarios públicos del muro de un animal específico, junto con sus respuestas organizadas jerárquicamente.\n\n### Método HTTP\n\n`GET`\n\n### URL de Solicitud\n\n`{{base_url}}/api/comentarios/muro/hako`\n\n> \n\n**Nota:** En este ejemplo, `\"hako\"` es el identificador del animal para el cual se están solicitando los comentarios. Puede variar según el nombre o ID del animal.\n\n \n  \n\n### Cuerpo de la Solicitud\n\nNo se requiere enviar cuerpo (`body`) en esta solicitud.\n\n### Respuesta\n\nLa respuesta será un arreglo en formato JSON, donde cada elemento representa un comentario con la siguiente información:\n\n- **id** (entero): Identificador único del comentario.\n    \n- **contenido** (cadena): Texto del comentario publicado.\n    \n- **fecha** (cadena, formato ISO 8601): Fecha y hora en que fue creado el comentario.\n    \n- **autorNombre** (cadena): Nombre del autor del comentario.\n    \n- **respuestas** (array): Lista de respuestas anidadas al comentario. Cada respuesta tiene la misma estructura.\n    \n\n#### Ejemplo de Respuesta Exitosa\n\n``` json\n[\n  {\n    \"id\": 1,\n    \"contenido\": \"Adoro\",\n    \"fecha\": \"2025-06-04T15:08:21.492430\",\n    \"autorNombre\": \"Admin\",\n    \"respuestas\": []\n  },\n  {\n    \"id\": 2,\n    \"contenido\": \"Que tierno\",\n    \"fecha\": \"2025-06-04T15:08:43.070411\",\n    \"autorNombre\": \"canelo\",\n    \"respuestas\": [\n      {\n        \"id\": 3,\n        \"contenido\": \"Siiiiiiiii\",\n        \"fecha\": \"2025-06-04T15:09:02.685328\",\n        \"autorNombre\": \"Admin\",\n        \"respuestas\": []\n      },\n      {\n        \"id\": 5,\n        \"contenido\": \"Me encanta Hako\",\n        \"fecha\": \"2025-06-04T21:01:53.298278\",\n        \"autorNombre\": \"Admin\",\n        \"respuestas\": []\n      }\n    ]\n  }\n]\n\n ```\n\n### Notas\n\n- Este endpoint **no requiere cuerpo de solicitud**.\n    \n- Los comentarios pueden tener múltiples niveles de respuestas, aunque normalmente se espera una o dos capas de anidación."
 					},
 					"response": []
 				},
@@ -722,7 +633,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token_empleado}}",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
@@ -731,7 +642,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"contenido\": \"Es hermosa!!!\",\r\n  \"animalNombre\": \"Alana\"\r\n}",
+							"raw": "{\r\n  \"contenido\": \"Enamorada de Hako\",\r\n  \"animalNombre\": \"hako\",\r\n  \"padreId\": 2\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -747,7 +658,178 @@
 								"api",
 								"comentarios"
 							]
-						}
+						},
+						"description": "## Endpoint: Crear Comentario en el Muro de un Animal\n\nEste endpoint permite publicar un nuevo comentario en el muro de un animal específico. También permite agregar una respuesta a un comentario existente utilizando el campo `padreId`.\n\n### Método HTTP\n\n`POST`\n\n### URL de Solicitud\n\n`{{base_url}}/api/comentarios`\n\n### Cuerpo de la Solicitud\n\nEl cuerpo debe enviarse en formato JSON e incluir los siguientes campos:\n\n- **contenido** (string): Texto del comentario que se desea publicar.\n    \n- **animalNombre** (string): Nombre del animal al que se le desea agregar el comentario.\n    \n- **padreId** (entero, opcional): ID del comentario al que se está respondiendo. Si no se desea responder a otro comentario, este campo puede omitirse o establecerse como `null`.\n    \n\n#### Ejemplo de Cuerpo de Solicitud\n\n``` json\n{\n  \"contenido\": \"Enamorada de Hako\",\n  \"animalNombre\": \"hako\",\n  \"padreId\": 2\n}\n\n ```\n\nEn este ejemplo, se está agregando una respuesta al comentario con ID `2` en el muro del animal llamado \"hako\".\n\n### Respuesta\n\nLa respuesta será en formato JSON e incluirá un mensaje que indica que el comentario fue agregado exitosamente.\n\n#### Ejemplo de Respuesta Exitosa\n\n``` json\n{\n  \"Mensaje\": \"Comentario agregado correctamente.\"\n}\n\n ```\n\n### Notas\n\n- El campo `padreId` permite construir hilos de conversación (comentarios y respuestas). Si se omite usando `null`, el comentario se considera principal (no es respuesta)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Indicadores",
+			"item": [
+				{
+					"name": "Cantidad animales por zona",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/zonas/indicador/cantidadAnimalesPorZona",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"zonas",
+								"indicador",
+								"cantidadAnimalesPorZona"
+							]
+						},
+						"description": "## Endpoint: Obtener Cantidad de Animales por Zona\n\nEste endpoint permite consultar un resumen estadístico que muestra cuántos animales hay registrados en cada zona del sistema.\n\n### Método HTTP\n\n`GET`\n\n### URL de Solicitud\n\n`{{base_url}}/api/zonas/indicador/cantidadAnimalesPorZona`\n\n### Cuerpo de la Solicitud\n\nEste endpoint **no requiere cuerpo** (`body`). La solicitud se realiza directamente mediante el método `GET`.\n\n### Respuesta\n\nLa respuesta será un arreglo en formato JSON, donde cada objeto representa una zona junto con la cantidad total de animales registrados en ella.\n\n#### Campos de la Respuesta\n\n- **nombreZona** (string): Nombre de la zona.\n    \n- **cantidadAnimales** (entero): Número total de animales registrados en esa zona.\n    \n\n#### Ejemplo de Respuesta Exitosa\n\n``` json\n[\n  {\n    \"nombreZona\": \"Zona de osos\",\n    \"cantidadAnimales\": 3\n  },\n  {\n    \"nombreZona\": \"Zona de panteras\",\n    \"cantidadAnimales\": 0\n  },\n  {\n    \"nombreZona\": \"Zona de aves / aviario\",\n    \"cantidadAnimales\": 1\n  }\n]\n\n ```\n\n### Notas\n\n- Este endpoint es útil para mostrar estadísticas o indicadores visuales (por ejemplo, gráficos o reportes).\n    \n- cssCopiarEditarAuthorization: Bearer {tu_token_jwt}\n    \n- Una zona puede mostrar `cantidadAnimales = 0` si no hay animales asignados actualmente."
+					},
+					"response": []
+				},
+				{
+					"name": "Porcentaje comentarios con respuesta",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comentarios/indicador/porcentajeComentariosConRespuesta",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"comentarios",
+								"indicador",
+								"porcentajeComentariosConRespuesta"
+							]
+						},
+						"description": "## Endpoint%3A%20Obtener%20Porcentaje%20de%20Comentarios%20con%20Respuesta\n\nEste%20endpoint%20proporciona%20un%20indicador%20en%20forma%20de%20porcentaje%20que%20muestra%20cu%C3%A1ntos%20comentarios%20tienen%20al%20menos%20una%20respuesta%2C%20en%20relaci%C3%B3n%20con%20el%20total%20de%20comentarios%20registrados.\n\n### M%C3%A9todo%20HTTP\n\n%3Ccode%20%3EGET%3C%2Fcode%3E\n\n### URL%20de%20Solicitud\n\n%3Ccode%20%3E%7B%7Bbase_url%7D%7D%2Fapi%2Fcomentarios%2Findicador%2FporcentajeComentariosConRespuesta%3C%2Fcode%3E\n\n### Cuerpo%20de%20la%20Solicitud\n\nEste%20endpoint%20%3Cstrong%20%3Eno%20requiere%20cuerpo%3C%2Fstrong%3E%20(%3Ccode%20%3Ebody%3C%2Fcode%3E).%20La%20informaci%C3%B3n%20se%20obtiene%20%C3%BAnicamente%20con%20una%20solicitud%20%3Ccode%20%3EGET%3C%2Fcode%3E.\n\n### Respuesta\n\nLa%20respuesta%20es%20un%20objeto%20JSON%20que%20contiene%20el%20porcentaje%20de%20comentarios%20que%20han%20recibido%20al%20menos%20una%20respuesta.\n\n#### Campos%20de%20la%20Respuesta\n\n%3Cli%20%3E%3Cdiv%3E%3Cstrong%20%3Eporcentaje%3C%2Fstrong%3E%20(string)%3A%20Porcentaje%20de%20comentarios%20con%20al%20menos%20una%20respuesta.%20El%20valor%20se%20presenta%20como%20texto%20e%20incluye%20el%20s%C3%ADmbolo%20de%20porcentaje%20(%3Ccode%20%3E%25%3C%2Fcode%3E).%3C%2Fdiv%3E%3C%2Fli%3E\n\n#### Ejemplo%20de%20Respuesta%20Exitosa\n\n``` json\n%3Cdiv%3E%7B%0A%3C%2Fdiv%3E%3Cdiv%3E%20%20%22porcentaje%22%3A%20%2250%2C0%25%22%0A%3C%2Fdiv%3E%3Cdiv%3E%7D%0A%3C%2Fdiv%3E\n ```\n\n> &lt;p &gt;En este ejemplo, el 50% de los comentarios registrados tienen al menos una respuesta.&lt;/p&gt; \n  \n\n### Notas\n\n%3Cli%20%3E%3Cdiv%3EEste%20endpoint%20es%20%C3%BAtil%20para%20generar%20%3Cstrong%20%3Eindicadores%20visuales%3C%2Fstrong%3E%20(por%20ejemplo%2C%20gr%C3%A1ficas%20o%20tarjetas%20estad%C3%ADsticas)%20en%20paneles%20de%20administraci%C3%B3n%20o%20informes.%3C%2Fdiv%3E%3C%2Fli%3E%3Cli%20%3E%3Cdiv%3ESi%20no%20hay%20comentarios%20registrados%20en%20el%20sistema%2C%20el%20backend%20debe%20manejar%20correctamente%20esta%20situaci%C3%B3n%20(por%20ejemplo%2C%20devolviendo%20%3Ccode%20%3E%220%25%22%3C%2Fcode%3E%20o%20lanzando%20un%20mensaje%20informativo).%0A%0A%3C%2Fdiv%3E%3C%2Fli%3E"
+					},
+					"response": []
+				},
+				{
+					"name": "Cantidad de animales por especie",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/especies/indicador/animalesPorEspecie",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"especies",
+								"indicador",
+								"animalesPorEspecie"
+							]
+						},
+						"description": "## Endpoint: Obtener Cantidad de Animales por Especie\n\nEste endpoint permite obtener un resumen de cuántos animales están registrados por cada especie dentro del sistema. Es útil para fines estadísticos o de visualización en paneles administrativos.\n\n### Método HTTP\n\n`GET`\n\n### URL de Solicitud\n\n`{{base_url}}/api/especies/indicador/animalesPorEspecie`\n\n### Cuerpo de la Solicitud\n\nEste endpoint **no requiere cuerpo** (`body`). Toda la información se obtiene directamente mediante una solicitud `GET`.\n\n### Parámetros\n\nNo se requieren parámetros de ruta ni de consulta.\n\n### Respuesta\n\nLa respuesta será un arreglo en formato JSON, donde cada objeto representa una especie con su respectiva cantidad de animales.\n\n#### Campos de la Respuesta\n\n- **especie** (string): Nombre de la especie.\n    \n- **cantidadAnimales** (entero): Número total de animales registrados para esa especie.\n    \n\n#### Ejemplo de Respuesta Exitosa\n\n``` json\n[\n  {\n    \"especie\": \"Guepardo amarillo\",\n    \"cantidadAnimales\": 0\n  },\n  {\n    \"especie\": \"paloma del sur\",\n    \"cantidadAnimales\": 1\n  },\n  {\n    \"especie\": \"oso pardo\",\n    \"cantidadAnimales\": 3\n  }\n]\n\n ```\n\n### Notas\n\n- Este endpoint es ideal para generar **indicadores visuales**, como gráficas de barras o tortas, en dashboards administrativos.\n    \n- Una especie puede tener `cantidadAnimales = 0` si aún no se han registrado animales bajo esa clasificación."
+					},
+					"response": []
+				},
+				{
+					"name": "Animales registrados en una fecha especifica",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/animales/indicador/animalesRegistradosEnFecha?fecha=2025-06-04",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"animales",
+								"indicador",
+								"animalesRegistradosEnFecha"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-06-04"
+								}
+							]
+						},
+						"description": "## Endpoint: Obtener Animales Registrados en una Fecha Específica\n\nEste endpoint permite consultar todos los animales que fueron registrados en una fecha determinada, incluyendo su nombre, especie y la zona en la que se encuentran ubicados.\n\n### Método HTTP\n\n`GET`\n\n### URL de Solicitud\n\n{{base_url}}/api/animales/indicador/animalesRegistradosEnFecha?fecha=2025-06-04  \n  \n\n### Parámetros de Consulta\n\n- **fecha** (LocalDate): Fecha específica en formato `YYYY-MM-DD` (ejemplo: `2025-06-04`) para la cual se desea obtener la lista de animales registrados.\n    \n\nEste parámetro es obligatorio. Si no se proporciona o tiene un formato incorrecto, el servidor puede devolver un error `400 Bad Request`.\n\n### Cuerpo de la Solicitud\n\nEste endpoint **no requiere cuerpo** (`body`), ya que los datos se envían mediante parámetros de consulta (query string).\n\n### Respuesta\n\nLa respuesta será un arreglo JSON, donde cada objeto representa un animal registrado en la fecha indicada.\n\n#### Campos de la Respuesta\n\n- **nombreAnimal** (string): Nombre del animal registrado.\n    \n- **especie** (string): Nombre de la especie a la que pertenece el animal.\n    \n- **zona** (string): Nombre de la zona del zoológico o hábitat donde se encuentra el animal.\n    \n\n#### Ejemplo de Respuesta Exitosa\n\n``` json\n[\n  {\n    \"nombreAnimal\": \"Kei\",\n    \"especie\": \"paloma del sur\",\n    \"zona\": \"Zona de aves / aviario\"\n  },\n  {\n    \"nombreAnimal\": \"Hako\",\n    \"especie\": \"oso pardo\",\n    \"zona\": \"Zona de osos\"\n  },\n  {\n    \"nombreAnimal\": \"Delye\",\n    \"especie\": \"oso pardo\",\n    \"zona\": \"Zona de osos\"\n  },\n  {\n    \"nombreAnimal\": \"Magarolu\",\n    \"especie\": \"oso pardo\",\n    \"zona\": \"Zona de osos\"\n  }\n]\n\n ```\n\n### Notas\n\n- Este endpoint es útil para monitoreo diario, reportes automáticos o generación de estadísticas en tiempo real.\n    \n- El parámetro `fecha` debe respetar el formato `YYYY-MM-DD`. Por ejemplo: `2025-06-04.`\n    \n- Si no hay animales registrados en la fecha especificada, la respuesta será un arreglo vacío (`[]`)."
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar coincidencia por palabra clave",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/busqueda?palabra=hako",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"busqueda"
+							],
+							"query": [
+								{
+									"key": "palabra",
+									"value": "hako"
+								}
+							]
+						},
+						"description": "## Endpoint: Búsqueda de Información por Palabra Clave\n\nEste endpoint permite realizar búsquedas en el sistema utilizando una palabra clave, devolviendo resultados relacionados con animales, comentarios y respuestas asociados.\n\n### Método HTTP\n\n`GET`\n\n### URL de Solicitud\n\n``` html\n{{base_url}}/api/busqueda?palabra={palabraClave}\n\n ```\n\n### Parámetros de Consulta\n\n- **palabra** (string, requerido): Palabra clave que se usará para realizar la búsqueda en los diferentes registros del sistema.\n    \n\nEste parámetro es obligatorio. Si no se proporciona, el servidor puede devolver un error `400 Bad Request`.\n\n### Cuerpo de la Solicitud\n\nEste endpoint **no requiere cuerpo** (`body`).\n\n### Respuesta\n\nLa respuesta es un arreglo JSON con los resultados que coinciden con la palabra clave de búsqueda. Cada resultado incluye información detallada sobre el tipo de resultado y su contexto.\n\n#### Campos de la Respuesta\n\n- **tipoResultado** (string): Tipo de resultado encontrado. Puede ser:\n    \n    - `\"ANIMAL\"`: Resultado relacionado con un animal.\n        \n    - `\"RESPUESTA\"`: Resultado que corresponde a una respuesta en un comentario.\n        \n    - `\"Zona\", \"Especie\", \"Comentario\"..etc...`\n        \n- **zonaNombre** (string): Nombre de la zona donde se encuentra el animal.\n    \n- **especieNombre** (string): Nombre de la especie del animal.\n    \n- **animalNombre** (string): Nombre del animal.\n    \n- **comentarioContenido** (string|null): Contenido del comentario relacionado (si aplica).\n    \n- **respuestaContenido** (string|null): Contenido de la respuesta asociada (si aplica).\n    \n\n#### Ejemplo de Respuesta Exitosa\n\n``` json\n[\n  {\n    \"tipoResultado\": \"ANIMAL\",\n    \"zonaNombre\": \"Zona de osos\",\n    \"especieNombre\": \"oso pardo\",\n    \"animalNombre\": \"Hako\",\n    \"comentarioContenido\": null,\n    \"respuestaContenido\": null\n  },\n  {\n    \"tipoResultado\": \"RESPUESTA\",\n    \"zonaNombre\": \"Zona de osos\",\n    \"especieNombre\": \"oso pardo\",\n    \"animalNombre\": \"Hako\",\n    \"comentarioContenido\": \"Que tierno\",\n    \"respuestaContenido\": \"Me encanta Hako\"\n  },\n  {\n    \"tipoResultado\": \"RESPUESTA\",\n    \"zonaNombre\": \"Zona de osos\",\n    \"especieNombre\": \"oso pardo\",\n    \"animalNombre\": \"Hako\",\n    \"comentarioContenido\": \"Que tierno\",\n    \"respuestaContenido\": \"Enamorada de Hako\"\n  }\n]\n\n ```\n\n### Notas\n\n- La búsqueda es sensible a la palabra clave proporcionada y puede devolver múltiples tipos de resultados.\n    \n- El endpoint es útil para encontrar rápidamente información relacionada con un término específico dentro de animales y comentarios.\n    \n- Se recomienda validar que el parámetro `palabra` no esté vacío antes de realizar la solicitud.\n    \n- Si no se encuentran resultados, la respuesta será un `NoContent` arreglo vacío `[]`."
 					},
 					"response": []
 				}
@@ -760,7 +842,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"heinner@gmail.com\",\r\n  \"password\": \"string\"\r\n}",
+					"raw": "{\r\n  \"email\": \"admin@mail.com\",\r\n  \"password\": \"admin\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -777,7 +859,8 @@
 						"auth",
 						"login"
 					]
-				}
+				},
+				"description": "## Descripción de la API: Inicio de sesión\n\nEste endpoint permite a los usuarios autenticarse en el sistema. Al realizar una solicitud POST a `{{base_url}}/v1/auth/login`, se envían las credenciales del usuario para obtener un token JWT que se utilizará para la autenticación en futuras solicitudes.\n\n### Parámetros de Solicitud\n\nLa solicitud debe incluir un cuerpo en formato JSON con los siguientes parámetros:\n\n- **email** (string): La dirección de correo electrónico del usuario que intenta iniciar sesión.\n    \n- **password** (string): La contraseña correspondiente a la dirección de correo electrónico proporcionada.\n    \n\n### Ejemplo de Cuerpo de Solicitud\n\n``` json\n{\n  \"email\": \"admin@mail.com\",\n  \"password\": \"admin\"\n}\n\n ```\n\n### Formato de Respuesta Esperado\n\nSi la autenticación es exitosa, el servidor devolverá un código de estado `200` con el siguiente cuerpo en formato JSON:\n\n``` json\n{\n  \"jwtToken\": \"\",\n  \"email\": \"\",\n  \"roles\": [\"\"]\n}\n\n ```\n\n- **jwtToken** (string): El token JWT que se utilizará para la autenticación en solicitudes posteriores.\n    \n- **email** (string): La dirección de correo electrónico del usuario autenticado.\n    \n- **roles** (array): Una lista de roles asociados al usuario.\n    \n\n### Notas Adicionales\n\n- Asegúrese de que las credenciales proporcionadas sean correctas para evitar errores de autenticación.\n    \n- El token JWT debe ser almacenado de manera segura y se debe enviar en el encabezado de autorización en las solicitudes posteriores al servidor."
 			},
 			"response": []
 		}
