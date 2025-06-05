@@ -3,6 +3,7 @@ package com.playko.zoologico.service.impl;
 import com.playko.zoologico.configuration.security.userDetails.CustomUserDetails;
 import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
+import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
 import com.playko.zoologico.entity.Usuario;
@@ -84,6 +85,27 @@ public class ComentarioService implements IComentarioService {
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public PorcentajeComentariosConRespuestasDto obtenerPorcentajeComentariosConRespuestas() {
+        List<Comentario> comentariosPadre = comentarioRepository.findByPadreIsNull();
+
+        if (comentariosPadre.isEmpty()) {
+            return new PorcentajeComentariosConRespuestasDto("0.0%");
+        }
+
+        long conRespuestas = comentariosPadre.stream()
+                .filter(comentario -> comentario.getRespuestas() != null && !comentario.getRespuestas().isEmpty())
+                .count();
+
+        double porcentaje = (double) conRespuestas / comentariosPadre.size() * 100;
+
+        String porcentajeFormateado = String.format("%.1f%%", porcentaje);
+
+        return new PorcentajeComentariosConRespuestasDto(porcentajeFormateado);
+    }
+
+
 
     private ComentarioResponseDto mapToResponseDto(Comentario comentario) {
         List<ComentarioResponseDto> respuestasDto = comentario.getRespuestas() != null
