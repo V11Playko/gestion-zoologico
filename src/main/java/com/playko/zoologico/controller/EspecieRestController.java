@@ -3,9 +3,12 @@ package com.playko.zoologico.controller;
 
 import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.EspecieRequestDto;
+import com.playko.zoologico.dto.response.AnimalesPorEspecieResponseDto;
 import com.playko.zoologico.dto.response.EspecieResponseDto;
 import com.playko.zoologico.service.IEspecieService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -94,4 +97,17 @@ public class EspecieRestController {
         especieService.eliminarEspecie(id);
         return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ESPECIE_DELETED_MESSAGE));
     }
+
+    @Operation(summary = "Obtener la cantidad de animales por especie")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cantidad de animales por especie obtenida correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimalesPorEspecieResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = Constants.NO_DATA_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+    })
+    @GetMapping("/indicador/animalesPorEspecie")
+    public ResponseEntity<List<AnimalesPorEspecieResponseDto>> obtenerCantidadAnimalesPorEspecie() {
+        return ResponseEntity.ok(especieService.obtenerCantidadAnimalesPorEspecie());
+    }
+
 }
