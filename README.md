@@ -37,9 +37,10 @@ En tu IDE (ej. IntelliJ IDEA):
 2. Selecciona la configuración del microservicio actual (por ejemplo, `gestion-zoologico`).
 3. En la sección **Environment Variables**, agrega las siguientes:
 
-| Variable | Descripción |
-|----------|-------------|
-| `USER`   | Usuario de tu base de datos PostgreSQL. *(Lo puedes encontrar en PgAdmin en `PostgreSQL -> Properties -> Connection -> Username`)* |
+| Variable   | Descripción |
+|------------|-------------|
+| `DB_URL`	  |URL de conexión JDBC a la base de datos PostgreSQL. Por defecto: `jdbc:postgresql://localhost:5432/gestion-zoologico`|
+| `USER`     | Usuario de tu base de datos PostgreSQL. *(Lo puedes encontrar en PgAdmin en `PostgreSQL -> Properties -> Connection -> Username`)* |
 | `PASSWORD` | Contraseña de tu base de datos PostgreSQL. |
 
 ---
@@ -70,6 +71,19 @@ EXPIRE_MS_SECURITY=86400000
 Puedes encontrar el modelo entidad-relación (MER) de la base de datos en la carpeta [`/docs`](./docs/modelo-er.png):
 
 ![Modelo ER](./docs/modelo-er.png)
+
+
+# ✔️ Cobertura de Tests
+
+Se desarrollaron **tests unitarios** enfocados en la capa de servicios (`service`), la cual contiene la lógica principal del negocio.
+
+- 📈 **Cobertura alcanzada**: **92%** (`266/287` líneas cubiertas).
+- 🧪 Se utilizaron librerías como `JUnit 5` y `Mockito` para facilitar las pruebas y la simulación de dependencias.
+- 🔍 Las pruebas abarcan flujos de negocio como:
+    - Registro y autenticación de usuarios.
+    - Gestión de zonas, especies y animales.
+    - Comentarios anidados.
+    - Lógica de búsqueda avanzada por criterios.
 
 ## 📝 Licencia
 

@@ -4,7 +4,7 @@ import com.playko.zoologico.configuration.security.dto.JwtTokenResponseDto;
 import com.playko.zoologico.configuration.security.dto.LoginRequestDto;
 import com.playko.zoologico.configuration.security.jwt.JwtUtils;
 import com.playko.zoologico.configuration.security.userDetails.CustomUserDetails;
-import com.playko.zoologico.service.IAuthHandler;
+import com.playko.zoologico.service.IAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AuthHandler implements IAuthHandler {
+public class AuthService implements IAuthService {
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
     @Override
