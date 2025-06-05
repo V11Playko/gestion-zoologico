@@ -2,7 +2,7 @@ package com.playko.zoologico.controller;
 
 import com.playko.zoologico.configuration.security.dto.JwtTokenResponseDto;
 import com.playko.zoologico.configuration.security.dto.LoginRequestDto;
-import com.playko.zoologico.service.IAuthHandler;
+import com.playko.zoologico.service.IAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthRestController {
 
-    private final IAuthHandler authHandler;
+    private final IAuthService authHandler;
 
     @Operation(summary = "Login into the system")
     @ApiResponses(value = {
