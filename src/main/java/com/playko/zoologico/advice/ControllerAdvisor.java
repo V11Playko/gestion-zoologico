@@ -3,6 +3,8 @@ package com.playko.zoologico.advice;
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
+import com.playko.zoologico.exception.animal.AnimalesNoEncontradosEnFechaException;
+import com.playko.zoologico.exception.animal.FechaFormatoInvalidoException;
 import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
 import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
 import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
@@ -193,5 +195,14 @@ public class ControllerAdvisor {
             ComentarioAnimalMismatchException comentarioAnimalMismatchException) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, COMENTARIO_ANIMAL_MISMATCH_MESSAGE));
+    }
+    @ExceptionHandler(FechaFormatoInvalidoException.class)
+    public ResponseEntity<String> manejarFechaInvalida(FechaFormatoInvalidoException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AnimalesNoEncontradosEnFechaException.class)
+    public ResponseEntity<String> manejarAnimalesNoEncontrados(AnimalesNoEncontradosEnFechaException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
