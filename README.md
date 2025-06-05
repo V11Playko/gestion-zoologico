@@ -1,6 +1,18 @@
 # Gestión Zoológico
 Aplicación backend para la gestión integral de un zoológico, que permite administrar zonas, especies, animales y usuarios. Incluye un sistema de comentarios anidados para cada animal, facilitando la comunicación y seguimiento de observaciones por parte de empleados.
 
+# Estructura del código
+
+- `advice`: manejo centralizado de errores.
+- `configuration`: configuracion de OpenApi, Bean, carpeta security y initialization.
+- `constans`: contiene todas las constants que hay en el proyecto.
+- `controller`: endpoints de la API.
+- `dto`: objetos de transferencia de datos.
+- `entity`: entidades JPA.
+- `exception`: todas las excepciones que se usan.
+- `repository`: acceso a datos.
+- `service`: lógica de negocio.
+
 # Instalación y configuración
 
 Antes de empezar, asegúrate de tener instalados y configurados los siguientes elementos:
@@ -36,10 +48,10 @@ En tu IDE (ej. IntelliJ IDEA):
 
 En la misma sección de **Environment Variables**, añade también:
 
-| Variable           | Descripción                                                                                                                                |
-|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| Variable           | Descripción                                                                                                                                               |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `KEYSECRET_SECURITY`| Clave secreta para firmar y validar los JWT. Usa una cadena segura aleatoria. Puedes generar una con el comando `openssl rand -base64 64` desde Git Bash. |
-| `EXPIRE_MS_SECURITY`| Tiempo de expiración del token en milisegundos (por ejemplo, `86400000` equivale a 1 día).                                                  |
+| `EXPIRE_MS_SECURITY`| Tiempo de expiración del token en milisegundos (poner, `86400000` que equivale a 1 día).                                                                  |
 
 #### 💡 Ejemplo de valores:
 ```env
@@ -52,6 +64,12 @@ EXPIRE_MS_SECURITY=86400000
 - **Gestión-Zoológico**: [http://localhost:8091/swagger-ui/index.html#/](http://localhost:8091/swagger-ui/index.html#/)
 
 ---
+
+## 🧩 Modelo Entidad-Relación
+
+Puedes encontrar el modelo entidad-relación (MER) de la base de datos en la carpeta [`/docs`](./docs/modelo-er.png):
+
+![Modelo ER](./docs/modelo-er.png)
 
 ## 📝 Licencia
 

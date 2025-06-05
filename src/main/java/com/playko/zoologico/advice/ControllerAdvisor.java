@@ -3,6 +3,8 @@ package com.playko.zoologico.advice;
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
+import com.playko.zoologico.exception.animal.AnimalesNoEncontradosEnFechaException;
+import com.playko.zoologico.exception.animal.FechaFormatoInvalidoException;
 import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
 import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
 import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
@@ -30,22 +32,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.playko.zoologico.configuration.Constants.ANIMAL_NOT_FOUND_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.ANIMAL_SIN_COMENTARIOS_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.COMENTARIO_ANIMAL_MISMATCH_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.COMENTARIO_PADRE_NOT_FOUND_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.EMAIL_ALREADY_EXISTS_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.ESPECIE_ALREADY_EXISTS_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.ESPECIE_CON_ANIMALES_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.ESPECIE_NOT_FOUND_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.NO_DATA_FOUND_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.RESPONSE_MESSAGE_KEY;
-import static com.playko.zoologico.configuration.Constants.ROLE_NOT_FOUND_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.USER_NOT_FOUND_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.ZONA_ALREADY_EXISTS;
-import static com.playko.zoologico.configuration.Constants.ZONA_CON_ANIMALES_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.ZONA_ESPECIE_MISMATCH_MESSAGE;
-import static com.playko.zoologico.configuration.Constants.ZONA_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ANIMAL_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ANIMAL_SIN_COMENTARIOS_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.COMENTARIO_ANIMAL_MISMATCH_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.COMENTARIO_PADRE_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.EMAIL_ALREADY_EXISTS_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_ALREADY_EXISTS_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_CON_ANIMALES_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.NO_DATA_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ROLE_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.USER_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ZONA_ALREADY_EXISTS;
+import static com.playko.zoologico.constants.ExceptionMessages.ZONA_CON_ANIMALES_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ZONA_ESPECIE_MISMATCH_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ZONA_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.GlobalConstants.RESPONSE_MESSAGE_KEY;
 
 @ControllerAdvice
 public class ControllerAdvisor {
@@ -99,14 +101,14 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(ZonaNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleZonaNotFoundException(
-            ZonaNotFoundException ZonaNotFoundException) {
+            ZonaNotFoundException zonaNotFoundException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ZONA_NOT_FOUND_MESSAGE));
     }
 
     @ExceptionHandler(ZonaAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleZonaAlreadyExistsException(
-            ZonaAlreadyExistsException ZonaAlreadyExistsException) {
+            ZonaAlreadyExistsException zonaAlreadyExistsException) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ZONA_ALREADY_EXISTS));
     }
@@ -193,5 +195,14 @@ public class ControllerAdvisor {
             ComentarioAnimalMismatchException comentarioAnimalMismatchException) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, COMENTARIO_ANIMAL_MISMATCH_MESSAGE));
+    }
+    @ExceptionHandler(FechaFormatoInvalidoException.class)
+    public ResponseEntity<String> manejarFechaInvalida(FechaFormatoInvalidoException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AnimalesNoEncontradosEnFechaException.class)
+    public ResponseEntity<String> manejarAnimalesNoEncontrados(AnimalesNoEncontradosEnFechaException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }

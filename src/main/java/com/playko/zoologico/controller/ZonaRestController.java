@@ -1,10 +1,11 @@
 package com.playko.zoologico.controller;
 
-import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.ZonaRequestDto;
+import com.playko.zoologico.dto.response.CantidadAnimalesPorZonaResponseDto;
 import com.playko.zoologico.dto.response.ZonaResponseDto;
 import com.playko.zoologico.service.IZonaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -24,6 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static com.playko.zoologico.constants.ExceptionMessages.NO_DATA_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.GlobalConstants.RESPONSE_MESSAGE_KEY;
+import static com.playko.zoologico.constants.ZonaConstants.ZONA_CREATED_MESSAGE;
+import static com.playko.zoologico.constants.ZonaConstants.ZONA_DELETED_MESSAGE;
+import static com.playko.zoologico.constants.ZonaConstants.ZONA_UPDATED_MESSAGE;
 
 @RestController
 @RequestMapping("/api/zonas")
@@ -64,7 +71,7 @@ public class ZonaRestController {
     public ResponseEntity<Map<String, String>> crearZona(@Valid @RequestBody ZonaRequestDto requestDto) {
         zonaService.crearZona(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ZONA_CREATED_MESSAGE));
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ZONA_CREATED_MESSAGE));
     }
 
     @Operation(summary = "Editar una zona existente")
@@ -77,7 +84,7 @@ public class ZonaRestController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> editarZona(@PathVariable Long id, @Valid @RequestBody ZonaRequestDto requestDto) {
         zonaService.editarZona(id, requestDto);
-        return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ZONA_UPDATED_MESSAGE));
+        return ResponseEntity.ok(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ZONA_UPDATED_MESSAGE));
     }
 
     @Operation(summary = "Eliminar una zona")
@@ -89,6 +96,17 @@ public class ZonaRestController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> eliminarZona(@PathVariable Long id) {
         zonaService.eliminarZona(id);
-        return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ZONA_DELETED_MESSAGE));
+        return ResponseEntity.ok(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ZONA_DELETED_MESSAGE));
+    }
+
+    @Operation(summary = "Obtener la cantidad de animales por zona")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cantidad de animales por zona obtenida", content = @Content),
+            @ApiResponse(responseCode = "404", description = NO_DATA_FOUND_MESSAGE, content = @Content)
+    })
+    @GetMapping("/indicador/cantidadAnimalesPorZona")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<CantidadAnimalesPorZonaResponseDto>> obtenerCantidadAnimalesPorZona() {
+        return ResponseEntity.ok(zonaService.obtenerCantidadAnimalesPorZona());
     }
 }

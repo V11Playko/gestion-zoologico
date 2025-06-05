@@ -1,11 +1,13 @@
 package com.playko.zoologico.controller;
 
 
-import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.EspecieRequestDto;
+import com.playko.zoologico.dto.response.AnimalesPorEspecieResponseDto;
 import com.playko.zoologico.dto.response.EspecieResponseDto;
 import com.playko.zoologico.service.IEspecieService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -25,6 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static com.playko.zoologico.constants.EspecieConstants.ESPECIE_CREATED_MESSAGE;
+import static com.playko.zoologico.constants.EspecieConstants.ESPECIE_DELETED_MESSAGE;
+import static com.playko.zoologico.constants.EspecieConstants.ESPECIE_UPDATED_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.NO_DATA_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.GlobalConstants.RESPONSE_MESSAGE_KEY;
 
 @RestController
 @RequestMapping("/api/especies")
@@ -66,7 +74,7 @@ public class EspecieRestController {
     public ResponseEntity<Map<String, String>> crearEspecie(@Valid @RequestBody EspecieRequestDto dto) {
         especieService.crearEspecie(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ESPECIE_CREATED_MESSAGE));
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ESPECIE_CREATED_MESSAGE));
     }
 
     @Operation(summary = "Editar una especie existente")
@@ -79,7 +87,7 @@ public class EspecieRestController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> editarEspecie(@PathVariable Long id, @Valid @RequestBody EspecieRequestDto dto) {
         especieService.editarEspecie(id, dto);
-        return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ESPECIE_UPDATED_MESSAGE));
+        return ResponseEntity.ok(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ESPECIE_UPDATED_MESSAGE));
     }
 
     @Operation(summary = "Eliminar una especie")
@@ -92,6 +100,20 @@ public class EspecieRestController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> eliminarEspecie(@PathVariable Long id) {
         especieService.eliminarEspecie(id);
-        return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ESPECIE_DELETED_MESSAGE));
+        return ResponseEntity.ok(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ESPECIE_DELETED_MESSAGE));
     }
+
+    @Operation(summary = "Obtener la cantidad de animales por especie")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cantidad de animales por especie obtenida correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimalesPorEspecieResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = NO_DATA_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+    })
+    @GetMapping("/indicador/animalesPorEspecie")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<AnimalesPorEspecieResponseDto>> obtenerCantidadAnimalesPorEspecie() {
+        return ResponseEntity.ok(especieService.obtenerCantidadAnimalesPorEspecie());
+    }
+
 }

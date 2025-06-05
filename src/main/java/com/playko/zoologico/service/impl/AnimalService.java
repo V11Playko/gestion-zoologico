@@ -1,6 +1,7 @@
 package com.playko.zoologico.service.impl;
 
 import com.playko.zoologico.dto.request.AnimalRequestDto;
+import com.playko.zoologico.dto.response.AnimalRegistradoResponseDto;
 import com.playko.zoologico.dto.response.AnimalResponseDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
@@ -8,6 +9,7 @@ import com.playko.zoologico.entity.Especie;
 import com.playko.zoologico.entity.Zona;
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
+import com.playko.zoologico.exception.animal.AnimalesNoEncontradosEnFechaException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
 import com.playko.zoologico.exception.zona.ZonaEspecieMismatchException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
@@ -19,7 +21,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -90,6 +94,26 @@ public class AnimalService implements IAnimalService {
                 .orElseThrow(AnimalNotFoundException::new);
 
         animalRepository.delete(animal);
+    }
+
+    @Override
+    public List<AnimalRegistradoResponseDto> obtenerAnimalesRegistradosEnFecha(LocalDate fecha) {
+        LocalDateTime inicioDelDia = fecha.atStartOfDay();
+        LocalDateTime finDelDia = fecha.atTime(LocalTime.MAX);
+
+        List<Animal> animales = animalRepository.findByFechaIngresoBetween(inicioDelDia, finDelDia);
+
+        if (animales.isEmpty()) {
+            throw new AnimalesNoEncontradosEnFechaException(fecha);
+        }
+
+        return animales.stream()
+                .map(animal -> new AnimalRegistradoResponseDto(
+                        animal.getNombre(),
+                        animal.getEspecie().getNombre(),
+                        animal.getEspecie().getZona().getNombre()
+                ))
+                .collect(Collectors.toList());
     }
 
     private AnimalResponseDto mapToResponseDto(Animal animal) {

@@ -11,6 +11,13 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
+import static com.playko.zoologico.constants.SwaggerConstants.SWAGGER_DESCRIPTION_MESSAGE;
+import static com.playko.zoologico.constants.SwaggerConstants.SWAGGER_LICENSE_NAME_MESSAGE;
+import static com.playko.zoologico.constants.SwaggerConstants.SWAGGER_LICENSE_URL_MESSAGE;
+import static com.playko.zoologico.constants.SwaggerConstants.SWAGGER_TERMS_OF_SERVICE_MESSAGE;
+import static com.playko.zoologico.constants.SwaggerConstants.SWAGGER_TITLE_MESSAGE;
+import static com.playko.zoologico.constants.SwaggerConstants.SWAGGER_VERSION_MESSAGE;
+
 @Configuration
 public class OpenApiConfiguration {
     @Bean
@@ -21,11 +28,11 @@ public class OpenApiConfiguration {
                 .addProperty("error", new StringSchema().example("string"));
         return new OpenAPI()
                 .info(new Info()
-                        .title(Constants.SWAGGER_TITLE_MESSAGE)
-                        .description(Constants.SWAGGER_DESCRIPTION_MESSAGE)
-                        .version(Constants.SWAGGER_VERSION_MESSAGE)
-                        .license(new License().name(Constants.SWAGGER_LICENSE_NAME_MESSAGE).url(Constants.SWAGGER_LICENSE_URL_MESSAGE))
-                        .termsOfService(Constants.SWAGGER_TERMS_OF_SERVICE_MESSAGE))
+                        .title(SWAGGER_TITLE_MESSAGE)
+                        .description(SWAGGER_DESCRIPTION_MESSAGE)
+                        .version(SWAGGER_VERSION_MESSAGE)
+                        .license(new License().name(SWAGGER_LICENSE_NAME_MESSAGE).url(SWAGGER_LICENSE_URL_MESSAGE))
+                        .termsOfService(SWAGGER_TERMS_OF_SERVICE_MESSAGE))
                 .components(new Components()
                         .addSchemas("Map", mapSchema)
                         .addSchemas("Error", errorSchema));

@@ -1,6 +1,7 @@
 package com.playko.zoologico.service.impl;
 
 import com.playko.zoologico.dto.request.ZonaRequestDto;
+import com.playko.zoologico.dto.response.CantidadAnimalesPorZonaResponseDto;
 import com.playko.zoologico.dto.response.ZonaResponseDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Especie;
@@ -82,6 +83,26 @@ public class ZonaService implements IZonaService {
         }
 
         zonaRepository.delete(zona);
+    }
+
+    @Override
+    public List<CantidadAnimalesPorZonaResponseDto> obtenerCantidadAnimalesPorZona() {
+        List<Zona> zonas = zonaRepository.findAll();
+
+        if (zonas.isEmpty()) {
+            throw new NoDataFoundException();
+        }
+
+        return zonas.stream().map(zona -> {
+            long cantidadAnimales = zona.getEspecies() != null
+                    ? zona.getEspecies().stream()
+                    .filter(especie -> especie.getAnimales() != null)
+                    .mapToLong(especie -> especie.getAnimales().size())
+                    .sum()
+                    : 0L;
+
+            return new CantidadAnimalesPorZonaResponseDto(zona.getNombre(), cantidadAnimales);
+        }).collect(Collectors.toList());
     }
 
     private ZonaResponseDto mapToResponseDto(Zona zona) {

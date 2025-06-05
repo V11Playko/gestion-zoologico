@@ -1,6 +1,7 @@
 package com.playko.zoologico.service.impl;
 
 import com.playko.zoologico.dto.request.EspecieRequestDto;
+import com.playko.zoologico.dto.response.AnimalesPorEspecieResponseDto;
 import com.playko.zoologico.dto.response.EspecieResponseDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Especie;
@@ -95,6 +96,20 @@ public class EspecieService implements IEspecieService {
         }
 
         especieRepository.delete(especie);
+    }
+
+    @Override
+    public List<AnimalesPorEspecieResponseDto> obtenerCantidadAnimalesPorEspecie() {
+        List<Especie> especies = especieRepository.findAll();
+
+        if (especies.isEmpty()) throw new NoDataFoundException();
+
+        return especies.stream()
+                .map(especie -> new AnimalesPorEspecieResponseDto(
+                        especie.getNombre(),
+                        especie.getAnimales() != null ? especie.getAnimales().size() : 0
+                ))
+                .collect(Collectors.toList());
     }
 
     private EspecieResponseDto mapToResponseDto(Especie especie) {
