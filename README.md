@@ -37,9 +37,10 @@ En tu IDE (ej. IntelliJ IDEA):
 2. Selecciona la configuración del microservicio actual (por ejemplo, `gestion-zoologico`).
 3. En la sección **Environment Variables**, agrega las siguientes:
 
-| Variable | Descripción |
-|----------|-------------|
-| `USER`   | Usuario de tu base de datos PostgreSQL. *(Lo puedes encontrar en PgAdmin en `PostgreSQL -> Properties -> Connection -> Username`)* |
+| Variable   | Descripción |
+|------------|-------------|
+| `DB_URL`	  |URL de conexión JDBC a la base de datos PostgreSQL. Por defecto: `jdbc:postgresql://localhost:5432/gestion-zoologico`|
+| `USER`     | Usuario de tu base de datos PostgreSQL. *(Lo puedes encontrar en PgAdmin en `PostgreSQL -> Properties -> Connection -> Username`)* |
 | `PASSWORD` | Contraseña de tu base de datos PostgreSQL. |
 
 ---
