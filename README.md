@@ -48,10 +48,10 @@ En tu IDE (ej. IntelliJ IDEA):
 
 En la misma sección de **Environment Variables**, añade también:
 
-| Variable           | Descripción                                                                                                                                |
-|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| Variable           | Descripción                                                                                                                                               |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `KEYSECRET_SECURITY`| Clave secreta para firmar y validar los JWT. Usa una cadena segura aleatoria. Puedes generar una con el comando `openssl rand -base64 64` desde Git Bash. |
-| `EXPIRE_MS_SECURITY`| Tiempo de expiración del token en milisegundos (por ejemplo, `86400000` equivale a 1 día).                                                  |
+| `EXPIRE_MS_SECURITY`| Tiempo de expiración del token en milisegundos (poner, `86400000` que equivale a 1 día).                                                                  |
 
 #### 💡 Ejemplo de valores:
 ```env
