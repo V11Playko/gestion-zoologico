@@ -3,8 +3,11 @@ package com.playko.zoologico.controller;
 import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
+import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
 import com.playko.zoologico.service.IComentarioService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -53,4 +56,16 @@ public class ComentarioRestController {
     public ResponseEntity<List<ComentarioResponseDto>> obtenerMuroDeAnimal(@PathVariable String animalNombre) {
         return ResponseEntity.ok(comentarioService.obtenerMuroDeAnimal(animalNombre));
     }
+
+    @Operation(summary = "Obtener el porcentaje de comentarios con respuestas")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Porcentaje de comentarios con respuestas obtenido correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = PorcentajeComentariosConRespuestasDto.class)))
+    })
+    @GetMapping("/indicador/porcentajeComentariosConRespuesta")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<PorcentajeComentariosConRespuestasDto> obtenerPorcentajeComentariosConRespuestas() {
+        return ResponseEntity.ok(comentarioService.obtenerPorcentajeComentariosConRespuestas());
+    }
+
 }
