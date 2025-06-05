@@ -19,7 +19,7 @@ Antes de empezar, asegúrate de tener instalados y configurados los siguientes e
 
 - Java 17
 - Gradle 8.5
-- Base de datos PostgreSQL (con las variables de entorno `USER` y `PASSWORD` ya configuradas).
+- Base de datos PostgreSQL (con las variables de entorno `DB_URL`, `USER` y `PASSWORD` ya configuradas).
 
 ## 🛠️ Pasos para configurar el entorno local
 
