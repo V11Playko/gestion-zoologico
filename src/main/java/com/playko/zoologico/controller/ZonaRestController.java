@@ -2,9 +2,11 @@ package com.playko.zoologico.controller;
 
 import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.ZonaRequestDto;
+import com.playko.zoologico.dto.response.CantidadAnimalesPorZonaResponseDto;
 import com.playko.zoologico.dto.response.ZonaResponseDto;
 import com.playko.zoologico.service.IZonaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -90,5 +92,16 @@ public class ZonaRestController {
     public ResponseEntity<Map<String, String>> eliminarZona(@PathVariable Long id) {
         zonaService.eliminarZona(id);
         return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ZONA_DELETED_MESSAGE));
+    }
+
+    @Operation(summary = "Obtener la cantidad de animales por zona")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cantidad de animales por zona obtenida", content = @Content),
+            @ApiResponse(responseCode = "404", description = Constants.NO_DATA_FOUND_MESSAGE, content = @Content)
+    })
+    @GetMapping("/indicador/cantidadAnimalesPorZona")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<CantidadAnimalesPorZonaResponseDto>> obtenerCantidadAnimalesPorZona() {
+        return ResponseEntity.ok(zonaService.obtenerCantidadAnimalesPorZona());
     }
 }
