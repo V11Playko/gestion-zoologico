@@ -1,6 +1,5 @@
 package com.playko.zoologico.controller;
 
-import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
 import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
@@ -26,6 +25,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static com.playko.zoologico.constants.ComentarioConstants.COMENTARIO_AGREGADO_MESSAGE;
+import static com.playko.zoologico.constants.GlobalConstants.RESPONSE_MESSAGE_KEY;
+
 @RestController
 @RequestMapping("/api/comentarios")
 @RequiredArgsConstructor
@@ -43,7 +45,7 @@ public class ComentarioRestController {
     public ResponseEntity<Map<String, String>> agregarComentario(@Valid @RequestBody ComentarioRequestDto dto) {
         comentarioService.agregarComentario(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.COMENTARIO_AGREGADO_MESSAGE));
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, COMENTARIO_AGREGADO_MESSAGE));
     }
 
     @Operation(summary = "Obtener muro de comentarios de un animal")

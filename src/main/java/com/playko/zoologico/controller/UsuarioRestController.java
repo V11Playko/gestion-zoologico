@@ -1,6 +1,5 @@
 package com.playko.zoologico.controller;
 
-import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.UsuarioRequestDto;
 import com.playko.zoologico.dto.response.UsuarioResponseDto;
 import com.playko.zoologico.service.IUsuarioService;
@@ -21,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static com.playko.zoologico.constants.GlobalConstants.RESPONSE_MESSAGE_KEY;
+import static com.playko.zoologico.constants.UsuarioConstants.USUARIO_CREATED_MESSAGE;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -52,6 +54,6 @@ public class UsuarioRestController {
     public ResponseEntity<Map<String, String>> crearUsuarioEmpleado(@Valid @RequestBody UsuarioRequestDto dto) {
         usuarioService.crearUsuarioEmpleado(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.USUARIO_CREATED_MESSAGE));
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, USUARIO_CREATED_MESSAGE));
     }
 }

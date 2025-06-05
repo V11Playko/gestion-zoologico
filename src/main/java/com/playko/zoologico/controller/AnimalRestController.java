@@ -1,6 +1,5 @@
 package com.playko.zoologico.controller;
 
-import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.AnimalRequestDto;
 import com.playko.zoologico.dto.response.AnimalRegistradoResponseDto;
 import com.playko.zoologico.dto.response.AnimalResponseDto;
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,6 +31,12 @@ import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static com.playko.zoologico.constants.AnimalConstants.ANIMAL_CREATED_MESSAGE;
+import static com.playko.zoologico.constants.AnimalConstants.ANIMAL_DELETED_MESSAGE;
+import static com.playko.zoologico.constants.AnimalConstants.ANIMAL_UPDATED_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.NO_DATA_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.GlobalConstants.RESPONSE_MESSAGE_KEY;
 
 @RestController
 @RequestMapping("/api/animales")
@@ -74,7 +78,7 @@ public class AnimalRestController {
     public ResponseEntity<Map<String, String>> crearAnimal(@Valid @RequestBody AnimalRequestDto dto) {
         animalService.crearAnimal(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ANIMAL_CREATED_MESSAGE));
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ANIMAL_CREATED_MESSAGE));
     }
 
     @Operation(summary = "Editar un animal existente")
@@ -86,7 +90,7 @@ public class AnimalRestController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> editarAnimal(@PathVariable Long id, @Valid @RequestBody AnimalRequestDto dto) {
         animalService.editarAnimal(id, dto);
-        return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ANIMAL_UPDATED_MESSAGE));
+        return ResponseEntity.ok(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ANIMAL_UPDATED_MESSAGE));
     }
 
     @Operation(summary = "Eliminar un animal")
@@ -98,14 +102,14 @@ public class AnimalRestController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> eliminarAnimal(@PathVariable Long id) {
         animalService.eliminarAnimal(id);
-        return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ANIMAL_DELETED_MESSAGE));
+        return ResponseEntity.ok(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ANIMAL_DELETED_MESSAGE));
     }
 
     @Operation(summary = "Obtener animales registrados en una fecha específica")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Animales registrados obtenidos correctamente",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimalRegistradoResponseDto.class))),
-            @ApiResponse(responseCode = "404", description = Constants.NO_DATA_FOUND_MESSAGE,
+            @ApiResponse(responseCode = "404", description = NO_DATA_FOUND_MESSAGE,
                     content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
     })
     @GetMapping("/indicador/animalesRegistradosEnFecha")
