@@ -106,6 +106,7 @@ public class EspecieRestController {
                     content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
     })
     @GetMapping("/indicador/animalesPorEspecie")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<AnimalesPorEspecieResponseDto>> obtenerCantidadAnimalesPorEspecie() {
         return ResponseEntity.ok(especieService.obtenerCantidadAnimalesPorEspecie());
     }

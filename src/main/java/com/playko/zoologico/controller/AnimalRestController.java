@@ -2,13 +2,18 @@ package com.playko.zoologico.controller;
 
 import com.playko.zoologico.configuration.Constants;
 import com.playko.zoologico.dto.request.AnimalRequestDto;
+import com.playko.zoologico.dto.response.AnimalRegistradoResponseDto;
 import com.playko.zoologico.dto.response.AnimalResponseDto;
+import com.playko.zoologico.exception.animal.FechaFormatoInvalidoException;
 import com.playko.zoologico.service.IAnimalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,8 +24,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -91,4 +100,23 @@ public class AnimalRestController {
         animalService.eliminarAnimal(id);
         return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ANIMAL_DELETED_MESSAGE));
     }
+
+    @Operation(summary = "Obtener animales registrados en una fecha específica")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Animales registrados obtenidos correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimalRegistradoResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = Constants.NO_DATA_FOUND_MESSAGE,
+                    content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+    })
+    @GetMapping("/indicador/animalesRegistradosEnFecha")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public List<AnimalRegistradoResponseDto> obtenerAnimalesRegistrados(@RequestParam String fecha) {
+        try {
+            LocalDate fechaParseada = LocalDate.parse(fecha, DateTimeFormatter.ISO_LOCAL_DATE);
+            return animalService.obtenerAnimalesRegistradosEnFecha(fechaParseada);
+        } catch (DateTimeParseException e) {
+            throw new FechaFormatoInvalidoException(fecha);
+        }
+    }
+
 }
