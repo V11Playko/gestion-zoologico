@@ -72,6 +72,19 @@ Puedes encontrar el modelo entidad-relación (MER) de la base de datos en la car
 
 ![Modelo ER](./docs/modelo-er.png)
 
+
+# ✔️ Cobertura de Tests
+
+Se desarrollaron **tests unitarios** enfocados en la capa de servicios (`service`), la cual contiene la lógica principal del negocio.
+
+- 📈 **Cobertura alcanzada**: **92%** (`266/287` líneas cubiertas).
+- 🧪 Se utilizaron librerías como `JUnit 5` y `Mockito` para facilitar las pruebas y la simulación de dependencias.
+- 🔍 Las pruebas abarcan flujos de negocio como:
+    - Registro y autenticación de usuarios.
+    - Gestión de zonas, especies y animales.
+    - Comentarios anidados.
+    - Lógica de búsqueda avanzada por criterios.
+
 ## 📝 Licencia
 
 Este proyecto está licenciado bajo la **Apache License**. Consulta el archivo [`LICENSE`](./LICENSE) para más información.
