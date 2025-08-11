@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ComentarioRequestDto {
     private String contenido;
-    private String animalNombre;
+    private Long animalId;
     private Long autorId;
     private Long padreId;
 }

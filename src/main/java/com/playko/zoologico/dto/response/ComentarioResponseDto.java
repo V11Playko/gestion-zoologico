@@ -15,6 +15,6 @@ public class ComentarioResponseDto {
     private Long id;
     private String contenido;
     private String fecha;
-    private String autorNombre;
+    private Long autorId;
     private List<ComentarioResponseDto> respuestas;
 }

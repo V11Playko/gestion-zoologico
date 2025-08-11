@@ -53,10 +53,10 @@ public class ComentarioRestController {
             @ApiResponse(responseCode = "200", description = "Muro de comentarios obtenido"),
             @ApiResponse(responseCode = "404", description = "Animal no encontrado")
     })
-    @GetMapping("/muro/{animalNombre}")
+    @GetMapping("/muro/{animalId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_EMPLEADO')")
-    public ResponseEntity<List<ComentarioResponseDto>> obtenerMuroDeAnimal(@PathVariable String animalNombre) {
-        return ResponseEntity.ok(comentarioService.obtenerMuroDeAnimal(animalNombre));
+    public ResponseEntity<List<ComentarioResponseDto>> obtenerMuroDeAnimal(@PathVariable Long animalId) {
+        return ResponseEntity.ok(comentarioService.obtenerMuroDeAnimal(animalId));
     }
 
     @Operation(summary = "Obtener el porcentaje de comentarios con respuestas")

@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface IComentarioService {
     void agregarComentario(ComentarioRequestDto dto);
-    List<ComentarioResponseDto> obtenerMuroDeAnimal(String animalName);
+    List<ComentarioResponseDto> obtenerMuroDeAnimal(Long animalId);
     PorcentajeComentariosConRespuestasDto obtenerPorcentajeComentariosConRespuestas();
 }
