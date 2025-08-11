@@ -11,5 +11,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class EspecieRequestDto {
     private String nombre;
-    private String zonaName;
+    private Long zonaId;
 }

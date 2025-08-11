@@ -14,6 +14,7 @@ import java.util.List;
 public class EspecieResponseDto {
     private Long id;
     private String nombre;
-    private String zonaName;
-    private List<String> nameAnimales;
+    private Long zonaId;
+    private List<Long> animalesIds;
 }
+

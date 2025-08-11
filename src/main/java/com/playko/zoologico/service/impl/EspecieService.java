@@ -51,11 +51,7 @@ public class EspecieService implements IEspecieService {
 
     @Override
     public void crearEspecie(EspecieRequestDto dto) {
-        if (especieRepository.existsByNombreIgnoreCase(dto.getNombre())) {
-            throw new EspecieAlreadyExistsException();
-        }
-
-        Zona zona = zonaRepository.findByNombreIgnoreCase(dto.getZonaName())
+        Zona zona = zonaRepository.findById(dto.getZonaId())
                 .orElseThrow(ZonaNotFoundException::new);
 
         Especie especie = new Especie();
@@ -70,18 +66,12 @@ public class EspecieService implements IEspecieService {
         Especie especie = especieRepository.findById(id)
                 .orElseThrow(EspecieNotFoundException::new);
 
-        String nuevoNombre = dto.getNombre().trim();
-        if (!especie.getNombre().equalsIgnoreCase(nuevoNombre)
-                && especieRepository.existsByNombreIgnoreCase(nuevoNombre)) {
-            throw new EspecieAlreadyExistsException();
-        }
+        especie.setNombre(dto.getNombre().trim());
 
-        Zona zona = zonaRepository.findByNombreIgnoreCase(dto.getZonaName())
+        Zona zona = zonaRepository.findById(dto.getZonaId())
                 .orElseThrow(ZonaNotFoundException::new);
 
-        especie.setNombre(nuevoNombre);
         especie.setZona(zona);
-
         especieRepository.save(especie);
     }
 
@@ -113,17 +103,17 @@ public class EspecieService implements IEspecieService {
     }
 
     private EspecieResponseDto mapToResponseDto(Especie especie) {
-        List<String> nombresAnimales = especie.getAnimales() != null ?
+        List<Long> animalesIds = especie.getAnimales() != null ?
                 especie.getAnimales().stream()
-                        .map(Animal::getNombre)
+                        .map(Animal::getId)
                         .collect(Collectors.toList())
                 : List.of();
 
         return new EspecieResponseDto(
                 especie.getId(),
                 especie.getNombre(),
-                especie.getZona().getNombre(),
-                nombresAnimales
+                especie.getZona().getId(),
+                animalesIds
         );
     }
 }
