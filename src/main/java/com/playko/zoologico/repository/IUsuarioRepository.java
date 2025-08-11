@@ -2,6 +2,8 @@ package com.playko.zoologico.repository;
 
 import com.playko.zoologico.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,4 +13,8 @@ public interface IUsuarioRepository extends JpaRepository<Usuario, Long> {
     Usuario findByEmail(String email);
     List<Usuario> findAllById(Long idUser);
     boolean existsByEmailIgnoreCase(String email);
+
+    @Query("SELECT u FROM Usuario u JOIN FETCH u.role WHERE u.email = :email")
+    Usuario findByEmailWithRole(@Param("email") String email);
+
 }
