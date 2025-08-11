@@ -11,18 +11,19 @@ import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
 import com.playko.zoologico.exception.zona.ZonaAlreadyExistsException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
+import com.playko.zoologico.repository.IEspecieRepository;
 import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.impl.ZonaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,294 +44,150 @@ class ZonaServiceTest {
 
     @Mock
     private IZonaRepository zonaRepository;
+
     @Mock
     private IAnimalRepository animalRepository;
+
+    @Mock
+    private IEspecieRepository especieRepository;
 
     @InjectMocks
     private ZonaService zonaService;
 
     private Zona zona;
-    private Especie especie1;
-    private Animal animalA;
-    private Animal animalB;
+    private Especie especie;
+    private Animal animal;
 
     @BeforeEach
     void setUp() {
-        // Configuramos una zona de ejemplo
+        animal = new Animal();
+        animal.setId(1L);
+
+        especie = new Especie();
+        especie.setId(10L);
+        especie.setAnimales(Set.of(animal));
+
         zona = new Zona();
-        zona.setId(1L);
-        zona.setNombre("Zona Test");
-        zona.setEspecies(Collections.emptyList());
-
-        // Configuramos una especie con animales
-        especie1 = new Especie();
-        especie1.setId(2L);
-        especie1.setNombre("Especie Test");
-        especie1.setZona(zona);
-
-        animalA = new Animal();
-        animalA.setId(3L);
-        animalA.setNombre("Animal A");
-        animalA.setEspecie(especie1);
-
-        animalB = new Animal();
-        animalB.setId(4L);
-        animalB.setNombre("Animal B");
-        animalB.setEspecie(especie1);
-
-        // Asociamos animales a la especie
-        especie1.setAnimales(List.of(animalA, animalB));
-        // Asociamos especie a la zona
-        zona.setEspecies(List.of(especie1));
-    }
-
-    // ====== obtenerZonaPorId ======
-
-    @Test
-    void testObtenerZonaPorId_Success() {
-        when(zonaRepository.findById(1L)).thenReturn(Optional.of(zona));
-
-        ZonaResponseDto dto = zonaService.obtenerZonaPorId(1L);
-
-        assertNotNull(dto);
-        assertEquals(zona.getId(), dto.getId());
-        assertEquals("Zona Test", dto.getNombre());
-        // La zona tiene una única especie "Especie Test"
-        assertEquals(List.of("Especie Test"), dto.getEspecies());
-        // La zona tiene dos animales ("Animal A", "Animal B")
-        assertTrue(dto.getNameAnimales().containsAll(List.of("Animal A", "Animal B")));
-        verify(zonaRepository, times(1)).findById(1L);
+        zona.setId(100L);
+        zona.setNombre("Zona Norte");
+        zona.setEspecies(Set.of(especie));
     }
 
     @Test
-    void testObtenerZonaPorId_NotFound() {
-        when(zonaRepository.findById(99L)).thenReturn(Optional.empty());
+    void obtenerZonaPorId_debeRetornarDtoCuandoExiste() {
+        when(zonaRepository.findById(100L)).thenReturn(Optional.of(zona));
 
-        assertThrows(ZonaNotFoundException.class, () ->
-                zonaService.obtenerZonaPorId(99L)
-        );
-        verify(zonaRepository, times(1)).findById(99L);
-    }
+        ZonaResponseDto result = zonaService.obtenerZonaPorId(100L);
 
-    // ====== obtenerTodasLasZonas ======
-
-    @Test
-    void testObtenerTodasLasZonas_Success() {
-        Zona otraZona = new Zona();
-        otraZona.setId(5L);
-        otraZona.setNombre("Otra Zona");
-        otraZona.setEspecies(Collections.emptyList());
-
-        when(zonaRepository.findAll()).thenReturn(List.of(zona, otraZona));
-
-        List<ZonaResponseDto> lista = zonaService.obtenerTodasLasZonas();
-
-        assertEquals(2, lista.size());
-        assertTrue(lista.stream().anyMatch(dto -> dto.getNombre().equals("Zona Test")));
-        assertTrue(lista.stream().anyMatch(dto -> dto.getNombre().equals("Otra Zona")));
-        verify(zonaRepository, times(1)).findAll();
+        assertNotNull(result);
+        assertEquals(100L, result.getId());
+        assertEquals("Zona Norte", result.getNombre());
+        assertEquals(List.of(10L), result.getEspeciesIds());
+        assertEquals(List.of(1L), result.getAnimalesIds());
     }
 
     @Test
-    void testObtenerTodasLasZonas_NoData() {
-        when(zonaRepository.findAll()).thenReturn(Collections.emptyList());
+    void obtenerZonaPorId_debeLanzarExcepcionCuandoNoExiste() {
+        when(zonaRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(NoDataFoundException.class, () ->
-                zonaService.obtenerTodasLasZonas()
-        );
-        verify(zonaRepository, times(1)).findAll();
-    }
-
-    // ====== crearZona ======
-
-    @Test
-    void testCrearZona_Success() {
-        ZonaRequestDto request = new ZonaRequestDto();
-        request.setNombre("Nueva Zona");
-
-        when(zonaRepository.existsByNombreIgnoreCase("Nueva Zona")).thenReturn(false);
-        when(zonaRepository.save(any(Zona.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        assertDoesNotThrow(() -> zonaService.crearZona(request));
-
-        verify(zonaRepository, times(1)).existsByNombreIgnoreCase("Nueva Zona");
-        verify(zonaRepository, times(1)).save(argThat(savedZona ->
-                savedZona.getNombre().equals("Nueva Zona")
-        ));
+        assertThrows(ZonaNotFoundException.class, () -> zonaService.obtenerZonaPorId(999L));
     }
 
     @Test
-    void testCrearZona_AlreadyExists() {
-        ZonaRequestDto request = new ZonaRequestDto();
-        request.setNombre("Zona Test");
+    void obtenerTodasLasZonas_debeRetornarListaCuandoExisten() {
+        when(zonaRepository.findAllWithEspeciesAndAnimales()).thenReturn(List.of(zona));
 
-        when(zonaRepository.existsByNombreIgnoreCase("Zona Test")).thenReturn(true);
+        List<ZonaResponseDto> result = zonaService.obtenerTodasLasZonas();
 
-        assertThrows(ZonaAlreadyExistsException.class, () ->
-                zonaService.crearZona(request)
-        );
-        verify(zonaRepository, times(1)).existsByNombreIgnoreCase("Zona Test");
-        verify(zonaRepository, never()).save(any());
-    }
-
-    // ====== editarZona ======
-
-    @Test
-    void testEditarZona_Success_ChangeName() {
-        ZonaRequestDto request = new ZonaRequestDto();
-        request.setNombre("Zona Modificada");
-
-        Zona existente = new Zona();
-        existente.setId(1L);
-        existente.setNombre("Zona Test");
-        existente.setEspecies(Collections.emptyList());
-
-        when(zonaRepository.findById(1L)).thenReturn(Optional.of(existente));
-        when(zonaRepository.existsByNombreIgnoreCase("Zona Modificada")).thenReturn(false);
-        when(zonaRepository.save(any(Zona.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        assertDoesNotThrow(() -> zonaService.editarZona(1L, request));
-
-        verify(zonaRepository, times(1)).findById(1L);
-        verify(zonaRepository, times(1)).existsByNombreIgnoreCase("Zona Modificada");
-        verify(zonaRepository, times(1)).save(argThat(z ->
-                z.getNombre().equals("Zona Modificada")
-        ));
+        assertEquals(1, result.size());
+        assertEquals("Zona Norte", result.get(0).getNombre());
+        verify(zonaRepository).findAllWithEspeciesAndAnimales();
     }
 
     @Test
-    void testEditarZona_Success_SameName() {
-        ZonaRequestDto request = new ZonaRequestDto();
-        request.setNombre("Zona Test"); // mismo nombre actual
+    void obtenerTodasLasZonas_debeLanzarExcepcionCuandoNoHayDatos() {
+        when(zonaRepository.findAllWithEspeciesAndAnimales()).thenReturn(List.of());
 
-        Zona existente = new Zona();
-        existente.setId(1L);
-        existente.setNombre("Zona Test");
-        existente.setEspecies(Collections.emptyList());
-
-        when(zonaRepository.findById(1L)).thenReturn(Optional.of(existente));
-        // No se llama a existsByNombre porque el nombre no cambia
-        when(zonaRepository.save(any(Zona.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        assertDoesNotThrow(() -> zonaService.editarZona(1L, request));
-
-        verify(zonaRepository, times(1)).findById(1L);
-        verify(zonaRepository, never()).existsByNombreIgnoreCase(any());
-        verify(zonaRepository, times(1)).save(any(Zona.class));
+        assertThrows(NoDataFoundException.class, () -> zonaService.obtenerTodasLasZonas());
     }
 
     @Test
-    void testEditarZona_NotFound() {
-        ZonaRequestDto request = new ZonaRequestDto();
-        request.setNombre("Zona Inexistente");
+    void crearZona_debeGuardarNuevaZona() {
+        ZonaRequestDto dto = new ZonaRequestDto(null, "  Nueva Zona  ");
 
-        when(zonaRepository.findById(99L)).thenReturn(Optional.empty());
+        zonaService.crearZona(dto);
 
-        assertThrows(ZonaNotFoundException.class, () ->
-                zonaService.editarZona(99L, request)
-        );
-        verify(zonaRepository, times(1)).findById(99L);
-        verify(zonaRepository, never()).save(any());
+        verify(zonaRepository).save(argThat(z -> z.getNombre().equals("Nueva Zona")));
     }
 
     @Test
-    void testEditarZona_NameCollision() {
-        ZonaRequestDto request = new ZonaRequestDto();
-        request.setNombre("Otra Zona");
+    void editarZona_debeActualizarNombreSiEsDistinto() {
+        when(zonaRepository.findById(100L)).thenReturn(Optional.of(zona));
+        ZonaRequestDto dto = new ZonaRequestDto(100L, "Zona Actualizada");
 
-        Zona existente = new Zona();
-        existente.setId(1L);
-        existente.setNombre("Zona Test");
-        existente.setEspecies(Collections.emptyList());
+        zonaService.editarZona(100L, dto);
 
-        when(zonaRepository.findById(1L)).thenReturn(Optional.of(existente));
-        // Simulamos que "Otra Zona" ya existe en otra zona
-        when(zonaRepository.existsByNombreIgnoreCase("Otra Zona")).thenReturn(true);
-
-        assertThrows(ZonaAlreadyExistsException.class, () ->
-                zonaService.editarZona(1L, request)
-        );
-        verify(zonaRepository, times(1)).findById(1L);
-        verify(zonaRepository, times(1)).existsByNombreIgnoreCase("Otra Zona");
-        verify(zonaRepository, never()).save(any());
-    }
-
-    // ====== eliminarZona ======
-
-    @Test
-    void testEliminarZona_Success() {
-        Zona existente = new Zona();
-        existente.setId(1L);
-        existente.setNombre("Zona Test");
-        existente.setEspecies(List.of(especie1));
-
-        when(zonaRepository.findById(1L)).thenReturn(Optional.of(existente));
-        // Simulamos que no hay animales asociados a esta zona
-        when(animalRepository.existsByEspecie_Zona(existente)).thenReturn(false);
-        doNothing().when(zonaRepository).delete(existente);
-
-        assertDoesNotThrow(() -> zonaService.eliminarZona(1L));
-
-        verify(zonaRepository, times(1)).findById(1L);
-        verify(animalRepository, times(1)).existsByEspecie_Zona(existente);
-        verify(zonaRepository, times(1)).delete(existente);
+        verify(zonaRepository).save(argThat(z -> z.getNombre().equals("Zona Actualizada")));
     }
 
     @Test
-    void testEliminarZona_NotFound() {
-        when(zonaRepository.findById(99L)).thenReturn(Optional.empty());
+    void editarZona_noDebeActualizarSiElNombreEsIgualIgnorandoMayusculas() {
+        when(zonaRepository.findById(100L)).thenReturn(Optional.of(zona));
+        ZonaRequestDto dto = new ZonaRequestDto(100L, "zona norte");
 
-        assertThrows(ZonaNotFoundException.class, () ->
-                zonaService.eliminarZona(99L)
-        );
-        verify(zonaRepository, times(1)).findById(99L);
-        verify(animalRepository, never()).existsByEspecie_Zona(any());
+        zonaService.editarZona(100L, dto);
+
+        verify(zonaRepository).save(zona);
+    }
+
+    @Test
+    void editarZona_debeLanzarExcepcionSiNoExiste() {
+        when(zonaRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ZonaNotFoundException.class, () -> zonaService.editarZona(999L, new ZonaRequestDto()));
+    }
+
+    @Test
+    void eliminarZona_debeEliminarCuandoNoHayAnimales() {
+        when(zonaRepository.findById(100L)).thenReturn(Optional.of(zona));
+        when(animalRepository.existsByEspecie_Zona(zona)).thenReturn(false);
+
+        zonaService.eliminarZona(100L);
+
+        verify(zonaRepository).delete(zona);
+    }
+
+    @Test
+    void eliminarZona_debeLanzarExcepcionSiHayAnimales() {
+        when(zonaRepository.findById(100L)).thenReturn(Optional.of(zona));
+        when(animalRepository.existsByEspecie_Zona(zona)).thenReturn(true);
+
+        assertThrows(ZonaConAnimalesException.class, () -> zonaService.eliminarZona(100L));
         verify(zonaRepository, never()).delete(any());
     }
 
     @Test
-    void testEliminarZona_HasAnimals() {
-        Zona existente = new Zona();
-        existente.setId(1L);
-        existente.setNombre("Zona Test");
-        existente.setEspecies(List.of(especie1));
+    void eliminarZona_debeLanzarExcepcionSiNoExiste() {
+        when(zonaRepository.findById(999L)).thenReturn(Optional.empty());
 
-        when(zonaRepository.findById(1L)).thenReturn(Optional.of(existente));
-        // Simulamos que sí hay animales asociados
-        when(animalRepository.existsByEspecie_Zona(existente)).thenReturn(true);
-
-        assertThrows(ZonaConAnimalesException.class, () ->
-                zonaService.eliminarZona(1L)
-        );
-        verify(zonaRepository, times(1)).findById(1L);
-        verify(animalRepository, times(1)).existsByEspecie_Zona(existente);
-        verify(zonaRepository, never()).delete(any());
+        assertThrows(ZonaNotFoundException.class, () -> zonaService.eliminarZona(999L));
     }
 
-    // ====== obtenerCantidadAnimalesPorZona ======
-
     @Test
-    void testObtenerCantidadAnimalesPorZona_Success() {
-        // ya en setUp la zona tiene una especie con 2 animales
+    void obtenerCantidadAnimalesPorZona_debeRetornarLista() {
         when(zonaRepository.findAll()).thenReturn(List.of(zona));
 
-        List<CantidadAnimalesPorZonaResponseDto> lista =
-                zonaService.obtenerCantidadAnimalesPorZona();
+        List<CantidadAnimalesPorZonaResponseDto> result = zonaService.obtenerCantidadAnimalesPorZona();
 
-        assertEquals(1, lista.size());
-        CantidadAnimalesPorZonaResponseDto dto = lista.get(0);
-        assertEquals("Zona Test", dto.getNombreZona());
-        assertEquals(2L, dto.getCantidadAnimales());
-        verify(zonaRepository, times(1)).findAll();
+        assertEquals(1, result.size());
+        assertEquals("Zona Norte", result.get(0).getNombreZona());
+        assertEquals(1L, result.get(0).getCantidadAnimales());
     }
 
     @Test
-    void testObtenerCantidadAnimalesPorZona_NoData() {
-        when(zonaRepository.findAll()).thenReturn(Collections.emptyList());
+    void obtenerCantidadAnimalesPorZona_debeLanzarExcepcionSiNoHayZonas() {
+        when(zonaRepository.findAll()).thenReturn(List.of());
 
-        assertThrows(NoDataFoundException.class, () ->
-                zonaService.obtenerCantidadAnimalesPorZona()
-        );
-        verify(zonaRepository, times(1)).findAll();
+        assertThrows(NoDataFoundException.class, () -> zonaService.obtenerCantidadAnimalesPorZona());
     }
 }

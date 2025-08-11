@@ -49,20 +49,20 @@ public class ZonaService implements IZonaService {
 
         return zonas.stream()
                 .map(zona -> {
-                    List<String> nombresEspecies = zona.getEspecies().stream()
-                            .map(Especie::getNombre)
+                    List<Long> idsEspecies = zona.getEspecies().stream()
+                            .map(Especie::getId)
                             .toList();
 
-                    List<String> nombresAnimales = zona.getEspecies().stream()
+                    List<Long> idsAnimales = zona.getEspecies().stream()
                             .flatMap(especie -> especie.getAnimales().stream())
-                            .map(Animal::getNombre)
+                            .map(Animal::getId)
                             .toList();
 
                     return new ZonaResponseDto(
                             zona.getId(),
                             zona.getNombre(),
-                            nombresEspecies,
-                            nombresAnimales
+                            idsEspecies,
+                            idsAnimales
                     );
                 })
                 .toList();
@@ -71,10 +71,6 @@ public class ZonaService implements IZonaService {
 
     @Override
     public void crearZona(ZonaRequestDto requestDto) {
-        if (zonaRepository.existsByNombreIgnoreCase(requestDto.getNombre())) {
-            throw new ZonaAlreadyExistsException();
-        }
-
         Zona nuevaZona = new Zona();
         nuevaZona.setNombre(requestDto.getNombre().trim());
         zonaRepository.save(nuevaZona);
@@ -88,9 +84,6 @@ public class ZonaService implements IZonaService {
         String nuevoNombre = requestDto.getNombre().trim();
 
         if (!zonaExistente.getNombre().equalsIgnoreCase(nuevoNombre)) {
-            if (zonaRepository.existsByNombreIgnoreCase(nuevoNombre)) {
-                throw new ZonaAlreadyExistsException();
-            }
             zonaExistente.setNombre(nuevoNombre);
         }
         zonaRepository.save(zonaExistente);
@@ -130,33 +123,26 @@ public class ZonaService implements IZonaService {
     }
 
     private ZonaResponseDto mapToResponseDto(Zona zona) {
-        List<String> nombresEspecies = zona.getEspecies() != null
-                ? zona.getEspecies()
-                .stream()
-                .map(Especie::getNombre)
+        List<Long> idsEspecies = zona.getEspecies() != null
+                ? zona.getEspecies().stream()
+                .map(Especie::getId)
                 .toList()
                 : List.of();
 
-        List<String> nombresAnimales = zona.getEspecies() != null
-                ? zona.getEspecies()
-                .stream()
-                .flatMap(especie -> {
-                    if (especie.getAnimales() == null) {
-                        return Stream.<String>empty();
-                    }
-                    return especie.getAnimales()
-                            .stream()
-                            .map(Animal::getNombre);
-                })
+        List<Long> idsAnimales = zona.getEspecies() != null
+                ? zona.getEspecies().stream()
+                .flatMap(especie -> especie.getAnimales() != null
+                        ? especie.getAnimales().stream().map(Animal::getId)
+                        : Stream.<Long>empty())
                 .toList()
                 : List.of();
-
 
         return new ZonaResponseDto(
                 zona.getId(),
                 zona.getNombre(),
-                nombresEspecies,
-                nombresAnimales
+                idsEspecies,
+                idsAnimales
         );
     }
+
 }
