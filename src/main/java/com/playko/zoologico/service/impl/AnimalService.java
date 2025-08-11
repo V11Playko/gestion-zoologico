@@ -56,15 +56,9 @@ public class AnimalService implements IAnimalService {
 
     @Override
     public void crearAnimal(AnimalRequestDto dto) {
-        Especie especie = especieRepository.findByNombreIgnoreCase(dto.getEspecieName())
+        Especie especie = especieRepository.findById(dto.getEspecieId())
                 .orElseThrow(EspecieNotFoundException::new);
 
-        Zona zona = zonaRepository.findByNombreIgnoreCase(especie.getZona().getNombre())
-                .orElseThrow(ZonaNotFoundException::new);
-
-        if (especie.getZona() == null || !especie.getZona().getId().equals(zona.getId())) {
-            throw new ZonaEspecieMismatchException();
-        }
 
         Animal animal = new Animal();
         animal.setNombre(dto.getNombre().trim());
@@ -79,7 +73,7 @@ public class AnimalService implements IAnimalService {
         Animal animal = animalRepository.findById(id)
                 .orElseThrow(AnimalNotFoundException::new);
 
-        Especie especie = especieRepository.findByNombreIgnoreCase(dto.getEspecieName())
+        Especie especie = especieRepository.findById(dto.getEspecieId())
                 .orElseThrow(EspecieNotFoundException::new);
 
         animal.setNombre(dto.getNombre().trim());
@@ -125,7 +119,7 @@ public class AnimalService implements IAnimalService {
                 animal.getId(),
                 animal.getNombre(),
                 animal.getFechaIngreso(),
-                animal.getEspecie().getNombre(),
+                animal.getEspecie().getId(),
                 comentarios
         );
     }

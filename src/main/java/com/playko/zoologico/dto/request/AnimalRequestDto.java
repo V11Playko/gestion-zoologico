@@ -1,5 +1,6 @@
 package com.playko.zoologico.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AnimalRequestDto {
+    @NotBlank(message = "El nombre del animal es obligatorio")
     private String nombre;
-    private String especieName;
+    private Long especieId;
     private LocalDateTime fechaIngreso;
 }

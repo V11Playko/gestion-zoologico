@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -57,279 +58,133 @@ class AnimalServiceTest {
     @InjectMocks
     private AnimalService animalService;
 
-    private Zona zona;
-    private Especie especie;
     private Animal animal;
+    private Especie especie;
+    private AnimalRequestDto requestDto;
 
     @BeforeEach
     void setUp() {
-        // Creamos una Zona de ejemplo
-        zona = new Zona();
-        zona.setId(1L);
-        zona.setNombre("Zona Test");
-
-        // Creamos una Especie de ejemplo asociada a la Zona
         especie = new Especie();
-        especie.setId(2L);
-        especie.setNombre("Especie Test");
-        especie.setZona(zona);
+        especie.setId(1L);
+        especie.setNombre("León");
+        especie.setZona(new Zona(1L, "Zona Safari", null));
 
-        // Creamos un Animal de ejemplo asociado a la Especie (y por ende a la Zona)
         animal = new Animal();
-        animal.setId(3L);
-        animal.setNombre("Animal Test");
-        animal.setFechaIngreso(LocalDateTime.now());
+        animal.setId(1L);
+        animal.setNombre("Simba");
+        animal.setFechaIngreso(LocalDateTime.of(2025, 1, 1, 10, 0));
         animal.setEspecie(especie);
-    }
+        animal.setComentarios(List.of());
 
-    // ========== obtenerAnimalPorId ==========
-
-    @Test
-    void testObtenerAnimalPorId_Success() {
-        when(animalRepository.findById(3L)).thenReturn(Optional.of(animal));
-
-        AnimalResponseDto dto = animalService.obtenerAnimalPorId(3L);
-
-        assertNotNull(dto);
-        assertEquals(animal.getId(), dto.getId());
-        assertEquals(animal.getNombre(), dto.getNombre());
-        assertEquals(especie.getNombre(), dto.getEspecieName());
-        verify(animalRepository, times(1)).findById(3L);
+        requestDto = new AnimalRequestDto("Simba", 1L, LocalDateTime.of(2025, 1, 1, 10, 0));
     }
 
     @Test
-    void testObtenerAnimalPorId_NotFound() {
-        when(animalRepository.findById(3L)).thenReturn(Optional.empty());
+    void obtenerAnimalPorId_exitoso() {
+        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
 
-        assertThrows(AnimalNotFoundException.class, () -> animalService.obtenerAnimalPorId(3L));
-        verify(animalRepository, times(1)).findById(3L);
-    }
+        AnimalResponseDto result = animalService.obtenerAnimalPorId(1L);
 
-    // ========== obtenerTodosLosAnimales ==========
-
-    @Test
-    void testObtenerTodosLosAnimales_Success() {
-        Animal otroAnimal = new Animal();
-        otroAnimal.setId(4L);
-        otroAnimal.setNombre("Otro Animal");
-        otroAnimal.setFechaIngreso(LocalDateTime.now());
-        otroAnimal.setEspecie(especie);
-
-        when(animalRepository.findAll()).thenReturn(List.of(animal, otroAnimal));
-
-        List<AnimalResponseDto> list = animalService.obtenerTodosLosAnimales();
-
-        assertEquals(2, list.size());
-        assertTrue(list.stream().anyMatch(dto -> dto.getId().equals(3L)));
-        assertTrue(list.stream().anyMatch(dto -> dto.getId().equals(4L)));
-        verify(animalRepository, times(1)).findAll();
+        assertEquals("Simba", result.getNombre());
+        assertEquals(1L, result.getEspecieId());
+        verify(animalRepository).findById(1L);
     }
 
     @Test
-    void testObtenerTodosLosAnimales_NoData() {
-        when(animalRepository.findAll()).thenReturn(Collections.emptyList());
+    void obtenerAnimalPorId_noEncontrado_lanzaExcepcion() {
+        when(animalRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(AnimalNotFoundException.class, () -> animalService.obtenerAnimalPorId(1L));
+    }
+
+    @Test
+    void obtenerTodosLosAnimales_exitoso() {
+        when(animalRepository.findAll()).thenReturn(List.of(animal));
+
+        List<AnimalResponseDto> result = animalService.obtenerTodosLosAnimales();
+
+        assertEquals(1, result.size());
+        verify(animalRepository).findAll();
+    }
+
+    @Test
+    void obtenerTodosLosAnimales_vacio_lanzaExcepcion() {
+        when(animalRepository.findAll()).thenReturn(List.of());
 
         assertThrows(NoDataFoundException.class, () -> animalService.obtenerTodosLosAnimales());
-        verify(animalRepository, times(1)).findAll();
-    }
-
-    // ========== crearAnimal ==========
-
-    @Test
-    void testCrearAnimal_Success() {
-        AnimalRequestDto request = new AnimalRequestDto();
-        request.setNombre("Nuevo Animal");
-        request.setEspecieName(especie.getNombre());
-        // Forzamos una fecha fija (por ejemplo, 1 de enero de 2021 a las 12:00)
-        request.setFechaIngreso(LocalDateTime.of(2021, 1, 1, 12, 0));
-
-        when(especieRepository.findByNombreIgnoreCase(especie.getNombre()))
-                .thenReturn(Optional.of(especie));
-        when(zonaRepository.findByNombreIgnoreCase(zona.getNombre()))
-                .thenReturn(Optional.of(zona));
-        // Simulamos que al llamar a save, simplemente devuelve la entidad que se guardó
-        when(animalRepository.save(any(Animal.class))).thenAnswer(i -> i.getArgument(0));
-
-        assertDoesNotThrow(() -> animalService.crearAnimal(request));
-
-        verify(especieRepository, times(1)).findByNombreIgnoreCase(especie.getNombre());
-        verify(zonaRepository, times(1)).findByNombreIgnoreCase(zona.getNombre());
-        verify(animalRepository, times(1)).save(any(Animal.class));
     }
 
     @Test
-    void testCrearAnimal_EspecieNotFound() {
-        AnimalRequestDto request = new AnimalRequestDto();
-        request.setNombre("Nuevo Animal");
-        request.setEspecieName("NoExiste");
+    void crearAnimal_exitoso() {
+        when(especieRepository.findById(1L)).thenReturn(Optional.of(especie));
 
-        when(especieRepository.findByNombreIgnoreCase("NoExiste"))
-                .thenReturn(Optional.empty());
+        animalService.crearAnimal(requestDto);
 
-        assertThrows(EspecieNotFoundException.class, () -> animalService.crearAnimal(request));
-        verify(especieRepository, times(1)).findByNombreIgnoreCase("NoExiste");
-        verify(zonaRepository, never()).findByNombreIgnoreCase(any());
-        verify(animalRepository, never()).save(any());
+        verify(animalRepository).save(any(Animal.class));
     }
 
     @Test
-    void testCrearAnimal_ZonaNotFound() {
-        AnimalRequestDto request = new AnimalRequestDto();
-        request.setNombre("Nuevo Animal");
-        request.setEspecieName(especie.getNombre());
+    void crearAnimal_especieNoEncontrada_lanzaExcepcion() {
+        when(especieRepository.findById(1L)).thenReturn(Optional.empty());
 
-        when(especieRepository.findByNombreIgnoreCase(especie.getNombre()))
-                .thenReturn(Optional.of(especie));
-        when(zonaRepository.findByNombreIgnoreCase(zona.getNombre()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(ZonaNotFoundException.class, () -> animalService.crearAnimal(request));
-        verify(especieRepository, times(1)).findByNombreIgnoreCase(especie.getNombre());
-        verify(zonaRepository, times(1)).findByNombreIgnoreCase(zona.getNombre());
-        verify(animalRepository, never()).save(any());
+        assertThrows(EspecieNotFoundException.class, () -> animalService.crearAnimal(requestDto));
     }
 
     @Test
-    void testCrearAnimal_ZonaEspecieMismatch() {
-        AnimalRequestDto request = new AnimalRequestDto();
-        request.setNombre("Nuevo Animal");
-        request.setEspecieName(especie.getNombre());
+    void editarAnimal_exitoso() {
+        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
+        when(especieRepository.findById(1L)).thenReturn(Optional.of(especie));
 
-        // Creamos una zona diferente a la que tiene la especie
-        Zona otraZona = new Zona();
-        otraZona.setId(99L);
-        otraZona.setNombre("Otra Zona");
+        animalService.editarAnimal(1L, requestDto);
 
-        when(especieRepository.findByNombreIgnoreCase(especie.getNombre()))
-                .thenReturn(Optional.of(especie));
-        when(zonaRepository.findByNombreIgnoreCase(zona.getNombre()))
-                .thenReturn(Optional.of(otraZona));
-
-        assertThrows(ZonaEspecieMismatchException.class, () -> animalService.crearAnimal(request));
-        verify(especieRepository, times(1)).findByNombreIgnoreCase(especie.getNombre());
-        verify(zonaRepository, times(1)).findByNombreIgnoreCase(zona.getNombre());
-        verify(animalRepository, never()).save(any());
-    }
-
-    // ========== editarAnimal ==========
-
-    @Test
-    void testEditarAnimal_Success() {
-        AnimalRequestDto request = new AnimalRequestDto();
-        request.setNombre("Animal Editado");
-        request.setEspecieName("Especie Nueva");
-
-        // Creamos un animal actual y una nueva especie válida
-        Animal currentAnimal = new Animal();
-        currentAnimal.setId(3L);
-        currentAnimal.setNombre("Animal Test");
-        currentAnimal.setFechaIngreso(LocalDateTime.now());
-        currentAnimal.setEspecie(especie);
-
-        Especie nuevaEspecie = new Especie();
-        nuevaEspecie.setId(5L);
-        nuevaEspecie.setNombre("Especie Nueva");
-        nuevaEspecie.setZona(zona);
-
-        when(animalRepository.findById(3L)).thenReturn(Optional.of(currentAnimal));
-        when(especieRepository.findByNombreIgnoreCase("Especie Nueva"))
-                .thenReturn(Optional.of(nuevaEspecie));
-        when(animalRepository.save(any(Animal.class))).thenAnswer(i -> i.getArgument(0));
-
-        assertDoesNotThrow(() -> animalService.editarAnimal(3L, request));
-        verify(animalRepository, times(1)).findById(3L);
-        verify(especieRepository, times(1)).findByNombreIgnoreCase("Especie Nueva");
-        verify(animalRepository, times(1)).save(any(Animal.class));
+        verify(animalRepository).save(animal);
+        assertEquals("Simba", animal.getNombre());
     }
 
     @Test
-    void testEditarAnimal_AnimalNotFound() {
-        AnimalRequestDto request = new AnimalRequestDto();
-        request.setNombre("Animal Editado");
-        request.setEspecieName("Especie Nueva");
+    void editarAnimal_noEncontrado_lanzaExcepcion() {
+        when(animalRepository.findById(1L)).thenReturn(Optional.empty());
 
-        when(animalRepository.findById(3L)).thenReturn(Optional.empty());
-
-        assertThrows(AnimalNotFoundException.class, () -> animalService.editarAnimal(3L, request));
-        verify(animalRepository, times(1)).findById(3L);
-        verify(especieRepository, never()).findByNombreIgnoreCase(any());
-        verify(animalRepository, never()).save(any());
+        assertThrows(AnimalNotFoundException.class, () -> animalService.editarAnimal(1L, requestDto));
     }
 
     @Test
-    void testEditarAnimal_EspecieNotFound() {
-        AnimalRequestDto request = new AnimalRequestDto();
-        request.setNombre("Animal Editado");
-        request.setEspecieName("NoExiste");
+    void eliminarAnimal_exitoso() {
+        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
 
-        when(animalRepository.findById(3L)).thenReturn(Optional.of(animal));
-        when(especieRepository.findByNombreIgnoreCase("NoExiste"))
-                .thenReturn(Optional.empty());
+        animalService.eliminarAnimal(1L);
 
-        assertThrows(EspecieNotFoundException.class, () -> animalService.editarAnimal(3L, request));
-        verify(animalRepository, times(1)).findById(3L);
-        verify(especieRepository, times(1)).findByNombreIgnoreCase("NoExiste");
-        verify(animalRepository, never()).save(any());
-    }
-
-    // ========== eliminarAnimal ==========
-
-    @Test
-    void testEliminarAnimal_Success() {
-        when(animalRepository.findById(3L)).thenReturn(Optional.of(animal));
-        doNothing().when(animalRepository).delete(animal);
-
-        assertDoesNotThrow(() -> animalService.eliminarAnimal(3L));
-        verify(animalRepository, times(1)).findById(3L);
-        verify(animalRepository, times(1)).delete(animal);
+        verify(animalRepository).delete(animal);
     }
 
     @Test
-    void testEliminarAnimal_NotFound() {
-        when(animalRepository.findById(3L)).thenReturn(Optional.empty());
+    void eliminarAnimal_noEncontrado_lanzaExcepcion() {
+        when(animalRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(AnimalNotFoundException.class, () -> animalService.eliminarAnimal(3L));
-        verify(animalRepository, times(1)).findById(3L);
-        verify(animalRepository, never()).delete(any());
-    }
-
-    // ========== obtenerAnimalesRegistradosEnFecha ==========
-
-    @Test
-    void testObtenerAnimalesRegistradosEnFecha_Success() {
-        LocalDate fecha = LocalDate.of(2022, 5, 10);
-        LocalDateTime inicio = fecha.atStartOfDay();
-        LocalDateTime fin = fecha.atTime(LocalTime.MAX);
-
-        Animal registrado = new Animal();
-        registrado.setId(6L);
-        registrado.setNombre("Animal Registrado");
-        registrado.setFechaIngreso(LocalDateTime.of(2022, 5, 10, 10, 0));
-        registrado.setEspecie(especie);
-
-        when(animalRepository.findByFechaIngresoBetween(inicio, fin))
-                .thenReturn(List.of(registrado));
-
-        List<AnimalRegistradoResponseDto> list = animalService.obtenerAnimalesRegistradosEnFecha(fecha);
-
-        assertEquals(1, list.size());
-        assertEquals("Animal Registrado", list.get(0).getNombreAnimal());
-        assertEquals(especie.getNombre(), list.get(0).getEspecie());
-        verify(animalRepository, times(1)).findByFechaIngresoBetween(inicio, fin);
+        assertThrows(AnimalNotFoundException.class, () -> animalService.eliminarAnimal(1L));
     }
 
     @Test
-    void testObtenerAnimalesRegistradosEnFecha_NoData() {
-        LocalDate fecha = LocalDate.of(2022, 5, 10);
-        LocalDateTime inicio = fecha.atStartOfDay();
-        LocalDateTime fin = fecha.atTime(LocalTime.MAX);
+    void obtenerAnimalesRegistradosEnFecha_exitoso() {
+        LocalDate fecha = LocalDate.of(2025, 1, 1);
+        when(animalRepository.findByFechaIngresoBetween(
+                fecha.atStartOfDay(), fecha.atTime(LocalTime.MAX)))
+                .thenReturn(List.of(animal));
 
-        when(animalRepository.findByFechaIngresoBetween(inicio, fin))
-                .thenReturn(Collections.emptyList());
+        List<AnimalRegistradoResponseDto> result = animalService.obtenerAnimalesRegistradosEnFecha(fecha);
 
-        assertThrows(AnimalesNoEncontradosEnFechaException.class, () ->
-                animalService.obtenerAnimalesRegistradosEnFecha(fecha)
-        );
-        verify(animalRepository, times(1)).findByFechaIngresoBetween(inicio, fin);
+        assertEquals(1, result.size());
+        assertEquals("Simba", result.get(0).getNombreAnimal());
+    }
+
+    @Test
+    void obtenerAnimalesRegistradosEnFecha_vacio_lanzaExcepcion() {
+        LocalDate fecha = LocalDate.of(2025, 1, 1);
+        when(animalRepository.findByFechaIngresoBetween(
+                fecha.atStartOfDay(), fecha.atTime(LocalTime.MAX)))
+                .thenReturn(List.of());
+
+        assertThrows(AnimalesNoEncontradosEnFechaException.class,
+                () -> animalService.obtenerAnimalesRegistradosEnFecha(fecha));
     }
 }

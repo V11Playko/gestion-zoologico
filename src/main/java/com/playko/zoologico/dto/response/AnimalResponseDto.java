@@ -16,6 +16,6 @@ public class AnimalResponseDto {
     private Long id;
     private String nombre;
     private LocalDateTime fechaIngreso;
-    private String especieName;
+    private Long especieId;
     private List<String> comentarios;
 }
