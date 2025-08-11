@@ -1,7 +1,11 @@
 # Created by https://www.toptal.com/developers/gitignore/api/java,gradle,windows,macos,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,gradle,windows,macos,linux
 
+# Configuración de ejecución de IntelliJ
+.run/
 .idea
+
+
 ### Java ###
 # Compiled class file
 *.class
