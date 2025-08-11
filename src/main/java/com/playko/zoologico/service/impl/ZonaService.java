@@ -11,13 +11,17 @@ import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
 import com.playko.zoologico.exception.zona.ZonaAlreadyExistsException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
+import com.playko.zoologico.repository.IEspecieRepository;
 import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.IZonaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,6 +31,7 @@ import java.util.stream.Stream;
 public class ZonaService implements IZonaService {
     private final IZonaRepository zonaRepository;
     private final IAnimalRepository animalRepository;
+    private final IEspecieRepository especieRepository;
     @Override
     public ZonaResponseDto obtenerZonaPorId(Long id) {
         Zona zona = zonaRepository.findById(id)
@@ -36,14 +41,33 @@ public class ZonaService implements IZonaService {
 
     @Override
     public List<ZonaResponseDto> obtenerTodasLasZonas() {
-        List<Zona> zonas = zonaRepository.findAll();
-
-        if (zonas.isEmpty()) throw new NoDataFoundException();
+        // Esta consulta ya hace un join fetch de especies y animales
+        List<Zona> zonas = zonaRepository.findAllWithEspeciesAndAnimales();
+        if (zonas.isEmpty()) {
+            throw new NoDataFoundException();
+        }
 
         return zonas.stream()
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
+                .map(zona -> {
+                    List<String> nombresEspecies = zona.getEspecies().stream()
+                            .map(Especie::getNombre)
+                            .toList();
+
+                    List<String> nombresAnimales = zona.getEspecies().stream()
+                            .flatMap(especie -> especie.getAnimales().stream())
+                            .map(Animal::getNombre)
+                            .toList();
+
+                    return new ZonaResponseDto(
+                            zona.getId(),
+                            zona.getNombre(),
+                            nombresEspecies,
+                            nombresAnimales
+                    );
+                })
+                .toList();
     }
+
 
     @Override
     public void crearZona(ZonaRequestDto requestDto) {
