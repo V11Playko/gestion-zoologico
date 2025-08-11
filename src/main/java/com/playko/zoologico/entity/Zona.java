@@ -1,19 +1,14 @@
 package com.playko.zoologico.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "zonas")
@@ -30,6 +25,6 @@ public class Zona {
     @Column(unique = true, nullable = false)
     private String nombre;
 
-    @OneToMany(mappedBy = "zona", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Especie> especies;
+    @OneToMany(mappedBy = "zona", fetch = FetchType.LAZY)
+    private Set<Especie> especies = new HashSet<>();
 }

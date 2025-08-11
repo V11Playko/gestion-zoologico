@@ -16,7 +16,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "especies")
@@ -37,6 +39,6 @@ public class Especie {
     @JoinColumn(name = "zona_id", nullable = false)
     private Zona zona;
 
-    @OneToMany(mappedBy = "especie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Animal> animales;
+    @OneToMany(mappedBy = "especie", fetch = FetchType.LAZY)
+    private Set<Animal> animales = new HashSet<>();
 }
