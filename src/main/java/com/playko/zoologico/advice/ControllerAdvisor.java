@@ -1,6 +1,7 @@
 package com.playko.zoologico.advice;
 
 import com.playko.zoologico.exception.NoDataFoundException;
+import com.playko.zoologico.exception.NonNegativePageNumberException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
 import com.playko.zoologico.exception.animal.AnimalesNoEncontradosEnFechaException;
@@ -14,6 +15,7 @@ import com.playko.zoologico.exception.especie.EspecieNotFoundException;
 import com.playko.zoologico.exception.usuario.EmailAlreadyExistsException;
 import com.playko.zoologico.exception.usuario.RoleNotFoundException;
 import com.playko.zoologico.exception.usuario.UsuarioNotFoundException;
+import com.playko.zoologico.exception.zona.IdZonaInvalidException;
 import com.playko.zoologico.exception.zona.ZonaAlreadyExistsException;
 import com.playko.zoologico.exception.zona.ZonaEspecieMismatchException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
@@ -40,6 +42,8 @@ import static com.playko.zoologico.constants.ExceptionMessages.EMAIL_ALREADY_EXI
 import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_CON_ANIMALES_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_NOT_FOUND_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ID_ZONA_INVALID_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.NON_NEGATIVE_PAGE_NUMBER_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.NO_DATA_FOUND_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ROLE_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.USER_NOT_FOUND_MESSAGE;
@@ -204,5 +208,19 @@ public class ControllerAdvisor {
     @ExceptionHandler(AnimalesNoEncontradosEnFechaException.class)
     public ResponseEntity<String> manejarAnimalesNoEncontrados(AnimalesNoEncontradosEnFechaException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(NonNegativePageNumberException.class)
+    public ResponseEntity<Map<String, String>> handleNonNegativePageNumberException(
+            NonNegativePageNumberException nonNegativePageNumberException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, NON_NEGATIVE_PAGE_NUMBER_MESSAGE));
+    }
+
+    @ExceptionHandler(IdZonaInvalidException.class)
+    public ResponseEntity<Map<String, String>> handleIdZonaInvalidException(
+            IdZonaInvalidException idZonaInvalidException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ID_ZONA_INVALID_MESSAGE));
     }
 }

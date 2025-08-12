@@ -16,6 +16,8 @@ public class ExceptionMessages {
     public static final String ZONA_ESPECIE_MISMATCH_MESSAGE = "La zona asignada al animal no coincide con la zona de su especie.";
     public static final String COMENTARIO_ANIMAL_MISMATCH_MESSAGE = "El comentario padre pertenece a un animal diferente.";
     public static final String ANIMAL_SIN_COMENTARIOS_MESSAGE = "Este animal aún no tiene comentarios.";
+    public static final String NON_NEGATIVE_PAGE_NUMBER_MESSAGE = "El numero de pagina no puede ser negativo.";
+    public static final String ID_ZONA_INVALID_MESSAGE = "El ID de la zona es inválido.";
 
     private ExceptionMessages() {
         throw new IllegalStateException("Utility class");
