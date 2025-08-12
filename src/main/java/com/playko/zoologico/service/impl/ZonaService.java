@@ -2,13 +2,14 @@ package com.playko.zoologico.service.impl;
 
 import com.playko.zoologico.dto.request.ZonaRequestDto;
 import com.playko.zoologico.dto.response.CantidadAnimalesPorZonaResponseDto;
+import com.playko.zoologico.dto.response.IdAndEspecieResponseDto;
 import com.playko.zoologico.dto.response.ZonaResponseDto;
-import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Especie;
 import com.playko.zoologico.entity.Zona;
 import com.playko.zoologico.exception.NoDataFoundException;
+import com.playko.zoologico.exception.NonNegativePageNumberException;
 import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
-import com.playko.zoologico.exception.zona.ZonaAlreadyExistsException;
+import com.playko.zoologico.exception.zona.IdZonaInvalidException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IEspecieRepository;
@@ -16,14 +17,18 @@ import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.IZonaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -34,40 +39,39 @@ public class ZonaService implements IZonaService {
     private final IEspecieRepository especieRepository;
     @Override
     public ZonaResponseDto obtenerZonaPorId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IdZonaInvalidException();
+        }
+
         Zona zona = zonaRepository.findById(id)
                 .orElseThrow(ZonaNotFoundException::new);
         return mapToResponseDto(zona);
     }
 
     @Override
-    public List<ZonaResponseDto> obtenerTodasLasZonas() {
-        // Esta consulta ya hace un join fetch de especies y animales
-        List<Zona> zonas = zonaRepository.findAllWithEspeciesAndAnimales();
-        if (zonas.isEmpty()) {
+    public Page<ZonaResponseDto> obtenerTodasLasZonas(String nombre, int page) {
+        if (page<0) throw new NonNegativePageNumberException();
+
+        Pageable pageable = PageRequest.of(page, 5);
+
+        Page<Zona> zonasPage = zonaRepository.findZonasPaginadas(nombre, pageable);
+
+        if (zonasPage.isEmpty()) {
             throw new NoDataFoundException();
         }
 
-        return zonas.stream()
-                .map(zona -> {
-                    List<Long> idsEspecies = zona.getEspecies().stream()
-                            .map(Especie::getId)
-                            .toList();
+        List<Long> ids = zonasPage.getContent().stream().map(Zona::getId).toList();
+        List<Zona> zonasConFetch = zonaRepository.findZonasWithFetchByIds(ids);
 
-                    List<Long> idsAnimales = zona.getEspecies().stream()
-                            .flatMap(especie -> especie.getAnimales().stream())
-                            .map(Animal::getId)
-                            .toList();
+        Map<Long, Zona> zonasMap = zonasConFetch.stream()
+                .collect(Collectors.toMap(Zona::getId, z -> z));
 
-                    return new ZonaResponseDto(
-                            zona.getId(),
-                            zona.getNombre(),
-                            idsEspecies,
-                            idsAnimales
-                    );
-                })
+        List<ZonaResponseDto> dtoList = zonasPage.getContent().stream()
+                .map(z -> mapToResponseDto(zonasMap.get(z.getId())))
                 .toList();
-    }
 
+        return new PageImpl<>(dtoList, pageable, zonasPage.getTotalElements());
+    }
 
     @Override
     public void crearZona(ZonaRequestDto requestDto) {
@@ -123,25 +127,26 @@ public class ZonaService implements IZonaService {
     }
 
     private ZonaResponseDto mapToResponseDto(Zona zona) {
-        List<Long> idsEspecies = zona.getEspecies() != null
-                ? zona.getEspecies().stream()
-                .map(Especie::getId)
-                .toList()
-                : List.of();
+        Set<Especie> especies = zona.getEspecies();
 
-        List<Long> idsAnimales = zona.getEspecies() != null
-                ? zona.getEspecies().stream()
-                .flatMap(especie -> especie.getAnimales() != null
-                        ? especie.getAnimales().stream().map(Animal::getId)
-                        : Stream.<Long>empty())
-                .toList()
-                : List.of();
+        List<IdAndEspecieResponseDto> especiesDto =
+                especies != null
+                        ? especies.stream()
+                        .map(e -> new IdAndEspecieResponseDto(e.getId(), e.getNombre()))
+                        .toList()
+                        : Collections.emptyList();
+
+        long cantidadAnimales =
+                especies != null
+                        ? especies.stream()
+                        .flatMap(e -> Optional.ofNullable(e.getAnimales()).orElse(Collections.emptySet()).stream())
+                        .count()
+                        : 0;
 
         return new ZonaResponseDto(
-                zona.getId(),
                 zona.getNombre(),
-                idsEspecies,
-                idsAnimales
+                especiesDto,
+                cantidadAnimales
         );
     }
 

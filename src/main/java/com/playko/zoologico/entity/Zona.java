@@ -6,8 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
@@ -26,5 +25,6 @@ public class Zona {
     private String nombre;
 
     @OneToMany(mappedBy = "zona", fetch = FetchType.LAZY)
-    private Set<Especie> especies = new HashSet<>();
+    @OrderBy("nombre ASC")
+    private Set<Especie> especies = new LinkedHashSet<>();
 }

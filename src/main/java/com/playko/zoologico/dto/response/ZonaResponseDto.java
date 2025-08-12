@@ -12,9 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ZonaResponseDto {
-    private Long id;
     private String nombre;
-    private List<Long> especiesIds;
-    private List<Long> animalesIds;
-
+    private List<IdAndEspecieResponseDto> especies;
+    private Long cantidadAnimales;
 }
