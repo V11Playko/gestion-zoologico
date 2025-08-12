@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.playko.zoologico.service.BusquedaServiceTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2025-08-11T20:09:20.018Z" hostname="NELUMBOBACK" time="0.075">
+  <properties/>
+  <testcase name="testBuscarPorPalabra_EmptyAll()" classname="com.playko.zoologico.service.BusquedaServiceTest" time="0.048"/>
+  <testcase name="testBuscarPorPalabra_ZonaMatch()" classname="com.playko.zoologico.service.BusquedaServiceTest" time="0.004"/>
+  <testcase name="testBuscarPorPalabra_ComentarioPadreMatch()" classname="com.playko.zoologico.service.BusquedaServiceTest" time="0.004"/>
+  <testcase name="testBuscarPorPalabra_EspecieMatch()" classname="com.playko.zoologico.service.BusquedaServiceTest" time="0.004"/>
+  <testcase name="testBuscarPorPalabra_RespuestaMatch()" classname="com.playko.zoologico.service.BusquedaServiceTest" time="0.004"/>
+  <testcase name="testBuscarPorPalabra_AnimalMatch()" classname="com.playko.zoologico.service.BusquedaServiceTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

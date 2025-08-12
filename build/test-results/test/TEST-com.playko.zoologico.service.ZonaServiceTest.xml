@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.playko.zoologico.service.ZonaServiceTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2025-08-11T20:09:20.453Z" hostname="NELUMBOBACK" time="0.056">
+  <properties/>
+  <testcase name="eliminarZona_debeLanzarExcepcionSiNoExiste()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.005"/>
+  <testcase name="obtenerZonaPorId_debeLanzarExcepcionCuandoNoExiste()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.003"/>
+  <testcase name="obtenerTodasLasZonas_debeRetornarListaCuandoExisten()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.005"/>
+  <testcase name="eliminarZona_debeEliminarCuandoNoHayAnimales()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.002"/>
+  <testcase name="editarZona_noDebeActualizarSiElNombreEsIgualIgnorandoMayusculas()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.004"/>
+  <testcase name="obtenerCantidadAnimalesPorZona_debeLanzarExcepcionSiNoHayZonas()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.002"/>
+  <testcase name="obtenerTodasLasZonas_debeLanzarExcepcionCuandoNoHayDatos()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.003"/>
+  <testcase name="crearZona_debeGuardarNuevaZona()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.003"/>
+  <testcase name="obtenerCantidadAnimalesPorZona_debeRetornarLista()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.007"/>
+  <testcase name="editarZona_debeActualizarNombreSiEsDistinto()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.003"/>
+  <testcase name="eliminarZona_debeLanzarExcepcionSiHayAnimales()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.004"/>
+  <testcase name="obtenerZonaPorId_debeRetornarDtoCuandoExiste()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.003"/>
+  <testcase name="editarZona_debeLanzarExcepcionSiNoExiste()" classname="com.playko.zoologico.service.ZonaServiceTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

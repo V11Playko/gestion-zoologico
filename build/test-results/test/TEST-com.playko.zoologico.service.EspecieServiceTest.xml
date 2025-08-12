@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.playko.zoologico.service.EspecieServiceTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2025-08-11T20:09:20.325Z" hostname="NELUMBOBACK" time="0.059">
+  <properties/>
+  <testcase name="editarEspecie_debeActualizarNombreYZona()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.008"/>
+  <testcase name="obtenerEspeciePorId_debeLanzarExcepcionCuandoNoExiste()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.003"/>
+  <testcase name="obtenerCantidadAnimalesPorEspecie_debeRetornarLista()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.004"/>
+  <testcase name="eliminarEspecie_debeLanzarExcepcionSiNoExiste()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.004"/>
+  <testcase name="obtenerEspeciePorId_debeRetornarDtoCuandoExiste()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.004"/>
+  <testcase name="eliminarEspecie_debeEliminarCuandoNoTieneAnimales()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.003"/>
+  <testcase name="editarEspecie_debeLanzarExcepcionSiEspecieNoExiste()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.003"/>
+  <testcase name="eliminarEspecie_debeLanzarExcepcionSiTieneAnimales()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.004"/>
+  <testcase name="obtenerTodasLasEspecies_debeLanzarExcepcionSiNoHayDatos()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.002"/>
+  <testcase name="obtenerCantidadAnimalesPorEspecie_debeLanzarExcepcionSiNoHayEspecies()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.002"/>
+  <testcase name="obtenerTodasLasEspecies_debeRetornarListaCuandoExisten()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.002"/>
+  <testcase name="crearEspecie_debeLanzarExcepcionSiZonaNoExiste()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.003"/>
+  <testcase name="crearEspecie_debeGuardarEspecieCuandoZonaExiste()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.002"/>
+  <testcase name="editarEspecie_debeLanzarExcepcionSiZonaNoExiste()" classname="com.playko.zoologico.service.EspecieServiceTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

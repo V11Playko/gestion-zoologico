@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.playko.zoologico.service.AnimalServiceTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2025-08-11T20:09:18.564Z" hostname="NELUMBOBACK" time="1.443">
+  <properties/>
+  <testcase name="editarAnimal_noEncontrado_lanzaExcepcion()" classname="com.playko.zoologico.service.AnimalServiceTest" time="1.356"/>
+  <testcase name="obtenerTodosLosAnimales_exitoso()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.022"/>
+  <testcase name="obtenerAnimalPorId_exitoso()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.006"/>
+  <testcase name="eliminarAnimal_noEncontrado_lanzaExcepcion()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.006"/>
+  <testcase name="crearAnimal_exitoso()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.009"/>
+  <testcase name="editarAnimal_exitoso()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.005"/>
+  <testcase name="obtenerAnimalPorId_noEncontrado_lanzaExcepcion()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.004"/>
+  <testcase name="crearAnimal_especieNoEncontrada_lanzaExcepcion()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.003"/>
+  <testcase name="obtenerTodosLosAnimales_vacio_lanzaExcepcion()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.004"/>
+  <testcase name="obtenerAnimalesRegistradosEnFecha_exitoso()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.006"/>
+  <testcase name="obtenerAnimalesRegistradosEnFecha_vacio_lanzaExcepcion()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.005"/>
+  <testcase name="eliminarAnimal_exitoso()" classname="com.playko.zoologico.service.AnimalServiceTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
