@@ -6,13 +6,10 @@ import com.playko.zoologico.dto.response.AnimalResponseDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
 import com.playko.zoologico.entity.Especie;
-import com.playko.zoologico.entity.Zona;
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalesNoEncontradosEnFechaException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
-import com.playko.zoologico.exception.zona.ZonaEspecieMismatchException;
-import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IEspecieRepository;
 import com.playko.zoologico.repository.IZonaRepository;
@@ -25,7 +22,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -51,7 +47,7 @@ public class AnimalService implements IAnimalService {
 
         return animales.stream()
                 .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -107,12 +103,12 @@ public class AnimalService implements IAnimalService {
                         animal.getEspecie().getNombre(),
                         animal.getEspecie().getZona().getNombre()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private AnimalResponseDto mapToResponseDto(Animal animal) {
         List<String> comentarios = animal.getComentarios() != null
-                ? animal.getComentarios().stream().map(Comentario::getContenido).collect(Collectors.toList())
+                ? animal.getComentarios().stream().map(Comentario::getContenido).toList()
                 : List.of();
 
         return new AnimalResponseDto(

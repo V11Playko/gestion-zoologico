@@ -1,17 +1,17 @@
 package com.playko.zoologico.service.impl;
 
-import com.playko.zoologico.configuration.security.userDetails.CustomUserDetails;
+import com.playko.zoologico.configuration.security.userdetails.CustomUserDetails;
 import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
 import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
 import com.playko.zoologico.entity.Usuario;
+import com.playko.zoologico.exception.ErrorGettingMailTokenException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
 import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
 import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
-import com.playko.zoologico.exception.usuario.RoleNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IComentarioRepository;
 import com.playko.zoologico.repository.IUsuarioRepository;
@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -83,7 +82,7 @@ public class ComentarioService implements IComentarioService {
 
         return comentarios.stream()
                 .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -111,7 +110,7 @@ public class ComentarioService implements IComentarioService {
         List<ComentarioResponseDto> respuestasDto = comentario.getRespuestas() != null
                 ? comentario.getRespuestas().stream()
                 .map(this::mapToResponseDto)
-                .collect(Collectors.toList())
+                .toList()
                 : new ArrayList<>();
 
         return new ComentarioResponseDto(
@@ -128,6 +127,6 @@ public class ComentarioService implements IComentarioService {
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
             return userDetails.getUsername();
         }
-        throw new RuntimeException("Error obteniendo el correo del token.");
+        throw new ErrorGettingMailTokenException();
     }
 }

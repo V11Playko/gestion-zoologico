@@ -18,6 +18,7 @@ public class ExceptionMessages {
     public static final String ANIMAL_SIN_COMENTARIOS_MESSAGE = "Este animal aún no tiene comentarios.";
     public static final String NON_NEGATIVE_PAGE_NUMBER_MESSAGE = "El numero de pagina no puede ser negativo.";
     public static final String ID_ZONA_INVALID_MESSAGE = "El ID de la zona es inválido.";
+    public static final String ERROR_GETTING_MAIL_TOKEN_MESSAGE = "Error obteniendo el correo del token";
 
     private ExceptionMessages() {
         throw new IllegalStateException("Utility class");

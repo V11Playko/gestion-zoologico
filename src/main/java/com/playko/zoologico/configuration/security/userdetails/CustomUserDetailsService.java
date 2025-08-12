@@ -1,4 +1,4 @@
-package com.playko.zoologico.configuration.security.userDetails;
+package com.playko.zoologico.configuration.security.userdetails;
 
 import com.playko.zoologico.entity.Usuario;
 import com.playko.zoologico.repository.IUsuarioRepository;

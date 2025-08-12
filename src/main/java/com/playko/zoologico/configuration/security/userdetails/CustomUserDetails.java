@@ -1,4 +1,4 @@
-package com.playko.zoologico.configuration.security.userDetails;
+package com.playko.zoologico.configuration.security.userdetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.playko.zoologico.entity.Role;
@@ -21,7 +21,8 @@ public class CustomUserDetails implements UserDetails {
 
     public static CustomUserDetails build(Usuario user, List<Role> roles) {
         List<SimpleGrantedAuthority> authorities = roles.stream()
-                .map(rol -> new SimpleGrantedAuthority(rol.getNombre())).toList();
+                .map(rol -> new SimpleGrantedAuthority(rol.getNombre()))
+                .toList();
 
         return new CustomUserDetails(
                 user.getEmail(),
@@ -48,25 +49,32 @@ public class CustomUserDetails implements UserDetails {
     public boolean isAccountNonExpired() {
         return true;
     }
+
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
+
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
     @Override
     public boolean isEnabled() {
         return true;
     }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         CustomUserDetails user = (CustomUserDetails) o;
         return Objects.equals(email, user.getUsername());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
     }
 }

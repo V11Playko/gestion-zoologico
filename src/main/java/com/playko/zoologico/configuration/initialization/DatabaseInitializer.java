@@ -1,4 +1,4 @@
-package com.playko.zoologico.configuration.Initialization;
+package com.playko.zoologico.configuration.initialization;
 
 import com.playko.zoologico.entity.Role;
 import com.playko.zoologico.entity.Usuario;
@@ -7,6 +7,9 @@ import com.playko.zoologico.repository.IUsuarioRepository;
 import com.playko.zoologico.service.IAuthPasswordEncoderPort;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
+
+import static com.playko.zoologico.constants.GlobalConstants.ROLE_ADMIN;
+import static com.playko.zoologico.constants.GlobalConstants.ROLE_EMPLEADO;
 
 @Component
 public class DatabaseInitializer {
@@ -27,8 +30,8 @@ public class DatabaseInitializer {
     }
 
     private void initializeRoles() {
-        createRoleIfNotExists("ROLE_ADMIN", "ROLE_ADMIN");
-        createRoleIfNotExists("ROLE_EMPLEADO", "ROLE_EMPLEADO");
+        createRoleIfNotExists(ROLE_ADMIN, ROLE_ADMIN);
+        createRoleIfNotExists(ROLE_EMPLEADO, ROLE_EMPLEADO);
     }
 
     private void createRoleIfNotExists(String name, String description) {

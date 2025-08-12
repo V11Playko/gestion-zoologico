@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -51,7 +50,7 @@ public class UsuarioService implements IUsuarioService {
 
         return usuarios.stream()
                 .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private UsuarioResponseDto mapToResponseDto(Usuario usuario) {

@@ -123,7 +123,7 @@ public class ZonaService implements IZonaService {
                     : 0L;
 
             return new CantidadAnimalesPorZonaResponseDto(zona.getNombre(), cantidadAnimales);
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private ZonaResponseDto mapToResponseDto(Zona zona) {

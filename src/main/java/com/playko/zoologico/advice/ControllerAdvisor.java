@@ -1,5 +1,6 @@
 package com.playko.zoologico.advice;
 
+import com.playko.zoologico.exception.ErrorGettingMailTokenException;
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.NonNegativePageNumberException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
@@ -39,6 +40,7 @@ import static com.playko.zoologico.constants.ExceptionMessages.ANIMAL_SIN_COMENT
 import static com.playko.zoologico.constants.ExceptionMessages.COMENTARIO_ANIMAL_MISMATCH_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.COMENTARIO_PADRE_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.EMAIL_ALREADY_EXISTS_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ERROR_GETTING_MAIL_TOKEN_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_CON_ANIMALES_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_NOT_FOUND_MESSAGE;
@@ -222,5 +224,12 @@ public class ControllerAdvisor {
             IdZonaInvalidException idZonaInvalidException) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ID_ZONA_INVALID_MESSAGE));
+    }
+
+    @ExceptionHandler(ErrorGettingMailTokenException.class)
+    public ResponseEntity<Map<String, String>> handleErrorGettingMailTokenException(
+            ErrorGettingMailTokenException errorGettingMailTokenException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ERROR_GETTING_MAIL_TOKEN_MESSAGE));
     }
 }

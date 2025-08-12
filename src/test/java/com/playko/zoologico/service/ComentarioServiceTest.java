@@ -1,6 +1,6 @@
 package com.playko.zoologico.service;
 
-import com.playko.zoologico.configuration.security.userDetails.CustomUserDetails;
+import com.playko.zoologico.configuration.security.userdetails.CustomUserDetails;
 import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
 import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
@@ -28,7 +28,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

@@ -1,6 +1,6 @@
 package com.playko.zoologico.configuration.security.jwt;
 
-import com.playko.zoologico.configuration.security.userDetails.CustomUserDetailsService;
+import com.playko.zoologico.configuration.security.userdetails.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
