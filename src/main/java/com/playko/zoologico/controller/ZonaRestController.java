@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
@@ -57,9 +58,12 @@ public class ZonaRestController {
     })
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_EMPLEADO')")
-    public ResponseEntity<List<ZonaResponseDto>> obtenerTodasLasZonas() {
-        return ResponseEntity.ok(zonaService.obtenerTodasLasZonas());
+    public List<ZonaResponseDto> listarZonas(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(defaultValue = "0") int page) {
+        return zonaService.obtenerTodasLasZonas(nombre, page).getContent();
     }
+
 
     @Operation(summary = "Crear una nueva zona")
     @ApiResponses(value = {
