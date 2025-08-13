@@ -21,14 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,18 +63,6 @@ class ZonaServiceTest {
         zona.setEspecies(Set.of(especie));
     }
 
-//    @Test
-//    void obtenerZonaPorId_debeRetornarDtoCuandoExiste() {
-//        when(zonaRepository.findById(100L)).thenReturn(Optional.of(zona));
-//
-//        ZonaResponseDto result = zonaService.obtenerZonaPorId(100L);
-//
-//        assertNotNull(result);
-//        assertEquals(100L, result.getId());
-//        assertEquals("Zona Norte", result.getNombre());
-//        assertEquals(List.of(10L), result.getEspeciesIds());
-//        assertEquals(List.of(1L), result.getAnimalesIds());
-//    }
 
     @Test
     void obtenerZonaPorId_debeLanzarExcepcionCuandoNoExiste() {
@@ -86,24 +70,6 @@ class ZonaServiceTest {
 
         assertThrows(ZonaNotFoundException.class, () -> zonaService.obtenerZonaPorId(999L));
     }
-
-//    @Test
-//    void obtenerTodasLasZonas_debeRetornarListaCuandoExisten() {
-//        when(zonaRepository.findAllWithEspeciesAndAnimales()).thenReturn(List.of(zona));
-//
-//        List<ZonaResponseDto> result = zonaService.obtenerTodasLasZonas();
-//
-//        assertEquals(1, result.size());
-//        assertEquals("Zona Norte", result.get(0).getNombre());
-//        verify(zonaRepository).findAllWithEspeciesAndAnimales();
-//    }
-//
-//    @Test
-//    void obtenerTodasLasZonas_debeLanzarExcepcionCuandoNoHayDatos() {
-//        when(zonaRepository.findAllWithEspeciesAndAnimales()).thenReturn(List.of());
-//
-//        assertThrows(NoDataFoundException.class, () -> zonaService.obtenerTodasLasZonas());
-//    }
 
     @Test
     void crearZona_debeGuardarNuevaZona() {
@@ -138,8 +104,13 @@ class ZonaServiceTest {
     void editarZona_debeLanzarExcepcionSiNoExiste() {
         when(zonaRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ZonaNotFoundException.class, () -> zonaService.editarZona(999L, new ZonaRequestDto()));
+        assertThrows(ZonaNotFoundException.class, this::callEditarZonaNotFound);
     }
+
+    private void callEditarZonaNotFound() {
+        zonaService.editarZona(999L, new ZonaRequestDto());
+    }
+
 
     @Test
     void eliminarZona_debeEliminarCuandoNoHayAnimales() {
