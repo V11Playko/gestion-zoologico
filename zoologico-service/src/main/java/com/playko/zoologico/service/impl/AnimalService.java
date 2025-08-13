@@ -1,21 +1,27 @@
 package com.playko.zoologico.service.impl;
 
+import com.playko.zoologico.configuration.security.userdetails.CustomUserDetails;
 import com.playko.zoologico.dto.request.AnimalRequestDto;
 import com.playko.zoologico.dto.response.AnimalRegistradoResponseDto;
 import com.playko.zoologico.dto.response.AnimalResponseDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
 import com.playko.zoologico.entity.Especie;
+import com.playko.zoologico.entity.Usuario;
+import com.playko.zoologico.exception.ErrorGettingMailTokenException;
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalesNoEncontradosEnFechaException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IEspecieRepository;
+import com.playko.zoologico.repository.IUsuarioRepository;
 import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.IAnimalService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,6 +34,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AnimalService implements IAnimalService {
     private final IAnimalRepository animalRepository;
+    private final IUsuarioRepository usuarioRepository;
     private final IEspecieRepository especieRepository;
     private final IZonaRepository zonaRepository;
 
@@ -55,14 +62,18 @@ public class AnimalService implements IAnimalService {
         Especie especie = especieRepository.findById(dto.getEspecieId())
                 .orElseThrow(EspecieNotFoundException::new);
 
+        String correoUsuarioAutenticado = obtenerCorreoDelToken();
+        Usuario creador = usuarioRepository.findByEmail(correoUsuarioAutenticado);
 
         Animal animal = new Animal();
         animal.setNombre(dto.getNombre().trim());
         animal.setFechaIngreso(dto.getFechaIngreso() != null ? dto.getFechaIngreso() : LocalDateTime.now());
         animal.setEspecie(especie);
+        animal.setCreador(creador);
 
         animalRepository.save(animal);
     }
+
 
     @Override
     public void editarAnimal(Long id, AnimalRequestDto dto) {
@@ -118,5 +129,13 @@ public class AnimalService implements IAnimalService {
                 animal.getEspecie().getId(),
                 comentarios
         );
+    }
+
+    public String obtenerCorreoDelToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            return userDetails.getUsername();
+        }
+        throw new ErrorGettingMailTokenException();
     }
 }
