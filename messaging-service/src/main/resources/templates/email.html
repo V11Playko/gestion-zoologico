@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es" xml:lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${subject}">Notificación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        .meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .comment {
+            font-size: 16px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 th:text="${subject}">Notificación</h2>
+    <div class="meta">
+        <strong>Animal:</strong> <span th:text="${animalName}">Nombre animal</span><br>
+        <strong>ID Animal:</strong> <span th:text="${animalId}">123</span><br>
+        <strong>Autor del comentario:</strong> <span th:text="${commentAuthorName}">Autor</span>
+        (<span th:text="${commentAuthorEmail}">email@example.com</span>)<br>
+        <strong>Fecha:</strong> <span th:text="${commentDate}">2025-08-12</span>
+    </div>
+    <div class="comment">
+        <p th:text="${body}">Aquí va el comentario...</p>
+    </div>
+</div>
+</body>
+</html>
