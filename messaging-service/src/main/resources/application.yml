@@ -1,1 +1,11 @@
-spring.application.name=messaging.service
+server:
+  port: 8092
+
+security:
+  jwt:
+    secret: ${KEYSECRET_SECURITY}   # <- Variable de entorno
+    issuer: "zoologico-service"
+    audience: "messaging-service"
+
+appDescription: "Messaging-Service"
+appVersion: "1.0.0"
