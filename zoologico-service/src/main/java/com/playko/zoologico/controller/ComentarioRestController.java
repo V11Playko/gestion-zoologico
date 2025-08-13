@@ -41,7 +41,7 @@ public class ComentarioRestController {
             @ApiResponse(responseCode = "404", description = "Animal o comentario padre no encontrado")
     })
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_EMPLEADO')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_EMPLEADO','ROLE_CLIENTE')")
     public ResponseEntity<Map<String, String>> agregarComentario(@Valid @RequestBody ComentarioRequestDto dto) {
         comentarioService.agregarComentario(dto);
         return ResponseEntity.status(HttpStatus.CREATED)

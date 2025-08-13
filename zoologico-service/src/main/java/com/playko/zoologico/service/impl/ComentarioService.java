@@ -1,5 +1,7 @@
 package com.playko.zoologico.service.impl;
 
+import com.playko.zoologico.client.MessagingClient;
+import com.playko.zoologico.client.dto.SendNotification;
 import com.playko.zoologico.configuration.security.userdetails.CustomUserDetails;
 import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
@@ -33,8 +35,8 @@ public class ComentarioService implements IComentarioService {
     private final IComentarioRepository comentarioRepository;
 
     private final IAnimalRepository animalRepository;
-
     private final IUsuarioRepository usuarioRepository;
+    private final MessagingClient messagingClient;
 
     @Override
     public void agregarComentario(ComentarioRequestDto dto) {
@@ -65,8 +67,25 @@ public class ComentarioService implements IComentarioService {
             comentario.setPadre(padre);
         }
 
+        Usuario creadorAnimal = animal.getCreador();
+        if (!autor.getId().equals(creadorAnimal.getId())) {
+            SendNotification notification = new SendNotification(
+                    creadorAnimal.getEmail(),
+                    "Nuevo comentario sobre el animal '" + animal.getNombre() + "'",
+                    comentario.getContenido(),
+                    animal.getId(),
+                    animal.getNombre(),
+                    comentario.getId(),
+                    comentario.getFecha(),
+                    autor.getNombre(),
+                    autor.getEmail()
+            );
+            messagingClient.sendNotification(notification);
+        }
+
         comentarioRepository.save(comentario);
     }
+
 
     @Override
     public List<ComentarioResponseDto> obtenerMuroDeAnimal(Long animalId) {
