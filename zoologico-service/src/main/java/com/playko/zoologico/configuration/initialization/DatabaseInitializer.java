@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import static com.playko.zoologico.constants.GlobalConstants.ROLE_ADMIN;
+import static com.playko.zoologico.constants.GlobalConstants.ROLE_CLIENTE;
 import static com.playko.zoologico.constants.GlobalConstants.ROLE_EMPLEADO;
 
 @Component
@@ -32,6 +33,7 @@ public class DatabaseInitializer {
     private void initializeRoles() {
         createRoleIfNotExists(ROLE_ADMIN, ROLE_ADMIN);
         createRoleIfNotExists(ROLE_EMPLEADO, ROLE_EMPLEADO);
+        createRoleIfNotExists(ROLE_CLIENTE, ROLE_CLIENTE);
     }
 
     private void createRoleIfNotExists(String name, String description) {
@@ -45,10 +47,10 @@ public class DatabaseInitializer {
     }
 
     private void initializeAdminUser() {
-        if (userRepository.findByEmail("admin@mail.com") == null) {
+        if (userRepository.findByEmail("heinnervega20@gmail.com") == null) {
             Usuario admin = new Usuario();
             admin.setNombre("Admin");
-            admin.setEmail("admin@mail.com");
+            admin.setEmail("heinnervega20@gmail.com");
             admin.setPassword(passwordEncoder.encodePassword("admin"));
 
             Role adminRole = roleRepository.findByNombre("ROLE_ADMIN");
