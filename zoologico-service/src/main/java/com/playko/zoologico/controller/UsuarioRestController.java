@@ -56,4 +56,18 @@ public class UsuarioRestController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, USUARIO_CREATED_MESSAGE));
     }
+
+    @Operation(summary = "Crear un nuevo usuario cliente (registro público)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Usuario cliente creado correctamente"),
+            @ApiResponse(responseCode = "409", description = "El correo ya existe"),
+            @ApiResponse(responseCode = "404", description = "Rol no encontrado")
+    })
+    @PostMapping("/registro")
+    public ResponseEntity<Map<String, String>> registrarCliente(@Valid @RequestBody UsuarioRequestDto dto) {
+        usuarioService.crearUsuarioCliente(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, USUARIO_CREATED_MESSAGE));
+    }
+
 }

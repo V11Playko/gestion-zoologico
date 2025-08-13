@@ -6,6 +6,10 @@ import com.playko.zoologico.dto.response.UsuarioResponseDto;
 import java.util.List;
 
 public interface IUsuarioService {
+
+    void crearUsuario(UsuarioRequestDto dto, String nombreRol);
     void crearUsuarioEmpleado(UsuarioRequestDto dto);
+    void crearUsuarioCliente(UsuarioRequestDto dto);
+
     List<UsuarioResponseDto> listarUsuarios();
 }

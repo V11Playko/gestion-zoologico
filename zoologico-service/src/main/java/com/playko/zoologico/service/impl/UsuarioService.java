@@ -24,23 +24,35 @@ public class UsuarioService implements IUsuarioService {
     private final IUsuarioRepository usuarioRepository;
     private final IRoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+
     @Override
-    public void crearUsuarioEmpleado(UsuarioRequestDto dto) {
+    public void crearUsuario(UsuarioRequestDto dto, String nombreRol) {
         if (usuarioRepository.existsByEmailIgnoreCase(dto.getEmail())) {
             throw new EmailAlreadyExistsException();
         }
 
-        Role roleEmpleado = roleRepository.findByNombreIgnoreCase("ROLE_EMPLEADO")
+        Role role = roleRepository.findByNombreIgnoreCase(nombreRol)
                 .orElseThrow(RoleNotFoundException::new);
 
         Usuario usuario = new Usuario();
         usuario.setNombre(dto.getNombre().trim());
         usuario.setEmail(dto.getEmail().trim().toLowerCase());
         usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
-        usuario.setRole(roleEmpleado);
+        usuario.setRole(role);
 
         usuarioRepository.save(usuario);
     }
+
+    @Override
+    public void crearUsuarioEmpleado(UsuarioRequestDto dto) {
+        crearUsuario(dto, "ROLE_EMPLEADO");
+    }
+
+    @Override
+    public void crearUsuarioCliente(UsuarioRequestDto dto) {
+        crearUsuario(dto, "ROLE_CLIENTE");
+    }
+
 
     @Override
     public List<UsuarioResponseDto> listarUsuarios() {
