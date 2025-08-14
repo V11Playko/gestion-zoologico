@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -80,14 +81,18 @@ public class ComentarioRestController {
     @GetMapping("/comentarios/excel")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<byte[]> generarExcelComentariosPorFecha(
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+            @RequestParam(required = false) String fecha) {
 
         byte[] fileBytes = comentarioService.generarExcelComentariosPorFecha(fecha);
 
-        LocalDate dateForName = (fecha != null) ? fecha : LocalDate.now(ZoneId.of("America/Bogota"));
-        String filename = "comentarios-" + dateForName.toString() + ".xlsx";
+        LocalDate dateForName;
+        try {
+            dateForName = (fecha != null) ? LocalDate.parse(fecha) : LocalDate.now(ZoneId.of("America/Bogota"));
+        } catch (DateTimeParseException e) {
+            dateForName = LocalDate.now(ZoneId.of("America/Bogota"));
+        }
 
+        String filename = "comentarios-" + dateForName.toString() + ".xlsx";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
