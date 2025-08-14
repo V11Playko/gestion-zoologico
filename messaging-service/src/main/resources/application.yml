@@ -1,6 +1,11 @@
 server:
   port: 8092
 
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+
 security:
   jwt:
     secret: ${KEYSECRET_SECURITY}   # <- Variable de entorno
