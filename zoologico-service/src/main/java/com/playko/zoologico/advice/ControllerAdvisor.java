@@ -1,5 +1,6 @@
 package com.playko.zoologico.advice;
 
+import com.playko.zoologico.exception.ErrorGeneratingExcelException;
 import com.playko.zoologico.exception.ErrorGettingMailTokenException;
 import com.playko.zoologico.exception.NoDataFoundException;
 import com.playko.zoologico.exception.NonNegativePageNumberException;
@@ -10,6 +11,7 @@ import com.playko.zoologico.exception.animal.FechaFormatoInvalidoException;
 import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
 import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
 import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
+import com.playko.zoologico.exception.comentario.NoComentariosEnFechaException;
 import com.playko.zoologico.exception.especie.EspecieAlreadyExistsException;
 import com.playko.zoologico.exception.especie.EspecieConAnimalesException;
 import com.playko.zoologico.exception.especie.EspecieNotFoundException;
@@ -40,6 +42,7 @@ import static com.playko.zoologico.constants.ExceptionMessages.ANIMAL_SIN_COMENT
 import static com.playko.zoologico.constants.ExceptionMessages.COMENTARIO_ANIMAL_MISMATCH_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.COMENTARIO_PADRE_NOT_FOUND_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.EMAIL_ALREADY_EXISTS_MESSAGE;
+import static com.playko.zoologico.constants.ExceptionMessages.ERROR_GENERATING_EXCEL_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ERROR_GETTING_MAIL_TOKEN_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_ALREADY_EXISTS_MESSAGE;
 import static com.playko.zoologico.constants.ExceptionMessages.ESPECIE_CON_ANIMALES_MESSAGE;
@@ -232,4 +235,19 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ERROR_GETTING_MAIL_TOKEN_MESSAGE));
     }
+
+    @ExceptionHandler(ErrorGeneratingExcelException.class)
+    public ResponseEntity<Map<String, String>> handleErrorGeneratingExcelException(
+            ErrorGeneratingExcelException errorGeneratingExcelException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ERROR_GENERATING_EXCEL_MESSAGE));
+    }
+
+    @ExceptionHandler(NoComentariosEnFechaException.class)
+    public ResponseEntity<Map<String, String>> handleNoComentariosEnFechaException(
+            NoComentariosEnFechaException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, ex.getMessage()));
+    }
+
 }
