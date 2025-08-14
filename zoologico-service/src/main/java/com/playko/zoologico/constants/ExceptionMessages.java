@@ -21,6 +21,7 @@ public class ExceptionMessages {
     public static final String ERROR_GETTING_MAIL_TOKEN_MESSAGE = "Error obteniendo el correo del token";
     public static final String ERROR_GENERATING_EXCEL_MESSAGE = "Error generando el excel.";
     public static final String NO_COMENTARIOS_EN_FECHA_MESSAGE = "No se encontraron comentarios para la fecha: ";
+    public static final String FECHA_INVALIDA = "Formato de fecha inválido. El formato correcto es 'yyyy-MM-dd'.";
 
 
     private ExceptionMessages() {
