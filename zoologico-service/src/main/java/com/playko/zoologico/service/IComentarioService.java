@@ -4,10 +4,13 @@ import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
 import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IComentarioService {
     void agregarComentario(ComentarioRequestDto dto);
     List<ComentarioResponseDto> obtenerMuroDeAnimal(Long animalId);
     PorcentajeComentariosConRespuestasDto obtenerPorcentajeComentariosConRespuestas();
+
+    byte[] generarExcelComentariosPorFecha(LocalDate fecha);
 }
