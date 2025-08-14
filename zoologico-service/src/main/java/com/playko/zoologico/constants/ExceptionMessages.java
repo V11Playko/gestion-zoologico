@@ -19,6 +19,9 @@ public class ExceptionMessages {
     public static final String NON_NEGATIVE_PAGE_NUMBER_MESSAGE = "El numero de pagina no puede ser negativo.";
     public static final String ID_ZONA_INVALID_MESSAGE = "El ID de la zona es inválido.";
     public static final String ERROR_GETTING_MAIL_TOKEN_MESSAGE = "Error obteniendo el correo del token";
+    public static final String ERROR_GENERATING_EXCEL_MESSAGE = "Error generando el excel.";
+    public static final String NO_COMENTARIOS_EN_FECHA_MESSAGE = "No se encontraron comentarios para la fecha: ";
+
 
     private ExceptionMessages() {
         throw new IllegalStateException("Utility class");
