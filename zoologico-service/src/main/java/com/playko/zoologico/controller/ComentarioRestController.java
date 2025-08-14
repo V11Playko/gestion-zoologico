@@ -11,7 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +22,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +74,28 @@ public class ComentarioRestController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<PorcentajeComentariosConRespuestasDto> obtenerPorcentajeComentariosConRespuestas() {
         return ResponseEntity.ok(comentarioService.obtenerPorcentajeComentariosConRespuestas());
+    }
+
+
+    @GetMapping("/comentarios/excel")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<byte[]> generarExcelComentariosPorFecha(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+
+        byte[] fileBytes = comentarioService.generarExcelComentariosPorFecha(fecha);
+
+        LocalDate dateForName = (fecha != null) ? fecha : LocalDate.now(ZoneId.of("America/Bogota"));
+        String filename = "comentarios-" + dateForName.toString() + ".xlsx";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .headers(headers)
+                .body(fileBytes);
     }
 
 }
