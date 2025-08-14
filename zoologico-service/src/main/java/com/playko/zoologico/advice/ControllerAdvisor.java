@@ -7,7 +7,7 @@ import com.playko.zoologico.exception.NonNegativePageNumberException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
 import com.playko.zoologico.exception.animal.AnimalesNoEncontradosEnFechaException;
-import com.playko.zoologico.exception.animal.FechaFormatoInvalidoException;
+import com.playko.zoologico.exception.FechaFormatoInvalidoException;
 import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
 import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
 import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
