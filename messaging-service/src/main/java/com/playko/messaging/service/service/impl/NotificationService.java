@@ -1,7 +1,9 @@
 package com.playko.messaging.service.service.impl;
 
+import com.playko.messaging.service.dto.EmailLog;
 import com.playko.messaging.service.dto.SendNotification;
 import com.playko.messaging.service.exception.MessageNotSendException;
+import com.playko.messaging.service.repository.EmailLogRepository;
 import com.playko.messaging.service.service.INotificationService;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.time.LocalDateTime;
+
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +23,7 @@ public class NotificationService implements INotificationService {
 
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
+    private final EmailLogRepository emailLogRepository;
 
     @Async
     @Override
@@ -43,8 +48,29 @@ public class NotificationService implements INotificationService {
             String contenidoHtml = templateEngine.process("email", context);
 
             helper.setText(contenidoHtml, true);
+
+            // Envía
             javaMailSender.send(message);
 
+            // Obtener Message-ID (puede venir como "<...>")
+            String[] messageIds = message.getHeader("Message-ID");
+            String messageId = (messageIds != null && messageIds.length > 0) ? messageIds[0] : null;
+
+            // Guardar en MongoDB
+            EmailLog log = EmailLog.builder()
+                    .messageId(messageId)
+                    .to(notification.getTo())
+                    .subject(notification.getSubject())
+                    .body(notification.getBody())
+                    .commentAuthorName(notification.getCommentAuthorName())
+                    .commentAuthorEmail(notification.getCommentAuthorEmail())
+                    .animalName(notification.getAnimalName())
+                    .animalId(notification.getAnimalId())
+                    .commentId(notification.getCommentId())
+                    .sentAt(LocalDateTime.now())
+                    .build();
+
+            emailLogRepository.save(log);
         } catch (Exception e) {
             throw new MessageNotSendException();
         }
