@@ -3,7 +3,7 @@ package com.playko.zoologico.controller;
 import com.playko.zoologico.dto.request.AnimalRequestDto;
 import com.playko.zoologico.dto.response.AnimalRegistradoResponseDto;
 import com.playko.zoologico.dto.response.AnimalResponseDto;
-import com.playko.zoologico.exception.animal.FechaFormatoInvalidoException;
+import com.playko.zoologico.exception.FechaFormatoInvalidoException;
 import com.playko.zoologico.service.IAnimalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
