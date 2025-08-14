@@ -36,6 +36,7 @@ public class MailConfig {
         props.put("mail.debug", "false");
 
         return mailSender;
+
     }
 }
 
