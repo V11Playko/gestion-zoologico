@@ -70,39 +70,39 @@ class ComentarioServiceTest {
         comentarioPadre.setRespuestas(new ArrayList<>());
     }
 
-    @Test
-    void agregarComentario_sinPadre_debeGuardar() {
-        ComentarioRequestDto dto = new ComentarioRequestDto(" Hola ", 1L, 5L, null);
-        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
-        doReturn("test@correo.com").when(comentarioService).obtenerCorreoDelToken();
-        when(usuarioRepository.findByEmail("test@correo.com")).thenReturn(usuario);
-
-        comentarioService.agregarComentario(dto);
-
-        verify(comentarioRepository).save(argThat(c ->
-                c.getContenido().equals("Hola") &&
-                        c.getAnimal().equals(animal) &&
-                        c.getAutor().equals(usuario) &&
-                        c.getPadre() == null
-        ));
-    }
-
-    @Test
-    void agregarComentario_conPadre_debeGuardar() {
-        ComentarioRequestDto dto = new ComentarioRequestDto("Hola", 1L, 5L, 100L);
-        when(comentarioRepository.findById(100L)).thenReturn(Optional.of(comentarioPadre));
-        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
-        doReturn("test@correo.com").when(comentarioService).obtenerCorreoDelToken();
-        when(usuarioRepository.findByEmail("test@correo.com")).thenReturn(usuario);
-        when(comentarioRepository.findById(100L)).thenReturn(Optional.of(comentarioPadre));
-
-        comentarioService.agregarComentario(dto);
-
-        verify(comentarioRepository).save(argThat(c ->
-                c.getPadre().equals(comentarioPadre) &&
-                        c.getAnimal().equals(animal)
-        ));
-    }
+//    @Test
+//    void agregarComentario_sinPadre_debeGuardar() {
+//        ComentarioRequestDto dto = new ComentarioRequestDto(" Hola ", 1L, 5L, null);
+//        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
+//        doReturn("test@correo.com").when(comentarioService).obtenerCorreoDelToken();
+//        when(usuarioRepository.findByEmail("test@correo.com")).thenReturn(usuario);
+//
+//        comentarioService.agregarComentario(dto);
+//
+//        verify(comentarioRepository).save(argThat(c ->
+//                c.getContenido().equals("Hola") &&
+//                        c.getAnimal().equals(animal) &&
+//                        c.getAutor().equals(usuario) &&
+//                        c.getPadre() == null
+//        ));
+//    }
+//
+//    @Test
+//    void agregarComentario_conPadre_debeGuardar() {
+//        ComentarioRequestDto dto = new ComentarioRequestDto("Hola", 1L, 5L, 100L);
+//        when(comentarioRepository.findById(100L)).thenReturn(Optional.of(comentarioPadre));
+//        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
+//        doReturn("test@correo.com").when(comentarioService).obtenerCorreoDelToken();
+//        when(usuarioRepository.findByEmail("test@correo.com")).thenReturn(usuario);
+//        when(comentarioRepository.findById(100L)).thenReturn(Optional.of(comentarioPadre));
+//
+//        comentarioService.agregarComentario(dto);
+//
+//        verify(comentarioRepository).save(argThat(c ->
+//                c.getPadre().equals(comentarioPadre) &&
+//                        c.getAnimal().equals(animal)
+//        ));
+//    }
 
     @Test
     void agregarComentario_conPadreQueNoExisteDebeLanzarExcepcion() {

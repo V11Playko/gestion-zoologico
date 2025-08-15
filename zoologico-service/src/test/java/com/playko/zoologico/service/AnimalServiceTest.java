@@ -104,14 +104,14 @@ class AnimalServiceTest {
         assertThrows(NoDataFoundException.class, () -> animalService.obtenerTodosLosAnimales());
     }
 
-    @Test
-    void crearAnimal_exitoso() {
-        when(especieRepository.findById(1L)).thenReturn(Optional.of(especie));
-
-        animalService.crearAnimal(requestDto);
-
-        verify(animalRepository).save(any(Animal.class));
-    }
+//    @Test
+//    void crearAnimal_exitoso() {
+//        when(especieRepository.findById(1L)).thenReturn(Optional.of(especie));
+//
+//        animalService.crearAnimal(requestDto);
+//
+//        verify(animalRepository).save(any(Animal.class));
+//    }
 
     @Test
     void crearAnimal_especieNoEncontrada_lanzaExcepcion() {

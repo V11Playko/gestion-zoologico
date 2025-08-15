@@ -4,6 +4,8 @@
 # Configuración de ejecución de IntelliJ
 .run/
 .idea
+# Gradle build output
+/build/reports
 
 .idea
 
