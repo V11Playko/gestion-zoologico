@@ -1,5 +1,6 @@
 package com.playko.messaging.service.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class SendNotification {
 
+   @NotBlank
     private String to;
 
     private String subject;

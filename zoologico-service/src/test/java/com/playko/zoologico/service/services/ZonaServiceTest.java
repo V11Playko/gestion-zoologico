@@ -1,4 +1,4 @@
-package com.playko.zoologico.service;
+package com.playko.zoologico.service.services;
 
 import com.playko.zoologico.dto.request.ZonaRequestDto;
 import com.playko.zoologico.dto.response.CantidadAnimalesPorZonaResponseDto;
@@ -13,7 +13,6 @@ import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
 import com.playko.zoologico.exception.zona.IdZonaInvalidException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
-import com.playko.zoologico.repository.IEspecieRepository;
 import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.impl.ZonaService;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +32,6 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

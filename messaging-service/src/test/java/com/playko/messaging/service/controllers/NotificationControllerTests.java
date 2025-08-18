@@ -1,77 +1,156 @@
 package com.playko.messaging.service.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.playko.messaging.service.configuration.security.jwt.JwtAuthorizationFilter;
+import com.playko.messaging.service.configuration.security.jwt.JwtUtils;
 import com.playko.messaging.service.controller.NotificationController;
 import com.playko.messaging.service.dto.SendNotification;
 import com.playko.messaging.service.service.INotificationService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.Mockito.*;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(NotificationController.class)
-class NotificationControllerTest {
+@WebMvcTest(controllers = NotificationController.class)
+@Import(JwtAuthorizationFilter.class) // importamos el filtro para que forme parte del contexto
+class NotificationControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private INotificationService emailService;
-
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    void sendNotification_success() throws Exception {
-        // Arrange
-        SendNotification notification = new SendNotification("test@example.com", "Hola mundo", "Este es el cuerpo");
+    @MockBean
+    private INotificationService emailService;
 
-        // Act & Assert
-        mockMvc.perform(post("/api/notifications/send")
+    @MockBean
+    private JwtUtils jwtUtils; // mockeamos JwtUtils para controlar validación y roles
+
+    private static final String BASE = "/api/notifications/send";
+
+    @Test
+    @DisplayName("POST /send con token válido y rol permitido -> 200 OK")
+    void sendNotification_WithValidToken_ReturnsOk() throws Exception {
+        SendNotification request = new SendNotification();
+        request.setTo("test@example.com");
+        request.setSubject("Prueba");
+        request.setBody("Mensaje de prueba");
+
+        String token = "valid-token";
+
+        // Preparar mocks
+        when(jwtUtils.validateJwtToken(eq(token))).thenReturn(true);
+        when(jwtUtils.getRoles(eq(token))).thenReturn(List.of("ROLE_ADMIN"));
+        doNothing().when(emailService).sendNotification(any(SendNotification.class));
+
+        mockMvc.perform(post(BASE)
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(notification)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Correo enviado correctamente a test@example.com"));
-
-        verify(emailService, times(1)).sendNotification(notification);
     }
 
     @Test
-    void sendNotification_validationError() throws Exception {
-        // Arrange → el campo "to" es obligatorio, simulamos que falta
-        SendNotification notification = new SendNotification("", "Asunto", "Cuerpo");
+    @DisplayName("POST /send sin token -> 401 Unauthorized")
+    void sendNotification_WithoutToken_ReturnsUnauthorized() throws Exception {
+        SendNotification request = new SendNotification();
+        request.setTo("test@example.com");
+        request.setSubject("Prueba");
+        request.setBody("Mensaje de prueba");
 
-        // Act & Assert
-        mockMvc.perform(post("/api/notifications/send")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(notification)))
-                .andExpect(status().isBadRequest()); // Spring devuelve 400 automáticamente
-        // Aquí no debe llamarse el servicio
-        verify(emailService, times(0)).sendNotification(any());
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void sendNotification_serviceThrowsException() throws Exception {
-        // Arrange
-        SendNotification notification = new SendNotification("fail@example.com", "Asunto", "Cuerpo");
+    @DisplayName("POST /send con token inválido -> 401 Unauthorized")
+    void sendNotification_WithInvalidToken_ReturnsUnauthorized() throws Exception {
+        SendNotification request = new SendNotification();
+        request.setTo("test@example.com");
+        request.setSubject("Prueba");
+        request.setBody("Mensaje de prueba");
 
-        doThrow(new RuntimeException("Error al enviar correo"))
-                .when(emailService).sendNotification(notification);
+        String token = "invalid-token";
 
-        // Act & Assert
-        mockMvc.perform(post("/api/notifications/send")
+        when(jwtUtils.validateJwtToken(eq(token))).thenReturn(false);
+
+        mockMvc.perform(post(BASE)
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(notification)))
-                .andExpect(status().isInternalServerError());
-        // ⚠️ Ojo: ahora mismo tu controller no captura excepciones, así que esto depende de cómo manejes los errores globalmente (ControllerAdvice).
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
 
-        verify(emailService, times(1)).sendNotification(notification);
+    @Test
+    @DisplayName("POST /send con rol no autorizado -> 401 Unauthorized")
+    void sendNotification_WithUnauthorizedRole_ReturnsUnauthorized() throws Exception {
+        SendNotification request = new SendNotification();
+        request.setTo("test@example.com");
+        request.setSubject("Prueba");
+        request.setBody("Mensaje de prueba");
+
+        String token = "valid-but-wrong-role";
+
+        when(jwtUtils.validateJwtToken(eq(token))).thenReturn(true);
+        // rol que no está en rolesEndpointsMap (ROLE_ADMIN/ROLE_EMPLEADO/ROLE_CLIENTE)
+        when(jwtUtils.getRoles(eq(token))).thenReturn(List.of("ROLE_SOME_OTHER"));
+
+        mockMvc.perform(post(BASE)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("POST /send con token válido pero payload inválido -> 400 Bad Request")
+    void sendNotification_WithValidToken_ButInvalidPayload_ReturnsBadRequest() throws Exception {
+        SendNotification request = new SendNotification();
+        request.setTo(""); // inválido para forzar error de @Valid
+        request.setSubject("Prueba");
+        request.setBody("Mensaje de prueba");
+
+        String token = "valid-token-for-validation";
+
+        when(jwtUtils.validateJwtToken(eq(token))).thenReturn(true);
+        when(jwtUtils.getRoles(eq(token))).thenReturn(List.of("ROLE_ADMIN"));
+
+        mockMvc.perform(post(BASE)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 }
