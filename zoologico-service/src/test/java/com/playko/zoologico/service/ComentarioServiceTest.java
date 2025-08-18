@@ -1,5 +1,7 @@
 package com.playko.zoologico.service;
 
+import com.playko.zoologico.client.MessagingClient;
+import com.playko.zoologico.client.dto.SendNotification;
 import com.playko.zoologico.configuration.security.userdetails.CustomUserDetails;
 import com.playko.zoologico.dto.request.ComentarioRequestDto;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
@@ -7,17 +9,23 @@ import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
 import com.playko.zoologico.entity.Usuario;
+import com.playko.zoologico.exception.FechaFormatoInvalidoException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
 import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
 import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
+import com.playko.zoologico.exception.comentario.NoComentariosEnFechaException;
 import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IComentarioRepository;
 import com.playko.zoologico.repository.IUsuarioRepository;
 import com.playko.zoologico.service.impl.ComentarioService;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -26,12 +34,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.io.ByteArrayInputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -47,184 +57,319 @@ class ComentarioServiceTest {
     @Mock
     private IUsuarioRepository usuarioRepository;
 
+    @Mock
+    private MessagingClient messagingClient;
+
     @InjectMocks
-    @Spy // para poder mockear obtenerCorreoDelToken()
     private ComentarioService comentarioService;
 
+    private Usuario autor;
+    private Usuario creadorAnimal;
     private Animal animal;
-    private Usuario usuario;
-    private Comentario comentarioPadre;
 
     @BeforeEach
     void setUp() {
+        autor = new Usuario();
+        autor.setId(10L);
+        autor.setNombre("Autor");
+        autor.setEmail("autor@test.com");
+
+        creadorAnimal = new Usuario();
+        creadorAnimal.setId(20L);
+        creadorAnimal.setNombre("Creador");
+        creadorAnimal.setEmail("creador@test.com");
+
         animal = new Animal();
-        animal.setId(1L);
-
-        usuario = new Usuario();
-        usuario.setId(5L);
-        usuario.setEmail("test@correo.com");
-
-        comentarioPadre = new Comentario();
-        comentarioPadre.setId(100L);
-        comentarioPadre.setAnimal(animal);
-        comentarioPadre.setRespuestas(new ArrayList<>());
+        animal.setId(100L);
+        animal.setNombre("Firulais");
+        animal.setCreador(creadorAnimal);
     }
 
-//    @Test
-//    void agregarComentario_sinPadre_debeGuardar() {
-//        ComentarioRequestDto dto = new ComentarioRequestDto(" Hola ", 1L, 5L, null);
-//        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
-//        doReturn("test@correo.com").when(comentarioService).obtenerCorreoDelToken();
-//        when(usuarioRepository.findByEmail("test@correo.com")).thenReturn(usuario);
-//
-//        comentarioService.agregarComentario(dto);
-//
-//        verify(comentarioRepository).save(argThat(c ->
-//                c.getContenido().equals("Hola") &&
-//                        c.getAnimal().equals(animal) &&
-//                        c.getAutor().equals(usuario) &&
-//                        c.getPadre() == null
-//        ));
-//    }
-//
-//    @Test
-//    void agregarComentario_conPadre_debeGuardar() {
-//        ComentarioRequestDto dto = new ComentarioRequestDto("Hola", 1L, 5L, 100L);
-//        when(comentarioRepository.findById(100L)).thenReturn(Optional.of(comentarioPadre));
-//        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
-//        doReturn("test@correo.com").when(comentarioService).obtenerCorreoDelToken();
-//        when(usuarioRepository.findByEmail("test@correo.com")).thenReturn(usuario);
-//        when(comentarioRepository.findById(100L)).thenReturn(Optional.of(comentarioPadre));
-//
-//        comentarioService.agregarComentario(dto);
-//
-//        verify(comentarioRepository).save(argThat(c ->
-//                c.getPadre().equals(comentarioPadre) &&
-//                        c.getAnimal().equals(animal)
-//        ));
-//    }
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void setAuthenticatedUserEmail(String email) {
+        Authentication auth = mock(Authentication.class);
+        CustomUserDetails cud = mock(CustomUserDetails.class);
+        when(cud.getUsername()).thenReturn(email);
+        when(auth.getPrincipal()).thenReturn(cud);
+        SecurityContext ctx = mock(SecurityContext.class);
+        when(ctx.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(ctx);
+    }
+
+    /* ===== agregarComentario ===== */
 
     @Test
-    void agregarComentario_conPadreQueNoExisteDebeLanzarExcepcion() {
-        ComentarioRequestDto dto = new ComentarioRequestDto("Hola", 1L, 5L, 999L);
+    void agregarComentario_shouldThrow_whenPadreNotFoundAtStart() {
+        // Arrange
+        ComentarioRequestDto dto = ComentarioRequestDto.builder()
+                .padreId(999L)
+                .animalId(100L)
+                .contenido("Hola")
+                .build();
+
         when(comentarioRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ComentarioPadreNotFoundException.class,
-                () -> comentarioService.agregarComentario(dto));
+        // Act & Assert
+        assertThrows(ComentarioPadreNotFoundException.class, () -> comentarioService.agregarComentario(dto));
+
+        // Verificar que solo se llamó a findById en comentarioRepository y que NO se consultó animal/usuario
+        verify(comentarioRepository).findById(999L);
+        verifyNoInteractions(animalRepository, usuarioRepository);
+
+        // Asegura que no hubo otras interacciones con comentarioRepository
+        verifyNoMoreInteractions(comentarioRepository);
     }
 
     @Test
-    void agregarComentario_conAnimalQueNoExisteDebeLanzarExcepcion() {
-        ComentarioRequestDto dto = new ComentarioRequestDto("Hola", 2L, 5L, null);
-        when(animalRepository.findById(2L)).thenReturn(Optional.empty());
+    void agregarComentario_shouldThrow_whenAnimalNotFound() {
+        ComentarioRequestDto dto = ComentarioRequestDto.builder()
+                .padreId(null)
+                .animalId(999L)
+                .contenido("Hola")
+                .build();
 
-        assertThrows(AnimalNotFoundException.class,
-                () -> comentarioService.agregarComentario(dto));
+        when(animalRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(AnimalNotFoundException.class, () -> comentarioService.agregarComentario(dto));
     }
 
     @Test
-    void agregarComentario_conPadreDeOtroAnimalDebeLanzarExcepcion() {
+    void agregarComentario_shouldThrow_whenPadreExistsButAnimalMismatch() {
+        // padre exists and belongs to another animal
+        Comentario padre = new Comentario();
+        padre.setId(1L);
         Animal otroAnimal = new Animal();
-        otroAnimal.setId(99L);
-        Comentario padreOtroAnimal = new Comentario();
-        padreOtroAnimal.setId(100L);
-        padreOtroAnimal.setAnimal(otroAnimal);
+        otroAnimal.setId(50L);
+        padre.setAnimal(otroAnimal);
 
-        ComentarioRequestDto dto = new ComentarioRequestDto("Hola", 1L, 5L, 100L);
-        when(comentarioRepository.findById(100L)).thenReturn(Optional.of(padreOtroAnimal));
-        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
-        doReturn("test@correo.com").when(comentarioService).obtenerCorreoDelToken();
-        when(usuarioRepository.findByEmail("test@correo.com")).thenReturn(usuario);
-        when(comentarioRepository.findById(100L)).thenReturn(Optional.of(padreOtroAnimal));
+        ComentarioRequestDto dto = ComentarioRequestDto.builder()
+                .padreId(1L)
+                .animalId(animal.getId()) // 100
+                .contenido("Respuesta")
+                .build();
 
-        assertThrows(ComentarioAnimalMismatchException.class,
-                () -> comentarioService.agregarComentario(dto));
+        when(comentarioRepository.findById(1L)).thenReturn(Optional.of(padre));
+        when(animalRepository.findById(animal.getId())).thenReturn(Optional.of(animal));
+        // set authenticated user and repository for usuario
+        setAuthenticatedUserEmail(autor.getEmail());
+        when(usuarioRepository.findByEmail(anyString())).thenReturn(autor);
+
+        assertThrows(ComentarioAnimalMismatchException.class, () -> comentarioService.agregarComentario(dto));
     }
 
     @Test
-    void obtenerMuroDeAnimal_debeRetornarLista() {
-        Comentario comentario = new Comentario();
-        comentario.setId(1L);
-        comentario.setContenido("Texto");
-        comentario.setFecha(LocalDateTime.now());
-        comentario.setAutor(usuario);
-        comentario.setRespuestas(List.of());
+    void agregarComentario_shouldSendNotification_whenAutorIsNotCreador() {
+        // Arrange
+        ComentarioRequestDto dto = ComentarioRequestDto.builder()
+                .padreId(null)
+                .animalId(animal.getId())
+                .contenido("  Contenido nuevo  ")
+                .build();
 
-        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
-        when(comentarioRepository.findByAnimalAndPadreIsNullOrderByFechaAsc(animal))
-                .thenReturn(List.of(comentario));
-        when(comentarioRepository.existsByAnimal_Id(1L)).thenReturn(true);
+        // NO stubbing de comentarioRepository.findById(...) — innecesario cuando padreId == null
+        when(animalRepository.findById(animal.getId())).thenReturn(Optional.of(animal));
 
-        List<ComentarioResponseDto> result = comentarioService.obtenerMuroDeAnimal(1L);
+        // user different than creator
+        autor.setId(11L);
+        setAuthenticatedUserEmail(autor.getEmail());
+        when(usuarioRepository.findByEmail(autor.getEmail())).thenReturn(autor);
 
-        assertEquals(1, result.size());
-        assertEquals("Texto", result.get(0).getContenido());
+        // Act
+        comentarioService.agregarComentario(dto);
+
+        // Assert saved comentario and notification sent
+        ArgumentCaptor<Comentario> captor = ArgumentCaptor.forClass(Comentario.class);
+        verify(comentarioRepository).save(captor.capture());
+        Comentario saved = captor.getValue();
+
+        assertThat(saved.getContenido()).isEqualTo("Contenido nuevo"); // trimmed
+        assertThat(saved.getAnimal()).isEqualTo(animal);
+        assertThat(saved.getAutor()).isEqualTo(autor);
+        assertThat(saved.getFecha()).isNotNull();
+
+        ArgumentCaptor<SendNotification> notifCaptor = ArgumentCaptor.forClass(SendNotification.class);
+        verify(messagingClient).sendNotification(notifCaptor.capture());
+        SendNotification sent = notifCaptor.getValue();
+        assertThat(sent.getTo()).isEqualTo(creadorAnimal.getEmail());
+        assertThat(sent.getSubject()).contains("Nuevo comentario sobre el animal");
+    }
+
+
+    @Test
+    void agregarComentario_shouldNotSendNotification_whenAutorIsCreador() {
+        ComentarioRequestDto dto = ComentarioRequestDto.builder()
+                .padreId(null)
+                .animalId(animal.getId())
+                .contenido("Hola")
+                .build();
+
+        when(animalRepository.findById(animal.getId())).thenReturn(Optional.of(animal));
+
+        // autor is same as creador
+        autor.setId(creadorAnimal.getId());
+        setAuthenticatedUserEmail(autor.getEmail());
+        when(usuarioRepository.findByEmail(autor.getEmail())).thenReturn(autor);
+
+        comentarioService.agregarComentario(dto);
+
+        verify(comentarioRepository).save(any(Comentario.class));
+        verify(messagingClient, never()).sendNotification(any());
     }
 
     @Test
-    void obtenerMuroDeAnimal_conAnimalQueNoExisteDebeLanzarExcepcion() {
-        when(animalRepository.findById(1L)).thenReturn(Optional.empty());
+    void agregarComentario_withPadreValid_shouldSetPadreAndSendNotification_ifNeeded() {
+        Comentario padre = new Comentario();
+        padre.setId(5L);
+        padre.setAnimal(animal); // same animal -> OK
+        padre.setContenido("Padre contenido");
+        padre.setAutor(autor);
 
-        assertThrows(AnimalNotFoundException.class,
-                () -> comentarioService.obtenerMuroDeAnimal(1L));
+        ComentarioRequestDto dto = ComentarioRequestDto.builder()
+                .padreId(5L)
+                .animalId(animal.getId())
+                .contenido(" Respuesta al padre ")
+                .build();
+
+        when(comentarioRepository.findById(5L)).thenReturn(Optional.of(padre)); // first initial check
+        when(animalRepository.findById(animal.getId())).thenReturn(Optional.of(animal));
+        // second findById used again inside branch
+        when(comentarioRepository.findById(5L)).thenReturn(Optional.of(padre));
+
+        // autor different than creador => notification
+        autor.setId(77L);
+        setAuthenticatedUserEmail(autor.getEmail());
+        when(usuarioRepository.findByEmail(autor.getEmail())).thenReturn(autor);
+
+        comentarioService.agregarComentario(dto);
+
+        ArgumentCaptor<Comentario> captor = ArgumentCaptor.forClass(Comentario.class);
+        verify(comentarioRepository).save(captor.capture());
+        Comentario saved = captor.getValue();
+
+        assertThat(saved.getPadre()).isEqualTo(padre);
+        assertThat(saved.getContenido()).isEqualTo("Respuesta al padre");
+
+        verify(messagingClient).sendNotification(any(SendNotification.class));
+    }
+
+    /* ===== obtenerMuroDeAnimal ===== */
+
+    @Test
+    void obtenerMuroDeAnimal_shouldThrow_whenAnimalNotFound() {
+        when(animalRepository.findById(999L)).thenReturn(Optional.empty());
+        assertThrows(AnimalNotFoundException.class, () -> comentarioService.obtenerMuroDeAnimal(999L));
     }
 
     @Test
-    void obtenerMuroDeAnimal_sinComentariosDebeLanzarExcepcion() {
-        when(animalRepository.findById(1L)).thenReturn(Optional.of(animal));
-        when(comentarioRepository.existsByAnimal_Id(1L)).thenReturn(false);
+    void obtenerMuroDeAnimal_shouldThrow_whenNoCommentsExist() {
+        when(animalRepository.findById(animal.getId())).thenReturn(Optional.of(animal));
+        when(comentarioRepository.findByAnimalAndPadreIsNullOrderByFechaAsc(animal)).thenReturn(List.of());
+        when(comentarioRepository.existsByAnimal_Id(animal.getId())).thenReturn(false);
 
-        assertThrows(AnimalSinComentariosException.class,
-                () -> comentarioService.obtenerMuroDeAnimal(1L));
+        assertThrows(AnimalSinComentariosException.class, () -> comentarioService.obtenerMuroDeAnimal(animal.getId()));
     }
 
     @Test
-    void obtenerPorcentajeComentariosConRespuestas_conListaVaciaDebeRetornarCero() {
+    void obtenerMuroDeAnimal_shouldReturnList_whenCommentsExist() {
+        Comentario c = new Comentario();
+        c.setId(111L);
+        c.setContenido("Un comentario");
+        c.setFecha(LocalDateTime.now().minusHours(1));
+        c.setAutor(autor);
+        c.setAnimal(animal);
+        c.setRespuestas(List.of()); // no child replies
+
+        when(animalRepository.findById(animal.getId())).thenReturn(Optional.of(animal));
+        when(comentarioRepository.findByAnimalAndPadreIsNullOrderByFechaAsc(animal)).thenReturn(List.of(c));
+        when(comentarioRepository.existsByAnimal_Id(animal.getId())).thenReturn(true);
+
+        List<ComentarioResponseDto> res = comentarioService.obtenerMuroDeAnimal(animal.getId());
+
+        assertThat(res).hasSize(1);
+        ComentarioResponseDto dto = res.get(0);
+        assertThat(dto.getId()).isEqualTo(111L);
+        assertThat(dto.getContenido()).isEqualTo("Un comentario");
+        assertThat(dto.getAutorId()).isEqualTo(autor.getId());
+        assertThat(dto.getRespuestas()).isEmpty();
+    }
+
+    /* ===== obtenerPorcentajeComentariosConRespuestas ===== */
+
+    @Test
+    void obtenerPorcentajeComentariosConRespuestas_shouldReturnZero_whenNoParents() {
         when(comentarioRepository.findByPadreIsNull()).thenReturn(List.of());
-
-        PorcentajeComentariosConRespuestasDto result = comentarioService.obtenerPorcentajeComentariosConRespuestas();
-
-        assertEquals("0.0%", result.getPorcentaje());
+        PorcentajeComentariosConRespuestasDto dto = comentarioService.obtenerPorcentajeComentariosConRespuestas();
+        assertThat(dto.getPorcentaje()).isEqualTo("0.0%");
     }
 
     @Test
-    void obtenerPorcentajeComentariosConRespuestas_conDatosDebeCalcularBien() {
+    void obtenerPorcentajeComentariosConRespuestas_shouldCalculateProperly() {
+        Comentario p1 = new Comentario(); // has respuestas
+        p1.setId(1L);
+        Comentario r = new Comentario();
+        p1.setRespuestas(List.of(r));
+
+        Comentario p2 = new Comentario(); // no respuestas
+        p2.setId(2L);
+        p2.setRespuestas(List.of());
+
+        when(comentarioRepository.findByPadreIsNull()).thenReturn(List.of(p1, p2));
+
+        PorcentajeComentariosConRespuestasDto result = comentarioService.obtenerPorcentajeComentariosConRespuestas();
+        // 1 de 2 -> 50.0%
+        assertThat(result.getPorcentaje()).isEqualTo("50,0%");
+    }
+
+    /* ===== generarExcelComentariosPorFecha ===== */
+
+    @Test
+    void generarExcelComentariosPorFecha_shouldThrow_whenFechaFormatoInvalido() {
+        String bad = "2023-99-99";
+        assertThrows(FechaFormatoInvalidoException.class, () -> comentarioService.generarExcelComentariosPorFecha(bad));
+    }
+
+    @Test
+    void generarExcelComentariosPorFecha_shouldThrow_whenNoComments() {
+        // make repository return empty for any start/end
+        when(comentarioRepository.findByFechaBetween(any(), any())).thenReturn(List.of());
+
+        assertThrows(NoComentariosEnFechaException.class, () -> comentarioService.generarExcelComentariosPorFecha("2023-08-01"));
+    }
+
+    @Test
+    void generarExcelComentariosPorFecha_shouldReturnByteArray_andContainExpectedSheets() throws Exception {
+        // Prepare a comment on a specific date
+        LocalDate fecha = LocalDate.of(2023, 8, 1);
+        LocalDateTime fechaHora = fecha.atTime(10, 30);
         Comentario c1 = new Comentario();
-        c1.setRespuestas(List.of(new Comentario()));
+        c1.setId(500L);
+        c1.setContenido("Contenido prueba");
+        c1.setFecha(fechaHora);
+        c1.setAutor(autor);
+        c1.setAnimal(animal);
+        c1.setPadre(null);
+        c1.setRespuestas(List.of());
 
-        Comentario c2 = new Comentario();
-        c2.setRespuestas(List.of());
+        // When findByFechaBetween called with any start/end -> return our list
+        when(comentarioRepository.findByFechaBetween(any(), any())).thenReturn(List.of(c1));
 
-        when(comentarioRepository.findByPadreIsNull()).thenReturn(List.of(c1, c2));
+        byte[] bytes = comentarioService.generarExcelComentariosPorFecha("2023-08-01");
 
-        PorcentajeComentariosConRespuestasDto result = comentarioService.obtenerPorcentajeComentariosConRespuestas();
+        // Basic assertions
+        assertThat(bytes).isNotNull();
+        assertThat(bytes.length).isGreaterThan(0);
 
-        assertEquals("50,0%", result.getPorcentaje());
-    }
-
-    @Test
-    void obtenerCorreoDelToken_debeRetornarUsuario() {
-        Authentication auth = mock(Authentication.class);
-        CustomUserDetails userDetails = mock(CustomUserDetails.class);
-        when(userDetails.getUsername()).thenReturn("correo@prueba.com");
-        when(auth.getPrincipal()).thenReturn(userDetails);
-
-        SecurityContext context = mock(SecurityContext.class);
-        when(context.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(context);
-
-        String result = comentarioService.obtenerCorreoDelToken();
-
-        assertEquals("correo@prueba.com", result);
-    }
-
-    @Test
-    void obtenerCorreoDelToken_sinAuthDebeLanzarExcepcion() {
-        SecurityContext context = mock(SecurityContext.class);
-        when(context.getAuthentication()).thenReturn(null);
-        SecurityContextHolder.setContext(context);
-
-        assertThrows(RuntimeException.class,
-                () -> comentarioService.obtenerCorreoDelToken());
+        // Open workbook and assert sheet names exist
+        try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(bytes))) {
+            assertThat(wb.getNumberOfSheets()).isGreaterThanOrEqualTo(4);
+            assertThat(wb.getSheet("Comentarios-2023-08-01")).isNotNull();
+            assertThat(wb.getSheet("Estadísticas")).isNotNull();
+            assertThat(wb.getSheet("Por Usuario")).isNotNull();
+            assertThat(wb.getSheet("Por Animal")).isNotNull();
+        }
     }
 }

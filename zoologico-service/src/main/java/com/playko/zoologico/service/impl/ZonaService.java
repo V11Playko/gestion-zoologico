@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 public class ZonaService implements IZonaService {
     private final IZonaRepository zonaRepository;
     private final IAnimalRepository animalRepository;
-    private final IEspecieRepository especieRepository;
     @Override
     public ZonaResponseDto obtenerZonaPorId(Long id) {
         if (id == null || id <= 0) {
