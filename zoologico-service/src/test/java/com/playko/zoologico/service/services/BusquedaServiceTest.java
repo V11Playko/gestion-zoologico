@@ -1,4 +1,4 @@
-package com.playko.zoologico.service;
+package com.playko.zoologico.service.services;
 
 import com.playko.zoologico.dto.response.BusquedaResultadoDto;
 import com.playko.zoologico.entity.Animal;
@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
