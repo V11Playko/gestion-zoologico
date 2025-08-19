@@ -12,5 +12,9 @@ security:
     issuer: "zoologico-service"
     audience: "messaging-service"
 
+sqs:
+  queue-url: ${SQS_QUEUE_URL}
+  dlq-url: ${SQS_DLQ_URL}
+
 appDescription: "Messaging-Service"
 appVersion: "1.0.0"

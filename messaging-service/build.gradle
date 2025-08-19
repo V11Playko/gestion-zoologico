@@ -33,6 +33,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
+	// AWS SQS
+	implementation 'software.amazon.awssdk:sqs:2.25.61'
+	implementation 'software.amazon.awssdk:s3:2.25.61'
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
 	// <-- MongoDB -->
