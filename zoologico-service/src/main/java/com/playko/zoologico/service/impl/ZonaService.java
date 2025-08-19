@@ -12,7 +12,6 @@ import com.playko.zoologico.exception.animal.ZonaConAnimalesException;
 import com.playko.zoologico.exception.zona.IdZonaInvalidException;
 import com.playko.zoologico.exception.zona.ZonaNotFoundException;
 import com.playko.zoologico.repository.IAnimalRepository;
-import com.playko.zoologico.repository.IEspecieRepository;
 import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.IZonaService;
 import jakarta.transaction.Transactional;
