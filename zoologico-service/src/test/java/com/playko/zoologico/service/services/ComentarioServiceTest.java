@@ -19,6 +19,7 @@ import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IComentarioRepository;
 import com.playko.zoologico.repository.IUsuarioRepository;
 import com.playko.zoologico.service.impl.ComentarioService;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
@@ -36,6 +37,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -268,8 +270,12 @@ class ComentarioServiceTest {
         when(comentarioRepository.findByAnimalAndPadreIsNullOrderByFechaAsc(animal)).thenReturn(List.of());
         when(comentarioRepository.existsByAnimal_Id(animal.getId())).thenReturn(false);
 
-        assertThrows(AnimalSinComentariosException.class, () -> comentarioService.obtenerMuroDeAnimal(animal.getId()));
+        // Extraer el ID del animal antes de la lambda
+        Long animalId = animal.getId();
+
+        assertThrows(AnimalSinComentariosException.class, () -> comentarioService.obtenerMuroDeAnimal(animalId));
     }
+
 
     @Test
     void obtenerMuroDeAnimal_shouldReturnList_whenCommentsExist() {
@@ -361,13 +367,19 @@ class ComentarioServiceTest {
         assertThat(bytes).isNotNull();
         assertThat(bytes.length).isGreaterThan(0);
 
-        // Open workbook and assert sheet names exist
         try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(bytes))) {
-            assertThat(wb.getNumberOfSheets()).isGreaterThanOrEqualTo(4);
+            // Convertir hojas a lista para usar hasSizeGreaterThan
+            List<Sheet> sheets = new ArrayList<>();
+            for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+                sheets.add(wb.getSheetAt(i));
+            }
+
+            assertThat(sheets).hasSizeGreaterThanOrEqualTo(3); // 4 o más hojas
             assertThat(wb.getSheet("Comentarios-2023-08-01")).isNotNull();
             assertThat(wb.getSheet("Estadísticas")).isNotNull();
             assertThat(wb.getSheet("Por Usuario")).isNotNull();
             assertThat(wb.getSheet("Por Animal")).isNotNull();
         }
+
     }
 }

@@ -3,34 +3,17 @@ package com.playko.zoologico.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.playko.zoologico.configuration.security.dto.JwtTokenResponseDto;
 import com.playko.zoologico.configuration.security.dto.LoginRequestDto;
-import com.playko.zoologico.configuration.security.jwt.AuthEntryPointJwt;
-import com.playko.zoologico.configuration.security.jwt.JwtUtils;
-import com.playko.zoologico.configuration.security.userdetails.CustomUserDetailsService;
 import com.playko.zoologico.service.IAuthService;
 import org.junit.jupiter.api.Test;
-import org.apache.catalina.security.SecurityConfig;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
