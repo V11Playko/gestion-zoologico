@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 
 
@@ -35,6 +36,7 @@ public class NotificationService implements INotificationService {
             helper.setTo(notification.getTo());
             helper.setSubject(notification.getSubject());
 
+            // Procesar template con Thymeleaf
             Context context = new Context();
             context.setVariable("subject", notification.getSubject());
             context.setVariable("body", notification.getBody());
@@ -46,13 +48,17 @@ public class NotificationService implements INotificationService {
             context.setVariable("commentAuthorEmail", notification.getCommentAuthorEmail());
 
             String contenidoHtml = templateEngine.process("email", context);
-
             helper.setText(contenidoHtml, true);
 
-            // Envía
+            // 🔹 Agregar adjunto si existe
+            if (notification.getAttachment() != null && notification.getAttachmentName() != null) {
+                helper.addAttachment(notification.getAttachmentName(),
+                        () -> new ByteArrayInputStream(notification.getAttachment()));
+            }
+
             javaMailSender.send(message);
 
-            // Obtener Message-ID (puede venir como "<...>")
+            // Obtener Message-ID
             String[] messageIds = message.getHeader("Message-ID");
             String messageId = (messageIds != null && messageIds.length > 0) ? messageIds[0] : null;
 

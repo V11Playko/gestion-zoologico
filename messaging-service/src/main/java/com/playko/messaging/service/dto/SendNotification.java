@@ -32,4 +32,8 @@ public class SendNotification {
     private LocalDateTime commentDate;
     private String commentAuthorName;
     private String commentAuthorEmail;
+
+ // 🔹 campos para adjunto
+ private byte[] attachment;
+ private String attachmentName;
 }
