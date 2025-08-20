@@ -54,7 +54,7 @@ class ZonaRestControllerTest {
     @MockBean
     private AuthEntryPointJwt unauthorizedHandler;
 
-    private final static String BASE_URL = "/api/zonas";
+    private static final String BASE_URL = "/api/zonas";
 
     // ----------- GET /{id} -----------
     @Test

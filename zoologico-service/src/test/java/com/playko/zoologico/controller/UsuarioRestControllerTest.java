@@ -50,7 +50,7 @@ class UsuarioRestControllerTest {
     @MockBean
     private AuthEntryPointJwt unauthorizedHandler;
 
-    private final static String BASE_URL = "/api/usuarios";
+    private static final String BASE_URL = "/api/usuarios";
 
     @Test
     @WithMockUser(authorities = {"ROLE_ADMIN"})

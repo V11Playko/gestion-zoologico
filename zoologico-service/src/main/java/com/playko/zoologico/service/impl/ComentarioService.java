@@ -51,6 +51,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.playko.zoologico.constants.ExcelConstants.HEADER_STYLE;
+import static com.playko.zoologico.constants.ExcelConstants.NORMAL_STYLE;
+import static com.playko.zoologico.constants.ExcelConstants.PERCENT_STYLE;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -190,10 +194,10 @@ public class ComentarioService implements IComentarioService {
                                     List<Comentario> comentarios,
                                     DateTimeFormatter dtf) {
 
-        CellStyle headerStyle = estilos.get("header");
-        CellStyle cellStyle = estilos.get("normal");
-
+        CellStyle headerStyle = estilos.get(HEADER_STYLE);
+        CellStyle cellStyle = estilos.get(NORMAL_STYLE);
         Sheet sheet = workbook.createSheet("Comentarios-" + queryDate);
+
         String[] headers = {
                 "ComentarioId", "Contenido", "Fecha",
                 "AutorId", "AutorNombre", "AutorEmail",
@@ -206,80 +210,87 @@ public class ComentarioService implements IComentarioService {
 
         int rowIdx = 1;
         for (Comentario c : comentarios) {
-            Row r = sheet.createRow(rowIdx++);
-            Usuario autor = c.getAutor();
-            Animal animal = c.getAnimal();
-            Usuario creadorAnimal = animal != null ? animal.getCreador() : null;
-            Comentario padre = c.getPadre();
-
-            int col = 0;
-            setCell(r, col++, c.getId(), cellStyle);
-            setCell(r, col++, nullSafeTrim(c.getContenido()), cellStyle);
-            setCell(r, col++, c.getFecha() != null ? c.getFecha().format(dtf) : "", cellStyle);
-
-            setCell(r, col++, autor != null && autor.getId() != null ? autor.getId() : null, cellStyle);
-            setCell(r, col++, autor != null ? autor.getNombre() : "", cellStyle);
-            setCell(r, col++, autor != null ? autor.getEmail() : "", cellStyle);
-
-            setCell(r, col++, animal != null && animal.getId() != null ? animal.getId() : null, cellStyle);
-            setCell(r, col++, animal != null ? animal.getNombre() : "", cellStyle);
-
-            setCell(r, col++, padre != null && padre.getId() != null ? padre.getId() : null, cellStyle);
-            setCell(r, col++, padre != null, cellStyle);
-
-            setCell(r, col++, creadorAnimal != null && creadorAnimal.getId() != null ? creadorAnimal.getId() : null, cellStyle);
-            setCell(r, col++, creadorAnimal != null ? creadorAnimal.getNombre() : "", cellStyle);
-            setCell(r, col++, creadorAnimal != null ? creadorAnimal.getEmail() : "", cellStyle);
+            Row row = sheet.createRow(rowIdx++);
+            setComentarioRow(row, c, cellStyle, dtf);
         }
 
-        for (int i = 0; i < headers.length; i++) sheet.autoSizeColumn(i);
+        // Ajustar tamaño de columnas
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
     }
+
+    private void setComentarioRow(Row row, Comentario c, CellStyle cellStyle, DateTimeFormatter dtf) {
+        Usuario autor = c.getAutor();
+        Animal animal = c.getAnimal();
+        Usuario creadorAnimal = safeGetCreador(animal);
+        Comentario padre = c.getPadre();
+
+        setCell(row, 0, c.getId(), cellStyle);
+        setCell(row, 1, nullSafeTrim(c.getContenido()), cellStyle);
+        setCell(row, 2, formatFecha(c.getFecha(), dtf), cellStyle);
+
+        setCell(row, 3, safeId(autor), cellStyle);
+        setCell(row, 4, safeNombre(autor), cellStyle);
+        setCell(row, 5, safeEmail(autor), cellStyle);
+
+        setCell(row, 6, safeId(animal), cellStyle);
+        setCell(row, 7, safeNombre(animal), cellStyle);
+
+        setCell(row, 8, safeId(padre), cellStyle);
+        setCell(row, 9, padre != null, cellStyle);
+
+        setCell(row, 10, safeId(creadorAnimal), cellStyle);
+        setCell(row, 11, safeNombre(creadorAnimal), cellStyle);
+        setCell(row, 12, safeEmail(creadorAnimal), cellStyle);
+    }
+
+    // Métodos auxiliares
+    private Long safeId(Object obj) {
+        if (obj instanceof Usuario u) return u.getId();
+        if (obj instanceof Animal a) return a.getId();
+        if (obj instanceof Comentario c) return c.getId();
+        return null;
+    }
+
+    private String safeNombre(Object obj) {
+        if (obj instanceof Usuario u) return u.getNombre();
+        if (obj instanceof Animal a) return a.getNombre();
+        return "";
+    }
+
+    private String safeEmail(Object obj) {
+        if (obj instanceof Usuario u) return u.getEmail();
+        return "";
+    }
+
+    private Usuario safeGetCreador(Animal animal) {
+        return animal != null ? animal.getCreador() : null;
+    }
+
+    private String formatFecha(LocalDateTime fecha, DateTimeFormatter dtf) {
+        return fecha != null ? fecha.format(dtf) : "";
+    }
+
 
     private void hojaPorEstadisticas(Workbook workbook,
                                      List<Comentario> comentarios,
                                      Map<String, CellStyle> estilos,
                                      DateTimeFormatter dtf) {
 
-        CellStyle headerStyle = estilos.get("header");
-        CellStyle cellStyle = estilos.get("normal");
-        CellStyle percentStyle = estilos.get("percent");
+        CellStyle headerStyle = estilos.get(HEADER_STYLE);
+        CellStyle cellStyle = estilos.get(NORMAL_STYLE);
+        CellStyle percentStyle = estilos.get(PERCENT_STYLE);
 
         long total = comentarios.size();
-        long respondidos = comentarios.stream().filter(c -> c.getPadre() != null).count();
-        double porcentajeRespondidos = total > 0 ? (respondidos * 1.0 / total) : 0.0;
+        long respondidos = contarRespondidos(comentarios);
+        double porcentajeRespondidos = calcularPorcentaje(respondidos, total);
 
-        Map<String, Long> comentariosPorEmail = comentarios.stream()
-                .filter(c -> c.getAutor() != null && c.getAutor().getEmail() != null)
-                .collect(Collectors.groupingBy(c -> c.getAutor().getEmail(), Collectors.counting()));
-        Map.Entry<String, Long> topEmailEntry = comentariosPorEmail.entrySet().stream()
-                .max(Map.Entry.comparingByValue()).orElse(null);
-        String emailTop = topEmailEntry != null ? topEmailEntry.getKey() + " (" + topEmailEntry.getValue() + ")" : "N/A";
-
-        Map<String, Long> comentariosPorAnimal = comentarios.stream()
-                .filter(c -> c.getAnimal() != null && c.getAnimal().getNombre() != null)
-                .collect(Collectors.groupingBy(c -> c.getAnimal().getNombre(), Collectors.counting()));
-        Map.Entry<String, Long> topAnimalEntry = comentariosPorAnimal.entrySet().stream()
-                .max(Map.Entry.comparingByValue()).orElse(null);
-        String animalTop = topAnimalEntry != null ? topAnimalEntry.getKey() + " (" + topAnimalEntry.getValue() + " comentarios)" : "N/A";
-
-        String primerComentario = comentarios.stream()
-                .filter(c -> c.getFecha() != null)
-                .min(Comparator.comparing(Comentario::getFecha))
-                .map(c -> c.getFecha().format(dtf) + " (" + safeString(c.getAutor() != null ? c.getAutor().getNombre() : null) + ")")
-                .orElse("N/A");
-
-        String ultimoComentario = comentarios.stream()
-                .filter(c -> c.getFecha() != null)
-                .max(Comparator.comparing(Comentario::getFecha))
-                .map(c -> c.getFecha().format(dtf) + " (" + safeString(c.getAutor() != null ? c.getAutor().getNombre() : null) + ")")
-                .orElse("N/A");
-
-        double promedioCaracteres = comentarios.stream()
-                .map(Comentario::getContenido)
-                .filter(Objects::nonNull)
-                .mapToInt(String::length)
-                .average()
-                .orElse(0.0);
+        String emailTop = obtenerTopAutor(comentarios);
+        String animalTop = obtenerTopAnimal(comentarios);
+        String primerComentario = obtenerPrimerComentario(comentarios, dtf);
+        String ultimoComentario = obtenerUltimoComentario(comentarios, dtf);
+        double promedioCaracteres = calcularPromedioCaracteres(comentarios);
 
         Sheet statsSheet = workbook.createSheet("Estadísticas");
         String[][] stats = {
@@ -294,12 +305,12 @@ public class ComentarioService implements IComentarioService {
         };
 
         for (int i = 0; i < stats.length; i++) {
-            Row r = statsSheet.createRow(i);
-            Cell keyCell = r.createCell(0);
+            Row row = statsSheet.createRow(i);
+            Cell keyCell = row.createCell(0);
             keyCell.setCellValue(stats[i][0]);
             keyCell.setCellStyle(headerStyle);
 
-            Cell valueCell = r.createCell(1);
+            Cell valueCell = row.createCell(1);
             if (i == 2) { // porcentaje
                 valueCell.setCellValue(porcentajeRespondidos);
                 valueCell.setCellStyle(percentStyle);
@@ -313,11 +324,67 @@ public class ComentarioService implements IComentarioService {
         statsSheet.autoSizeColumn(1);
     }
 
+    // Métodos auxiliares
+    private long contarRespondidos(List<Comentario> comentarios) {
+        return comentarios.stream().filter(c -> c.getPadre() != null).count();
+    }
+
+    private double calcularPorcentaje(long parte, long total) {
+        return total > 0 ? (parte * 1.0 / total) : 0.0;
+    }
+
+    private String obtenerTopAutor(List<Comentario> comentarios) {
+        return comentarios.stream()
+                .filter(c -> c.getAutor() != null && c.getAutor().getEmail() != null)
+                .collect(Collectors.groupingBy(c -> c.getAutor().getEmail(), Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(e -> e.getKey() + " (" + e.getValue() + ")")
+                .orElse("N/A");
+    }
+
+    private String obtenerTopAnimal(List<Comentario> comentarios) {
+        return comentarios.stream()
+                .filter(c -> c.getAnimal() != null && c.getAnimal().getNombre() != null)
+                .collect(Collectors.groupingBy(c -> c.getAnimal().getNombre(), Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(e -> e.getKey() + " (" + e.getValue() + " comentarios)")
+                .orElse("N/A");
+    }
+
+    private String obtenerPrimerComentario(List<Comentario> comentarios, DateTimeFormatter dtf) {
+        return comentarios.stream()
+                .filter(c -> c.getFecha() != null)
+                .min(Comparator.comparing(Comentario::getFecha))
+                .map(c -> c.getFecha().format(dtf) + " (" + safeString(c.getAutor() != null ? c.getAutor().getNombre() : null) + ")")
+                .orElse("N/A");
+    }
+
+    private String obtenerUltimoComentario(List<Comentario> comentarios, DateTimeFormatter dtf) {
+        return comentarios.stream()
+                .filter(c -> c.getFecha() != null)
+                .max(Comparator.comparing(Comentario::getFecha))
+                .map(c -> c.getFecha().format(dtf) + " (" + safeString(c.getAutor() != null ? c.getAutor().getNombre() : null) + ")")
+                .orElse("N/A");
+    }
+
+    private double calcularPromedioCaracteres(List<Comentario> comentarios) {
+        return comentarios.stream()
+                .map(Comentario::getContenido)
+                .filter(Objects::nonNull)
+                .mapToInt(String::length)
+                .average()
+                .orElse(0.0);
+    }
+
+
     private void hojaPorUsuario(Workbook workbook,
                                 List<Comentario> comentarios,
                                 Map<String, CellStyle> estilos) {
-        CellStyle headerStyle = estilos.get("header");
-        CellStyle cellStyle = estilos.get("normal");
+
+        CellStyle headerStyle = estilos.get(HEADER_STYLE);
+        CellStyle cellStyle = estilos.get(NORMAL_STYLE);
 
         Sheet userSheet = workbook.createSheet("Por Usuario");
         String[] userHeaders = {"AutorNombre", "AutorEmail", "# Comentarios", "# Respuestas hechas", "# Respuestas recibidas"};
@@ -341,12 +408,11 @@ public class ComentarioService implements IComentarioService {
                     .count();
 
             Row r = userSheet.createRow(row++);
-            int col = 0;
-            setCell(r, col++, safeString(u.getNombre()), cellStyle);
-            setCell(r, col++, safeString(u.getEmail()), cellStyle);
-            setCell(r, col++, totalByUser, cellStyle);
-            setCell(r, col++, respuestasHechas, cellStyle);
-            setCell(r, col++, respuestasRecibidas, cellStyle);
+            setCell(r, 0, safeString(u.getNombre()), cellStyle);
+            setCell(r, 1, safeString(u.getEmail()), cellStyle);
+            setCell(r, 2, totalByUser, cellStyle);
+            setCell(r, 3, respuestasHechas, cellStyle);
+            setCell(r, 4, respuestasRecibidas, cellStyle);
         }
 
         for (int i = 0; i < userHeaders.length; i++) userSheet.autoSizeColumn(i);
@@ -355,9 +421,10 @@ public class ComentarioService implements IComentarioService {
     private void hojaPorAnimal(Workbook workbook,
                                List<Comentario> comentarios,
                                Map<String, CellStyle> estilos) {
-        CellStyle headerStyle = estilos.get("header");
-        CellStyle cellStyle = estilos.get("normal");
-        CellStyle percentStyle = estilos.get("percent");
+
+        CellStyle headerStyle = estilos.get(HEADER_STYLE);
+        CellStyle cellStyle = estilos.get(NORMAL_STYLE);
+        CellStyle percentStyle = estilos.get(PERCENT_STYLE);
 
         Sheet animalSheet = workbook.createSheet("Por Animal");
         String[] animalHeaders = {"AnimalNombre", "# Comentarios", "# Usuarios distintos", "% Respondidos (en animal)"};
@@ -383,12 +450,12 @@ public class ComentarioService implements IComentarioService {
             double pctRespondidosAnimal = totalAnimal > 0 ? (respondidosAnimal * 1.0 / totalAnimal) : 0.0;
 
             Row r = animalSheet.createRow(row++);
-            int col = 0;
-            setCell(r, col++, safeString(a != null ? a.getNombre() : ""), cellStyle);
-            setCell(r, col++, totalAnimal, cellStyle);
-            setCell(r, col++, usuariosDistintos, cellStyle);
-            // porcentaje como número con formato
-            Cell pctCell = r.createCell(col++);
+            setCell(r, 0, safeString(a != null ? a.getNombre() : ""), cellStyle);
+            setCell(r, 1, totalAnimal, cellStyle);
+            setCell(r, 2, usuariosDistintos, cellStyle);
+
+            // Porcentaje como número con formato
+            Cell pctCell = r.createCell(3);
             pctCell.setCellValue(pctRespondidosAnimal);
             pctCell.setCellStyle(percentStyle);
         }
@@ -405,20 +472,20 @@ public class ComentarioService implements IComentarioService {
         headerFont.setBold(true);
         headerStyle.setFont(headerFont);
         setBorders(headerStyle);
-        estilos.put("header", headerStyle);
+        estilos.put(HEADER_STYLE, headerStyle);
 
         // normal
         CellStyle normal = workbook.createCellStyle();
         setBorders(normal);
         normal.setWrapText(true);
-        estilos.put("normal", normal);
+        estilos.put(NORMAL_STYLE, normal);
 
         // percent
         CellStyle percent = workbook.createCellStyle();
         percent.cloneStyleFrom(normal);
         DataFormat df = workbook.createDataFormat();
         percent.setDataFormat(df.getFormat("0.00%"));
-        estilos.put("percent", percent);
+        estilos.put(PERCENT_STYLE, percent);
 
         return estilos;
     }
@@ -443,15 +510,16 @@ public class ComentarioService implements IComentarioService {
         Cell cell = row.createCell(col);
         if (value == null) {
             cell.setCellValue("");
-        } else if (value instanceof Number) {
-            cell.setCellValue(((Number) value).doubleValue());
-        } else if (value instanceof Boolean) {
-            cell.setCellValue((Boolean) value);
+        } else if (value instanceof Number numberValue) {
+            cell.setCellValue(numberValue.doubleValue());
+        } else if (value instanceof Boolean booleanValue) {
+            cell.setCellValue(booleanValue);
         } else {
             cell.setCellValue(String.valueOf(value));
         }
         if (style != null) cell.setCellStyle(style);
     }
+
 
     private String nullSafeTrim(String s) {
         return s == null ? "" : s.trim();

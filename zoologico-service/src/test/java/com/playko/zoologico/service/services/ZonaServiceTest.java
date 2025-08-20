@@ -130,7 +130,7 @@ class ZonaServiceTest {
         assertThat(dto).isNotNull();
         assertThat(dto.getNombre()).isEqualTo(zona2.getNombre());
         assertThat(dto.getEspecies()).isEmpty();
-        assertThat(dto.getCantidadAnimales()).isEqualTo(0L);
+        assertThat(dto.getCantidadAnimales()).isZero();
     }
 
     /* ========== obtenerTodasLasZonas ========== */
@@ -251,9 +251,12 @@ class ZonaServiceTest {
         when(zonaRepository.findById(zona1.getId())).thenReturn(Optional.of(zona1));
         when(animalRepository.existsByEspecie_Zona(zona1)).thenReturn(true);
 
-        assertThrows(ZonaConAnimalesException.class, () -> zonaService.eliminarZona(zona1.getId()));
+        Runnable action = () -> zonaService.eliminarZona(zona1.getId());
+
+        assertThrows(ZonaConAnimalesException.class, action::run);
         verify(zonaRepository, never()).delete(any());
     }
+
 
     @Test
     void eliminarZona_shouldDelete_whenNoAnimals() {
@@ -286,6 +289,6 @@ class ZonaServiceTest {
         CantidadAnimalesPorZonaResponseDto r2 = res.stream().filter(r -> r.getNombreZona().equals(zona2.getNombre())).findFirst().orElseThrow();
 
         assertThat(r1.getCantidadAnimales()).isEqualTo(3L);
-        assertThat(r2.getCantidadAnimales()).isEqualTo(0L);
+        assertThat(r2.getCantidadAnimales()).isZero();
     }
 }

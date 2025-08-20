@@ -123,7 +123,7 @@ class ControllerAdvisorTest {
     // BindException
     // -----------------------------
     @Test
-    void handleBindExceptions_returnsBadRequestAndMap() throws Exception {
+    void handleBindExceptions_returnsBadRequestAndMap() {
         BindException bindException = new BindException(new Object(), "obj");
         bindException.addError(new FieldError("obj", "campoBind", "no valido"));
 

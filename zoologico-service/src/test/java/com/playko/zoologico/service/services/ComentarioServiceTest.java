@@ -39,6 +39,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -346,40 +347,44 @@ class ComentarioServiceTest {
 
     @Test
     void generarExcelComentariosPorFecha_shouldReturnByteArray_andContainExpectedSheets() throws Exception {
-        // Prepare a comment on a specific date
-        LocalDate fecha = LocalDate.of(2023, 8, 1);
-        LocalDateTime fechaHora = fecha.atTime(10, 30);
+        // Preparar un comentario en una fecha específica
+        LocalDateTime fechaHora = LocalDate.of(2023, 8, 1).atTime(10, 30);
         Comentario c1 = new Comentario();
         c1.setId(500L);
         c1.setContenido("Contenido prueba");
         c1.setFecha(fechaHora);
         c1.setAutor(autor);
         c1.setAnimal(animal);
-        c1.setPadre(null);
-        c1.setRespuestas(List.of());
 
-        // When findByFechaBetween called with any start/end -> return our list
+        // Mock repository
         when(comentarioRepository.findByFechaBetween(any(), any())).thenReturn(List.of(c1));
 
         byte[] bytes = comentarioService.generarExcelComentariosPorFecha("2023-08-01");
 
-        // Basic assertions
-        assertThat(bytes).isNotNull();
-        assertThat(bytes.length).isGreaterThan(0);
+        // Verificar resultado básico
+        assertThat(bytes)
+                .isNotNull()
+                .hasSizeGreaterThan(0);
 
         try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(bytes))) {
-            // Convertir hojas a lista para usar hasSizeGreaterThan
+            // Convertir hojas a lista
             List<Sheet> sheets = new ArrayList<>();
             for (int i = 0; i < wb.getNumberOfSheets(); i++) {
                 sheets.add(wb.getSheetAt(i));
             }
 
-            assertThat(sheets).hasSizeGreaterThanOrEqualTo(3); // 4 o más hojas
-            assertThat(wb.getSheet("Comentarios-2023-08-01")).isNotNull();
-            assertThat(wb.getSheet("Estadísticas")).isNotNull();
-            assertThat(wb.getSheet("Por Usuario")).isNotNull();
-            assertThat(wb.getSheet("Por Animal")).isNotNull();
-        }
+            // Verificar cantidad mínima de hojas
+            assertThat(sheets).hasSizeGreaterThanOrEqualTo(4);
 
+            // Verificar que todas las hojas esperadas existan en una sola cadena de aserciones
+            assertThat(List.of(
+                    wb.getSheet("Comentarios-2023-08-01"),
+                    wb.getSheet("Estadísticas"),
+                    wb.getSheet("Por Usuario"),
+                    wb.getSheet("Por Animal")
+            )).allMatch(Objects::nonNull, "Todas las hojas esperadas deben existir");
+        }
     }
+
+
 }

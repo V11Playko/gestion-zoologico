@@ -3,14 +3,15 @@ package com.playko.zoologico.service.impl;
 import com.playko.zoologico.service.IComentarioService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ReportScheduler {
 
     private final IComentarioService comentarioService;
@@ -24,6 +25,7 @@ public class ReportScheduler {
 
         String s3Key = s3Service.subirArchivo(excel, key);
 
-        System.out.println("📤 Reporte subido a S3 con key: " + s3Key);
+        // Reemplazamos System.out por log
+        log.info("📤 Reporte subido a S3 con key: {}", s3Key);
     }
 }

@@ -52,7 +52,7 @@ class EspecieRestControllerTest {
     @MockBean
     private AuthEntryPointJwt unauthorizedHandler;
 
-    private final static String BASE_URL = "/api/especies";
+    private static final String BASE_URL = "/api/especies";
 
     @Test
     @WithMockUser(authorities = {"ROLE_ADMIN"})

@@ -209,7 +209,10 @@ class EspecieServiceTest {
         when(especieRepository.findById(especie1.getId())).thenReturn(Optional.of(especie1));
         when(zonaRepository.findById(777L)).thenReturn(Optional.empty());
 
-        assertThrows(ZonaNotFoundException.class, () -> especieService.editarEspecie(especie1.getId(), dto));
+        // Extraer el ID antes de la lambda
+        Long especieId = especie1.getId();
+
+        assertThrows(ZonaNotFoundException.class, () -> especieService.editarEspecie(especieId, dto));
         verify(especieRepository, never()).save(any());
     }
 
@@ -230,7 +233,10 @@ class EspecieServiceTest {
         when(especieRepository.findById(especie1.getId())).thenReturn(Optional.of(especie1));
         when(animalRepository.existsByEspecie(especie1)).thenReturn(true);
 
-        assertThrows(EspecieConAnimalesException.class, () -> especieService.eliminarEspecie(especie1.getId()));
+        // Extraer el ID antes de la lambda
+        Long especieId = especie1.getId();
+
+        assertThrows(EspecieConAnimalesException.class, () -> especieService.eliminarEspecie(especieId));
         verify(especieRepository, never()).delete(any());
     }
 
@@ -264,8 +270,9 @@ class EspecieServiceTest {
         AnimalesPorEspecieResponseDto r2 = res.stream().filter(r -> r.getEspecie().equals("E2")).findFirst().orElseThrow();
 
         assertThat(r1.getCantidadAnimales()).isEqualTo(2);
-        assertThat(r2.getCantidadAnimales()).isEqualTo(0);
+        assertThat(r2.getCantidadAnimales()).isZero();  // ✅ Cambio recomendado por SonarQube
     }
+
 
     @Test
     void obtenerCantidadAnimalesPorEspecie_shouldThrow_whenEmpty() {
