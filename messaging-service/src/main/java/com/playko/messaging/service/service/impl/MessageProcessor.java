@@ -11,13 +11,17 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Locale;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -28,58 +32,106 @@ public class MessageProcessor {
     private final S3Client s3Client;
     private final INotificationService emailService;
 
-    @Value("${sqs.dlq-url}")
-    private String dlqUrl;
+    @Value("${sqs.excel-dlq-url}")
+    private String excelDlqUrl;
+    @Value("${sqs.pdf-dlq-url}")
+    private String pdfDlqUrl;
+
+    // ThreadLocal para recordar tipo actual (excel/pdf)
+    private final ThreadLocal<String> tipoProcesando = new ThreadLocal<>();
 
     @Retryable(
             value = { Exception.class },
-            maxAttempts = 3,  // opcional: controla cuántos intentos
-            backoff = @Backoff(delay = 2000, multiplier = 2) // 2s, 4s, 8s
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2)
     )
     public void procesarMensaje(String body) throws Exception {
-        log.debug("📜 Cuerpo del mensaje: {}", body);
-
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(body);
-
         JsonNode recordNode = root.path("Records").get(0);
         String bucket = recordNode.path("s3").path("bucket").path("name").asText();
         String key = recordNode.path("s3").path("object").path("key").asText();
 
-        log.info("📂 Obteniendo archivo de S3 - Bucket: {}, Key: {}", bucket, key);
+        log.info("📂 Procesando S3 notification: bucket={}, key={}", bucket, key);
+
+        String lowerKey = key.toLowerCase(Locale.ROOT);
+        boolean isExcel = lowerKey.endsWith(".xlsx") || lowerKey.endsWith(".xls");
+        boolean isPdf = lowerKey.endsWith(".pdf");
+
+        if (isExcel) tipoProcesando.set("excel");
+        else if (isPdf) tipoProcesando.set("pdf");
+        else tipoProcesando.set("otro");
 
         GetObjectRequest getRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
                 .build();
 
-        try (InputStream in = s3Client.getObject(getRequest);
+        try (ResponseInputStream<GetObjectResponse> response = s3Client.getObject(getRequest);
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            in.transferTo(out);
-            byte[] excel = out.toByteArray();
+            GetObjectResponse getObjectResponse = response.response();
+            Map<String, String> metadata = getObjectResponse.metadata();
+            String creatorEmail = (metadata != null && metadata.containsKey("creator-email"))
+                    ? metadata.get("creator-email")
+                    : null;
 
-            log.info("📊 Archivo descargado correctamente ({} bytes)", excel.length);
+            response.transferTo(out);
+            byte[] contenido = out.toByteArray();
+            String nombreArchivo = key.substring(key.lastIndexOf('/') + 1);
 
-            SendNotification notification = SendNotification.builder()
-                    .to("heinnervega20@gmail.com")
-                    .subject("Nuevo Reporte Disponible")
-                    .body("Se ha generado un nuevo reporte: " + key)
-                    .attachment(excel)
-                    .attachmentName(key.substring(key.lastIndexOf("/") + 1))
-                    .build();
+            if (isExcel) {
+                String destino = creatorEmail != null ? creatorEmail : "heinnervega20@gmail.com";
+                log.info("📊 Excel descargado ({} bytes). Enviando a: {}", contenido.length, destino);
 
-            emailService.sendNotification(notification);
-            log.info("📧 Notificación enviada correctamente para el archivo {}", key);
+                SendNotification notification = SendNotification.builder()
+                        .to(destino)
+                        .subject("Nuevo Reporte XLSX disponible")
+                        .body("Se ha generado un nuevo reporte: " + key)
+                        .attachment(contenido)
+                        .attachmentName(nombreArchivo)
+                        .build();
+                emailService.sendNotification(notification);
+                log.info("📧 Notificación Excel enviada a {}", destino);
+
+            } else if (isPdf) {
+                String destino = creatorEmail != null ? creatorEmail : "heinnervega20@gmail.com";
+                log.info("📄 PDF descargado ({} bytes). Enviando a: {}", contenido.length, destino);
+
+                SendNotification notification = SendNotification.builder()
+                        .to(destino)
+                        .subject("Nuevo Reporte PDF disponible")
+                        .body("Se ha generado un nuevo PDF: " + key)
+                        .attachment(contenido)
+                        .attachmentName(nombreArchivo)
+                        .build();
+                emailService.sendNotification(notification);
+                log.info("📧 Notificación PDF enviada a {}", destino);
+
+            } else {
+                log.warn("⚠️ Tipo de archivo no manejado: {}", key);
+            }
         }
     }
 
     @Recover
     public void recover(Exception e, String body) {
-        log.error("❌ No se pudo procesar el mensaje después de varios intentos. Enviando a DLQ...", e);
+        String tipo = tipoProcesando.get();
+        String targetDlq = excelDlqUrl; // default
+
+        if ("pdf".equals(tipo)) {
+            targetDlq = pdfDlqUrl;
+        } else if ("excel".equals(tipo)) {
+            targetDlq = excelDlqUrl;
+        }
+
+        log.error("❌ No se pudo procesar el mensaje después de varios intentos. Enviando a DLQ [{}]...", targetDlq, e);
+
         sqsClient.sendMessage(SendMessageRequest.builder()
-                .queueUrl(dlqUrl)
+                .queueUrl(targetDlq)
                 .messageBody(body)
                 .build());
+
+        tipoProcesando.remove();
     }
 }

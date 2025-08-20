@@ -32,39 +32,73 @@ public class SqsListenerService {
     private final SqsClient sqsClient;
     private final MessageProcessor messageProcessor;
 
-    @Value("${sqs.queue-url}")
-    private String queueUrl;
+    @Value("${sqs.excel-queue-url}")
+    private String excelQueueUrl;
+
+    @Value("${sqs.pdf-queue-url}")
+    private String pdfQueueUrl;
 
     @Scheduled(fixedDelay = 10000)
-    public void escucharMensajes() {
-        log.info("🔄 Iniciando polling de la cola SQS...");
+    public void escucharMensajesExcel() {
+        log.info("🔄 Iniciando polling de la cola Excel...");
 
         try {
             ReceiveMessageRequest request = ReceiveMessageRequest.builder()
-                    .queueUrl(queueUrl)
-                    .waitTimeSeconds(20) // long polling
+                    .queueUrl(excelQueueUrl)
+                    .waitTimeSeconds(20)
                     .maxNumberOfMessages(5)
                     .build();
 
             List<Message> messages = sqsClient.receiveMessage(request).messages();
-            log.info("📩 Se recibieron {} mensajes de la cola", messages.size());
+            log.info("📩 Se recibieron {} mensajes de la cola Excel", messages.size());
 
             for (Message msg : messages) {
-                log.info("➡️ Procesando mensaje con ID: {}", msg.messageId());
+                log.info("➡️ Procesando mensaje Excel con ID: {}", msg.messageId());
 
-                // ✅ Aquí Spring Retry sí intercepta
                 messageProcessor.procesarMensaje(msg.body());
 
                 sqsClient.deleteMessage(DeleteMessageRequest.builder()
-                        .queueUrl(queueUrl)
+                        .queueUrl(excelQueueUrl)
                         .receiptHandle(msg.receiptHandle())
                         .build());
 
-                log.info("✅ Mensaje {} eliminado de la cola", msg.messageId());
+                log.info("✅ Mensaje Excel {} eliminado de la cola", msg.messageId());
             }
 
         } catch (Exception e) {
-            log.error("❌ Error al escuchar mensajes de SQS", e);
+            log.error("❌ Error al escuchar mensajes de la cola Excel", e);
+        }
+    }
+
+    @Scheduled(fixedDelay = 10000)
+    public void escucharMensajesPdf() {
+        log.info("🔄 Iniciando polling de la cola PDF...");
+
+        try {
+            ReceiveMessageRequest request = ReceiveMessageRequest.builder()
+                    .queueUrl(pdfQueueUrl)
+                    .waitTimeSeconds(20)
+                    .maxNumberOfMessages(5)
+                    .build();
+
+            List<Message> messages = sqsClient.receiveMessage(request).messages();
+            log.info("📩 Se recibieron {} mensajes de la cola PDF", messages.size());
+
+            for (Message msg : messages) {
+                log.info("➡️ Procesando mensaje PDF con ID: {}", msg.messageId());
+
+                messageProcessor.procesarMensaje(msg.body());
+
+                sqsClient.deleteMessage(DeleteMessageRequest.builder()
+                        .queueUrl(pdfQueueUrl)
+                        .receiptHandle(msg.receiptHandle())
+                        .build());
+
+                log.info("✅ Mensaje PDF {} eliminado de la cola", msg.messageId());
+            }
+
+        } catch (Exception e) {
+            log.error("❌ Error al escuchar mensajes de la cola PDF", e);
         }
     }
 }
