@@ -51,10 +51,6 @@ public class ExcelService implements IExcelService {
 
     private final IComentarioRepository comentarioRepository;
 
-    private final IAnimalRepository animalRepository;
-    private final IUsuarioRepository usuarioRepository;
-    private final MessagingClient messagingClient;
-
     @Override
     public byte[] generarExcelComentariosPorFecha(String fechaStr) {
         LocalDate queryDate;

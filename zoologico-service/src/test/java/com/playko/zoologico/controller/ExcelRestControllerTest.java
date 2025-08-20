@@ -5,7 +5,6 @@ import com.playko.zoologico.configuration.security.WebSecurityConfig;
 import com.playko.zoologico.configuration.security.jwt.AuthEntryPointJwt;
 import com.playko.zoologico.configuration.security.jwt.JwtUtils;
 import com.playko.zoologico.configuration.security.userdetails.CustomUserDetailsService;
-import com.playko.zoologico.service.IComentarioService;
 import com.playko.zoologico.service.IExcelService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -17,7 +17,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 
 @RestController
-@RequestMapping("/api/comentarios")
+@RequestMapping("/api/reporte")
 @RequiredArgsConstructor
 public class ExcelRestController {
 
@@ -38,7 +38,7 @@ public class ExcelRestController {
             dateForName = LocalDate.now(ZoneId.of("America/Bogota"));
         }
 
-        String filename = "comentarios-" + dateForName.toString() + ".xlsx";
+        String filename = "reporte-comentarios-" + dateForName.toString() + ".xlsx";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
