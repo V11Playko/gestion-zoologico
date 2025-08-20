@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="es" xml:lang="es">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Reporte por Creador</title>
+    <style type="text/css">
+        body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
+        h1, h2 { color: darkblue; margin: 0 0 8px 0; }
+        .creador { margin-bottom: 16px; }
+        .animal-section { margin-bottom: 18px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+        thead { display: table-header-group; }
+        tbody { display: table-row-group; }
+        /* evitar cortar filas/tabla cuando sea posible */
+        .no-split, .no-split tbody, .no-split tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+    </style>
+</head>
+<body>
+<div class="creador">
+    <h1 th:text="'Reporte de comentarios - ' + ${creadorNombre}"></h1>
+    <p><strong>Email:</strong> <span th:text="${creadorEmail}"></span></p>
+    <p><strong>Fecha:</strong> <span th:text="${fecha}"></span></p>
+</div>
+
+<!-- Por cada animal -->
+<div th:each="a : ${animales}">
+    <div class="animal-section no-split">
+        <h2 th:text="${a.animalNombre}">Nombre Animal</h2>
+
+        <div th:if="${#lists.isEmpty(a.comentarios)}">
+            <p><em th:text="${a.mensajeSinComentarios}">No hay comentarios...</em></p>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(a.comentarios)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th><th>Contenido</th><th>Fecha</th><th>Autor</th><th>Email Autor</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${a.comentarios}">
+                    <td th:text="${c.id}"></td>
+                    <td th:text="${c.contenido}"></td>
+                    <td th:text="${c.fecha}"></td>
+                    <td th:text="${c.autor != null ? c.autor.nombre : ''}"></td>
+                    <td th:text="${c.autor != null ? c.autor.email : ''}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
