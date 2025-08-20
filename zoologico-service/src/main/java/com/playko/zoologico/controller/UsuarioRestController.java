@@ -43,13 +43,27 @@ public class UsuarioRestController {
         return ResponseEntity.ok(usuarios);
     }
 
+    @Operation(summary = "Crear un nuevo usuario admin")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Usuario admin creado correctamente"),
+            @ApiResponse(responseCode = "409", description = "El correo ya existe"),
+            @ApiResponse(responseCode = "404", description = "Rol no encontrado")
+    })
+    @PostMapping("/admin")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Map<String, String>> crearUsuarioAdmin(@Valid @RequestBody UsuarioRequestDto dto) {
+        usuarioService.crearUsuarioAdmin(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Collections.singletonMap(RESPONSE_MESSAGE_KEY, USUARIO_CREATED_MESSAGE));
+    }
+
     @Operation(summary = "Crear un nuevo usuario empleado")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Usuario empleado creado correctamente"),
             @ApiResponse(responseCode = "409", description = "El correo ya existe"),
             @ApiResponse(responseCode = "404", description = "Rol no encontrado")
     })
-    @PostMapping
+    @PostMapping("/empleado")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> crearUsuarioEmpleado(@Valid @RequestBody UsuarioRequestDto dto) {
         usuarioService.crearUsuarioEmpleado(dto);

@@ -44,6 +44,11 @@ public class UsuarioService implements IUsuarioService {
     }
 
     @Override
+    public void crearUsuarioAdmin(UsuarioRequestDto dto) {
+        crearUsuario(dto, "ROLE_ADMIN");
+    }
+
+    @Override
     public void crearUsuarioEmpleado(UsuarioRequestDto dto) {
         crearUsuario(dto, "ROLE_EMPLEADO");
     }

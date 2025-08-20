@@ -8,6 +8,7 @@ import java.util.List;
 public interface IUsuarioService {
 
     void crearUsuario(UsuarioRequestDto dto, String nombreRol);
+    void crearUsuarioAdmin(UsuarioRequestDto dto);
     void crearUsuarioEmpleado(UsuarioRequestDto dto);
     void crearUsuarioCliente(UsuarioRequestDto dto);
 
