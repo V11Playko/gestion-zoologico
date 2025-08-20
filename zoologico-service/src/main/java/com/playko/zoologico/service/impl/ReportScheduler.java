@@ -1,6 +1,7 @@
 package com.playko.zoologico.service.impl;
 
 import com.playko.zoologico.service.IComentarioService;
+import com.playko.zoologico.service.IExcelService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,12 +15,12 @@ import java.time.LocalDate;
 @Slf4j
 public class ReportScheduler {
 
-    private final IComentarioService comentarioService;
+    private final IExcelService excelService;
     private final S3Service s3Service;
 
     @Scheduled(cron = "0 32 17 * * *", zone = "America/Bogota")
     public void generarYEnviarReporte() {
-        byte[] excel = comentarioService.generarExcelComentariosPorFecha(null);
+        byte[] excel = excelService.generarExcelComentariosPorFecha(null);
 
         String key = "reportes/comentarios-" + LocalDate.now() + ".xlsx";
 

@@ -11,5 +11,4 @@ public interface IComentarioService {
     List<ComentarioResponseDto> obtenerMuroDeAnimal(Long animalId);
     PorcentajeComentariosConRespuestasDto obtenerPorcentajeComentariosConRespuestas();
 
-    byte[] generarExcelComentariosPorFecha(String fecha);
 }
