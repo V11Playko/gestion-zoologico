@@ -17,8 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = NotificationController.class)
-@Import(JwtAuthorizationFilter.class) // importamos el filtro para que forme parte del contexto
+@Import(JwtAuthorizationFilter.class)
 class NotificationControllerTests {
 
     @Autowired
@@ -39,7 +37,7 @@ class NotificationControllerTests {
     private INotificationService emailService;
 
     @MockBean
-    private JwtUtils jwtUtils; // mockeamos JwtUtils para controlar validación y roles
+    private JwtUtils jwtUtils;
 
     private static final String BASE = "/api/notifications/send";
 
@@ -54,9 +52,9 @@ class NotificationControllerTests {
         String token = "valid-token";
 
         // Preparar mocks
-        when(jwtUtils.validateJwtToken(eq(token))).thenReturn(true);
-        when(jwtUtils.getRoles(eq(token))).thenReturn(List.of("ROLE_ADMIN"));
-        doNothing().when(emailService).sendNotification(any(SendNotification.class));
+        when(jwtUtils.validateJwtToken(token)).thenReturn(true);
+        when(jwtUtils.getRoles(token)).thenReturn(List.of("ROLE_ADMIN"));
+        doNothing().when(emailService).sendNotification(request);
 
         mockMvc.perform(post(BASE)
                         .header("Authorization", "Bearer " + token)
@@ -90,7 +88,7 @@ class NotificationControllerTests {
 
         String token = "invalid-token";
 
-        when(jwtUtils.validateJwtToken(eq(token))).thenReturn(false);
+        when(jwtUtils.validateJwtToken(token)).thenReturn(false);
 
         mockMvc.perform(post(BASE)
                         .header("Authorization", "Bearer " + token)
@@ -109,9 +107,8 @@ class NotificationControllerTests {
 
         String token = "valid-but-wrong-role";
 
-        when(jwtUtils.validateJwtToken(eq(token))).thenReturn(true);
-        // rol que no está en rolesEndpointsMap (ROLE_ADMIN/ROLE_EMPLEADO/ROLE_CLIENTE)
-        when(jwtUtils.getRoles(eq(token))).thenReturn(List.of("ROLE_SOME_OTHER"));
+        when(jwtUtils.validateJwtToken(token)).thenReturn(true);
+        when(jwtUtils.getRoles(token)).thenReturn(List.of("ROLE_SOME_OTHER"));
 
         mockMvc.perform(post(BASE)
                         .header("Authorization", "Bearer " + token)
@@ -130,8 +127,8 @@ class NotificationControllerTests {
 
         String token = "valid-token-for-validation";
 
-        when(jwtUtils.validateJwtToken(eq(token))).thenReturn(true);
-        when(jwtUtils.getRoles(eq(token))).thenReturn(List.of("ROLE_ADMIN"));
+        when(jwtUtils.validateJwtToken(token)).thenReturn(true);
+        when(jwtUtils.getRoles(token)).thenReturn(List.of("ROLE_ADMIN"));
 
         mockMvc.perform(post(BASE)
                         .header("Authorization", "Bearer " + token)

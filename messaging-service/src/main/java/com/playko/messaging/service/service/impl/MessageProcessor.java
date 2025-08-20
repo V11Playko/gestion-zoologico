@@ -39,16 +39,12 @@ public class MessageProcessor {
     public void procesarMensaje(String body) throws Exception {
         log.debug("📜 Cuerpo del mensaje: {}", body);
 
-        if (body.contains("FORZAR_ERROR")) {
-            throw new RuntimeException("💥 Error forzado para probar recover");
-        }
-
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(body);
 
-        JsonNode record = root.path("Records").get(0);
-        String bucket = record.path("s3").path("bucket").path("name").asText();
-        String key = record.path("s3").path("object").path("key").asText();
+        JsonNode recordNode = root.path("Records").get(0);
+        String bucket = recordNode.path("s3").path("bucket").path("name").asText();
+        String key = recordNode.path("s3").path("object").path("key").asText();
 
         log.info("📂 Obteniendo archivo de S3 - Bucket: {}, Key: {}", bucket, key);
 

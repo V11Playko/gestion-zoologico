@@ -109,12 +109,14 @@ class NotificationServiceTests {
     @Test
     void sendNotification_shouldThrowException_whenJavaMailSenderFails() {
         // Arrange
-        when(templateEngine.process(eq("email"), any(Context.class))).thenReturn("<html>Email</html>");
+        when(templateEngine.process("email", any(Context.class))).thenReturn("<html>Email</html>");
         doThrow(new RuntimeException("Error de envío")).when(javaMailSender).send(any(MimeMessage.class));
+
+        SendNotification notification = buildNotification(); // Separar creación
 
         // Act & Assert
         assertThrows(MessageNotSendException.class, () ->
-                notificationService.sendNotification(buildNotification())
+                notificationService.sendNotification(notification)
         );
         verify(emailLogRepository, never()).save(any());
     }
@@ -122,12 +124,14 @@ class NotificationServiceTests {
     @Test
     void sendNotification_shouldThrowException_whenTemplateEngineFails() {
         // Arrange
-        when(templateEngine.process(eq("email"), any(Context.class)))
+        when(templateEngine.process("email", any(Context.class)))
                 .thenThrow(new RuntimeException("Error en template"));
+
+        SendNotification notification = buildNotification(); // Separar creación
 
         // Act & Assert
         assertThrows(MessageNotSendException.class, () ->
-                notificationService.sendNotification(buildNotification())
+                notificationService.sendNotification(notification)
         );
         verify(emailLogRepository, never()).save(any());
     }
@@ -177,13 +181,14 @@ class NotificationServiceTests {
         // Arrange
         MimeMessage spyMessage = spy(new MimeMessage((Session) null));
         when(javaMailSender.createMimeMessage()).thenReturn(spyMessage);
-        // Forzar fallo en setTo lanzando MessagingException
         doThrow(new jakarta.mail.MessagingException("Fallo en setTo"))
                 .when(spyMessage).setRecipients(any(), (Address[]) any());
 
+        SendNotification notification = buildNotification(); // Separar creación
+
         // Act & Assert
         assertThrows(MessageNotSendException.class, () ->
-                notificationService.sendNotification(buildNotification())
+                notificationService.sendNotification(notification)
         );
         verify(templateEngine, never()).process(anyString(), any());
         verify(emailLogRepository, never()).save(any());

@@ -35,7 +35,7 @@ public class SqsListenerService {
     @Value("${sqs.queue-url}")
     private String queueUrl;
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 10000)
     public void escucharMensajes() {
         log.info("🔄 Iniciando polling de la cola SQS...");
 
