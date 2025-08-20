@@ -35,5 +35,10 @@ cloud:
       access-key: ${AWS_ACCESS_KEY}
       secret-key: ${AWS_SECRET_KEY}
 
+scheduler:
+  excel-cron: ${EXCEL_CRON}
+  pdf-cron: ${PDF_CRON}
+
+
 appDescription: "zoologico-service"
 appVersion: "1.0.0"
