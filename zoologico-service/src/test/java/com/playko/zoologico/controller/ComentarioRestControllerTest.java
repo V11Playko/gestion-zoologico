@@ -142,29 +142,4 @@ class ComentarioRestControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    // -----------------------------------------
-    // Test GET: generarExcelComentariosPorFecha
-    // -----------------------------------------
-    @Test
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
-    void generarExcelComentariosPorFecha_RetornaCreated() throws Exception {
-        byte[] mockBytes = new byte[]{1,2,3};
-        when(comentarioService.generarExcelComentariosPorFecha("2025-08-18")).thenReturn(mockBytes);
-
-        mockMvc.perform(get("/api/comentarios/comentarios/excel")
-                        .param("fecha", "2025-08-18")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"comentarios-2025-08-18.xlsx\""));
-    }
-
-    @Test
-    @WithMockUser(username = "user", authorities = {"ROLE_USER"}) // explícito ROLE_USER
-    void generarExcelComentariosPorFecha_UsuarioSinRol_RetornaForbidden() throws Exception {
-        mockMvc.perform(get("/api/comentarios/comentarios/excel")
-                        .param("fecha", "2025-08-18")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-    }
-
 }

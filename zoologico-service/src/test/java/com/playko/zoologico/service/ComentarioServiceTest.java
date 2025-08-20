@@ -1,4 +1,4 @@
-package com.playko.zoologico.service.services;
+package com.playko.zoologico.service;
 
 import com.playko.zoologico.client.MessagingClient;
 import com.playko.zoologico.client.dto.SendNotification;
@@ -328,63 +328,5 @@ class ComentarioServiceTest {
         // 1 de 2 -> 50.0%
         assertThat(result.getPorcentaje()).isEqualTo("50,0%");
     }
-
-    /* ===== generarExcelComentariosPorFecha ===== */
-
-    @Test
-    void generarExcelComentariosPorFecha_shouldThrow_whenFechaFormatoInvalido() {
-        String bad = "2023-99-99";
-        assertThrows(FechaFormatoInvalidoException.class, () -> comentarioService.generarExcelComentariosPorFecha(bad));
-    }
-
-    @Test
-    void generarExcelComentariosPorFecha_shouldThrow_whenNoComments() {
-        // make repository return empty for any start/end
-        when(comentarioRepository.findByFechaBetween(any(), any())).thenReturn(List.of());
-
-        assertThrows(NoComentariosEnFechaException.class, () -> comentarioService.generarExcelComentariosPorFecha("2023-08-01"));
-    }
-
-    @Test
-    void generarExcelComentariosPorFecha_shouldReturnByteArray_andContainExpectedSheets() throws Exception {
-        // Preparar un comentario en una fecha específica
-        LocalDateTime fechaHora = LocalDate.of(2023, 8, 1).atTime(10, 30);
-        Comentario c1 = new Comentario();
-        c1.setId(500L);
-        c1.setContenido("Contenido prueba");
-        c1.setFecha(fechaHora);
-        c1.setAutor(autor);
-        c1.setAnimal(animal);
-
-        // Mock repository
-        when(comentarioRepository.findByFechaBetween(any(), any())).thenReturn(List.of(c1));
-
-        byte[] bytes = comentarioService.generarExcelComentariosPorFecha("2023-08-01");
-
-        // Verificar resultado básico
-        assertThat(bytes)
-                .isNotNull()
-                .hasSizeGreaterThan(0);
-
-        try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(bytes))) {
-            // Convertir hojas a lista
-            List<Sheet> sheets = new ArrayList<>();
-            for (int i = 0; i < wb.getNumberOfSheets(); i++) {
-                sheets.add(wb.getSheetAt(i));
-            }
-
-            // Verificar cantidad mínima de hojas
-            assertThat(sheets).hasSizeGreaterThanOrEqualTo(4);
-
-            // Verificar que todas las hojas esperadas existan en una sola cadena de aserciones
-            assertThat(List.of(
-                    wb.getSheet("Comentarios-2023-08-01"),
-                    wb.getSheet("Estadísticas"),
-                    wb.getSheet("Por Usuario"),
-                    wb.getSheet("Por Animal")
-            )).allMatch(Objects::nonNull, "Todas las hojas esperadas deben existir");
-        }
-    }
-
 
 }

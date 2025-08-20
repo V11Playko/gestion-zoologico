@@ -1,4 +1,4 @@
-package com.playko.zoologico.service.services;
+package com.playko.zoologico.service;
 
 import com.playko.zoologico.dto.request.EspecieRequestDto;
 import com.playko.zoologico.dto.response.AnimalesPorEspecieResponseDto;
