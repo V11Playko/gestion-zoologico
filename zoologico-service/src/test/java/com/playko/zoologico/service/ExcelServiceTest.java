@@ -38,7 +38,6 @@ class ExcelServiceTest {
     private ExcelService excelService;
 
     private Usuario autor;
-    private Usuario creadorAnimal;
     private Animal animal;
 
     /* ===== generarExcelComentariosPorFecha ===== */

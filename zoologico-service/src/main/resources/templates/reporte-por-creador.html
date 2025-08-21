@@ -24,7 +24,9 @@
 </head>
 <body>
 <div class="creador">
-    <h1 th:text="'Reporte de comentarios - ' + ${creadorNombre}"></h1>
+    <h1 th:text="'Reporte de comentarios - ' + ${creadorNombre}">
+        Reporte de comentarios
+    </h1>
     <p><strong>Email:</strong> <span th:text="${creadorEmail}"></span></p>
     <p><strong>Fecha:</strong> <span th:text="${fecha}"></span></p>
 </div>

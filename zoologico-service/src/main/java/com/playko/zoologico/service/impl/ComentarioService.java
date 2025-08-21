@@ -9,51 +9,24 @@ import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
 import com.playko.zoologico.entity.Usuario;
-import com.playko.zoologico.exception.ErrorGeneratingExcelException;
 import com.playko.zoologico.exception.ErrorGettingMailTokenException;
-import com.playko.zoologico.exception.FechaFormatoInvalidoException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
 import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
 import com.playko.zoologico.exception.comentario.ComentarioPadreNotFoundException;
-import com.playko.zoologico.exception.comentario.NoComentariosEnFechaException;
 import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IComentarioRepository;
 import com.playko.zoologico.repository.IUsuarioRepository;
 import com.playko.zoologico.service.IComentarioService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static com.playko.zoologico.constants.ExcelConstants.HEADER_STYLE;
-import static com.playko.zoologico.constants.ExcelConstants.NORMAL_STYLE;
-import static com.playko.zoologico.constants.ExcelConstants.PERCENT_STYLE;
 
 @Service
 @Transactional

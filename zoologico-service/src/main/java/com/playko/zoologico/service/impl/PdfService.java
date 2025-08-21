@@ -8,6 +8,7 @@ import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IComentarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -33,6 +30,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class PdfService {
 
     private final IComentarioRepository comentarioRepository;
@@ -61,17 +59,13 @@ public class PdfService {
                 }
                 java.nio.file.Path outPath = java.nio.file.Paths.get(outputDir, fileName);
                 java.nio.file.Files.write(outPath, info.getBytes());
-                System.out.println("PDF guardado: " + outPath.toAbsolutePath());
+                log.info("📄 PDF guardado en {}", outPath.toAbsolutePath());
             } catch (Exception ex) {
-                System.err.println("No se pudo escribir PDF: " + ex.getMessage());
+                log.error("❌ No se pudo escribir PDF {}: {}", fileName, ex.getMessage(), ex);
             }
         });
     }
 
-    /**
-     * Genera los reportes en memoria y devuelve un Map<nombreArchivo, PdfInfo>
-     * donde PdfInfo contiene los bytes y el email del creador (para metadata).
-     */
     public Map<String, PdfInfo> generarReportesEnMemoria(LocalDate fecha) {
         LocalDateTime startOfDay = fecha.atStartOfDay();
         LocalDateTime endOfDay = fecha.atTime(LocalTime.MAX);
@@ -107,7 +101,7 @@ public class PdfService {
                     m.put("mensajeSinComentarios", null);
                 }
                 return m;
-            }).collect(Collectors.toList());
+            }).toList();
 
             Context context = new Context();
             context.setVariable("creadorNombre", creador.getNombre() != null ? creador.getNombre() : creador.getEmail());
@@ -131,15 +125,13 @@ public class PdfService {
                 PdfInfo info = new PdfInfo(os.toByteArray(), creador.getEmail());
                 reportes.put(fileName, info);
             } catch (Exception e) {
-                System.err.println("Error generando PDF para creador " + creador.getEmail() + ": " + e.getMessage());
-                e.printStackTrace();
+                log.error("⚠️ Error generando PDF para {}: {}", creador.getEmail(), e.getMessage(), e);
             }
         }
 
         return reportes;
     }
 
-    // DTO sencillo para transportar bytes + email
     public static class PdfInfo {
         private final byte[] bytes;
         private final String creatorEmail;

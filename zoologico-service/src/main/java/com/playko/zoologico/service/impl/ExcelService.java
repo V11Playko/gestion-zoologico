@@ -1,6 +1,5 @@
 package com.playko.zoologico.service.impl;
 
-import com.playko.zoologico.client.MessagingClient;
 import com.playko.zoologico.dto.response.ComentarioResponseDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
@@ -8,9 +7,7 @@ import com.playko.zoologico.entity.Usuario;
 import com.playko.zoologico.exception.ErrorGeneratingExcelException;
 import com.playko.zoologico.exception.FechaFormatoInvalidoException;
 import com.playko.zoologico.exception.comentario.NoComentariosEnFechaException;
-import com.playko.zoologico.repository.IAnimalRepository;
 import com.playko.zoologico.repository.IComentarioRepository;
-import com.playko.zoologico.repository.IUsuarioRepository;
 import com.playko.zoologico.service.IExcelService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
