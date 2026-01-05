@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -15,7 +17,9 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Zona {
+@SQLDelete(sql = "UPDATE zonas SET deleted = true, deleted_at = now() WHERE id = ?")
+@Where(clause = "deleted = false")
+public class Zona extends Audit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

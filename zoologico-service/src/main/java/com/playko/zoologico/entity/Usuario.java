@@ -3,6 +3,7 @@ package com.playko.zoologico.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.List;
 
@@ -23,7 +26,9 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Usuario {
+@SQLDelete(sql = "UPDATE usuarios SET deleted = true, deleted_at = now() WHERE id = ?")
+@Where(clause = "deleted = false")
+public class Usuario extends Audit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +47,6 @@ public class Usuario {
     @JoinColumn(name = "id_role")
     private Role role;
 
-    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "autor", fetch = FetchType.LAZY)
     private List<Comentario> comentarios;
 }
