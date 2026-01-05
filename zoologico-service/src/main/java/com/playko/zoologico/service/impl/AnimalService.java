@@ -20,6 +20,7 @@ import com.playko.zoologico.repository.IZonaRepository;
 import com.playko.zoologico.service.IAnimalService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -34,9 +35,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AnimalService implements IAnimalService {
     private final IAnimalRepository animalRepository;
-    private final IUsuarioRepository usuarioRepository;
     private final IEspecieRepository especieRepository;
-    private final IZonaRepository zonaRepository;
+    private final AuditorAware<Usuario> auditorProvider;
 
     @Override
     public AnimalResponseDto obtenerAnimalPorId(Long id) {
@@ -62,14 +62,11 @@ public class AnimalService implements IAnimalService {
         Especie especie = especieRepository.findById(dto.getEspecieId())
                 .orElseThrow(EspecieNotFoundException::new);
 
-        String correoUsuarioAutenticado = obtenerCorreoDelToken();
-        Usuario creador = usuarioRepository.findByEmail(correoUsuarioAutenticado);
 
         Animal animal = new Animal();
         animal.setNombre(dto.getNombre().trim());
         animal.setFechaIngreso(dto.getFechaIngreso() != null ? dto.getFechaIngreso() : LocalDateTime.now());
         animal.setEspecie(especie);
-        animal.setCreador(creador);
 
         animalRepository.save(animal);
     }
@@ -93,6 +90,7 @@ public class AnimalService implements IAnimalService {
     public void eliminarAnimal(Long id) {
         Animal animal = animalRepository.findById(id)
                 .orElseThrow(AnimalNotFoundException::new);
+        auditorProvider.getCurrentAuditor().ifPresent(animal::setDeletedBy);
 
         animalRepository.delete(animal);
     }

@@ -78,8 +78,8 @@ public class PdfService {
                 .collect(Collectors.groupingBy(c -> c.getAnimal().getId()));
 
         Map<Usuario, List<Animal>> animalesPorCreador = animales.stream()
-                .filter(a -> a.getCreador() != null)
-                .collect(Collectors.groupingBy(Animal::getCreador));
+                .filter(a -> a.getCreatedBy() != null)
+                .collect(Collectors.groupingBy(Animal::getCreatedBy));
 
         DateTimeFormatter fechaFmt = DateTimeFormatter.ISO_LOCAL_DATE;
         Map<String, PdfInfo> reportes = new HashMap<>();

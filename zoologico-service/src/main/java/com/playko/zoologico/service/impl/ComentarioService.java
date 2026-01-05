@@ -67,7 +67,7 @@ public class ComentarioService implements IComentarioService {
             comentario.setPadre(padre);
         }
 
-        Usuario creadorAnimal = animal.getCreador();
+        Usuario creadorAnimal = animal.getCreatedBy();
         if (!autor.getId().equals(creadorAnimal.getId())) {
             SendNotification notification = new SendNotification(
                     creadorAnimal.getEmail(),

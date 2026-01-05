@@ -164,7 +164,7 @@ public class ExcelService implements IExcelService {
     }
 
     private Usuario safeGetCreador(Animal animal) {
-        return animal != null ? animal.getCreador() : null;
+        return animal != null ? animal.getCreatedBy() : null;
     }
 
     private String formatFecha(LocalDateTime fecha, DateTimeFormatter dtf) {
