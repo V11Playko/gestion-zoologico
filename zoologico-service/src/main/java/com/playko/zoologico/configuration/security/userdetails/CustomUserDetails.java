@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.playko.zoologico.entity.Role;
 import com.playko.zoologico.entity.Usuario;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,11 +14,13 @@ import java.util.List;
 import java.util.Objects;
 
 @AllArgsConstructor
+@Getter
 public class CustomUserDetails implements UserDetails {
     private String email;
     @JsonIgnore
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
+    private Usuario usuario;
 
     public static CustomUserDetails build(Usuario user, List<Role> roles) {
         List<SimpleGrantedAuthority> authorities = roles.stream()
@@ -27,7 +30,9 @@ public class CustomUserDetails implements UserDetails {
         return new CustomUserDetails(
                 user.getEmail(),
                 user.getPassword(),
-                authorities);
+                authorities,
+                user
+        );
     }
 
     @Override
