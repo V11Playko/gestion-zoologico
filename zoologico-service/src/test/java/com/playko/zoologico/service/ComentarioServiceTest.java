@@ -74,7 +74,7 @@ class ComentarioServiceTest {
         animal = new Animal();
         animal.setId(100L);
         animal.setNombre("Firulais");
-        animal.setCreador(creadorAnimal);
+        animal.setCreatedBy(creadorAnimal);
     }
 
     @AfterEach

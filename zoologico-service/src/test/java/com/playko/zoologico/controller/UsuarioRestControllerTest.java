@@ -80,7 +80,7 @@ class UsuarioRestControllerTest {
         dto.setEmail("empleado@test.com");
         dto.setPassword("123456");
 
-        mockMvc.perform(post(BASE_URL)
+        mockMvc.perform(post(BASE_URL + "/empleado")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -96,7 +96,7 @@ class UsuarioRestControllerTest {
         dto.setEmail("empleado@test.com");
         dto.setPassword("123456");
 
-        mockMvc.perform(post(BASE_URL)
+        mockMvc.perform(post(BASE_URL + "/empleado")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(dto)))
                 .andExpect(status().isForbidden());
