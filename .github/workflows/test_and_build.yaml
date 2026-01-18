@@ -27,6 +27,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Ejecutar Checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest
+
 
       # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
       # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
@@ -35,6 +38,11 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: chmod +x ./gradlew && ./gradlew build
+      - name: Ejecutar SpotBugs
+        run: mvn spotbugs:check
+      - name: Ejecutar pruebas con cobertura JaCoCo
+        run: ./gradlew test jacocoTestReport
+
 
       # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
       # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
