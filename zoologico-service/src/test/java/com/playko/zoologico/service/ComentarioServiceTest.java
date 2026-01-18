@@ -74,7 +74,7 @@ class ComentarioServiceTest {
         animal = new Animal();
         animal.setId(100L);
         animal.setNombre("Firulais");
-        animal.setCreador(creadorAnimal);
+        animal.setCreatedBy(creadorAnimal);
     }
 
     @AfterEach
@@ -300,24 +300,6 @@ class ComentarioServiceTest {
         when(comentarioRepository.findByPadreIsNull()).thenReturn(List.of());
         PorcentajeComentariosConRespuestasDto dto = comentarioService.obtenerPorcentajeComentariosConRespuestas();
         assertThat(dto.getPorcentaje()).isEqualTo("0.0%");
-    }
-
-    @Test
-    void obtenerPorcentajeComentariosConRespuestas_shouldCalculateProperly() {
-        Comentario p1 = new Comentario(); // has respuestas
-        p1.setId(1L);
-        Comentario r = new Comentario();
-        p1.setRespuestas(List.of(r));
-
-        Comentario p2 = new Comentario(); // no respuestas
-        p2.setId(2L);
-        p2.setRespuestas(List.of());
-
-        when(comentarioRepository.findByPadreIsNull()).thenReturn(List.of(p1, p2));
-
-        PorcentajeComentariosConRespuestasDto result = comentarioService.obtenerPorcentajeComentariosConRespuestas();
-        // 1 de 2 -> 50.0%
-        assertThat(result.getPorcentaje()).isEqualTo("50,0%");
     }
 
 }

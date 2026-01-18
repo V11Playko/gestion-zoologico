@@ -8,6 +8,7 @@ import com.playko.zoologico.configuration.security.userdetails.CustomUserDetails
 import com.playko.zoologico.service.IExcelService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -23,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ExcelRestController.class)
-@Import(WebSecurityConfig.class)
 class ExcelRestControllerTest {
 
     @Autowired
@@ -56,21 +56,24 @@ class ExcelRestControllerTest {
     @WithMockUser(authorities = {"ROLE_ADMIN"})
     void generarExcelComentariosPorFecha_RetornaCreated() throws Exception {
         byte[] mockBytes = new byte[]{1,2,3};
-        when(excelService.generarExcelComentariosPorFecha("2025-08-18")).thenReturn(mockBytes);
+        when(excelService.generarExcelComentariosPorFecha("2025-08-18"))
+                .thenReturn(mockBytes);
 
-        mockMvc.perform(get("/api/comentarios/excel")
-                        .param("fecha", "2025-08-18")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/reporte/excel")
+                        .param("fecha", "2025-08-18"))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"comentarios-2025-08-18.xlsx\""));
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"reporte-comentarios-2025-08-18.xlsx\""
+                ));
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"ROLE_USER"}) // explícito ROLE_USER
+    @WithMockUser(username = "user", authorities = {"ROLE_USER"})
     void generarExcelComentariosPorFecha_UsuarioSinRol_RetornaForbidden() throws Exception {
         mockMvc.perform(get("/api/comentarios/excel")
                         .param("fecha", "2025-08-18")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
 }

@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +27,9 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Animal {
+@SQLDelete(sql = "UPDATE animales SET deleted = true, deleted_at = now() WHERE id = ?")
+@Where(clause = "deleted = false")
+public class Animal extends Audit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,10 +45,7 @@ public class Animal {
     @JoinColumn(name = "especie_id", nullable = false)
     private Especie especie;
 
-    @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "animal", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Comentario> comentarios;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creador_id", nullable = false)
-    private Usuario creador;
 }

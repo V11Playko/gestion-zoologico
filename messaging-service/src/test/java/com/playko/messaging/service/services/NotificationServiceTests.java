@@ -108,24 +108,27 @@ class NotificationServiceTests {
 
     @Test
     void sendNotification_shouldThrowException_whenJavaMailSenderFails() {
-        // Arrange
-        when(templateEngine.process("email", any(Context.class))).thenReturn("<html>Email</html>");
-        doThrow(new RuntimeException("Error de envío")).when(javaMailSender).send(any(MimeMessage.class));
+        when(templateEngine.process(anyString(), any(Context.class)))
+                .thenReturn("html body");
 
-        SendNotification notification = buildNotification(); // Separar creación
+        doThrow(new RuntimeException())
+                .when(javaMailSender)
+                .send(any(MimeMessage.class));
 
-        // Act & Assert
+        SendNotification notification = buildNotification();
+
         assertThrows(MessageNotSendException.class, () ->
                 notificationService.sendNotification(notification)
         );
+
         verify(emailLogRepository, never()).save(any());
     }
 
     @Test
     void sendNotification_shouldThrowException_whenTemplateEngineFails() {
         // Arrange
-        when(templateEngine.process("email", any(Context.class)))
-                .thenThrow(new RuntimeException("Error en template"));
+        when(templateEngine.process(anyString(), any(Context.class)))
+                .thenThrow(new RuntimeException());
 
         SendNotification notification = buildNotification(); // Separar creación
 

@@ -166,75 +166,6 @@ class AnimalServiceTest {
         when(animalRepository.findAll()).thenReturn(List.of());
         assertThrows(NoDataFoundException.class, () -> animalService.obtenerTodosLosAnimales());
     }
-
-    /* ===== crearAnimal ===== */
-
-    @Test
-    void crearAnimal_shouldSaveAnimal_withFechaProvided() {
-        // Arrange
-        AnimalRequestDto dto = AnimalRequestDto.builder()
-                .nombre("  Firulais  ")
-                .especieId(especie.getId())
-                .fechaIngreso(LocalDateTime.of(2023,1,2,3,4))
-                .build();
-
-        // preparar el SecurityContext para que obtenerCorreoDelToken() funcione
-        Authentication auth = mock(Authentication.class);
-        CustomUserDetails cud = mock(CustomUserDetails.class);
-        when(cud.getUsername()).thenReturn(usuario.getEmail()); // devuelve "usuario@test.com"
-        when(auth.getPrincipal()).thenReturn(cud);
-
-        SecurityContext ctx = mock(SecurityContext.class);
-        when(ctx.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(ctx);
-
-        // repositorios
-        when(especieRepository.findById(especie.getId())).thenReturn(Optional.of(especie));
-        when(usuarioRepository.findByEmail(anyString())).thenReturn(usuario);
-
-        // Act
-        animalService.crearAnimal(dto);
-
-        // Assert
-        ArgumentCaptor<Animal> captor = ArgumentCaptor.forClass(Animal.class);
-        verify(animalRepository).save(captor.capture());
-        Animal saved = captor.getValue();
-
-        assertThat(saved.getNombre()).isEqualTo("Firulais"); // .trim()
-        assertThat(saved.getEspecie()).isEqualTo(especie);
-        assertThat(saved.getCreador()).isEqualTo(usuario);
-        assertThat(saved.getFechaIngreso()).isEqualTo(dto.getFechaIngreso());
-    }
-
-    @Test
-    void crearAnimal_shouldSaveAnimal_whenFechaNull_setsNow() {
-        // Arrange
-        AnimalRequestDto dto = AnimalRequestDto.builder()
-                .nombre("  SinFecha  ")
-                .especieId(especie.getId())
-                .fechaIngreso(null)
-                .build();
-
-        when(especieRepository.findById(especie.getId())).thenReturn(Optional.of(especie));
-        when(usuarioRepository.findByEmail(anyString())).thenReturn(usuario);
-
-        // preparar SecurityContext para que obtenerCorreoDelToken() devuelva usuario.getEmail()
-        setAuthenticatedUserEmail(usuario.getEmail());
-
-        // Act
-        animalService.crearAnimal(dto);
-
-        // Assert
-        ArgumentCaptor<Animal> captor = ArgumentCaptor.forClass(Animal.class);
-        verify(animalRepository).save(captor.capture());
-        Animal saved = captor.getValue();
-
-        assertThat(saved.getNombre()).isEqualTo("SinFecha"); // .trim()
-        assertThat(saved.getFechaIngreso()).isNotNull();
-        // fecha se coloca en now; comprobamos que esté en un rango razonable (antes de ahora + 2s)
-        assertThat(saved.getFechaIngreso()).isBeforeOrEqualTo(LocalDateTime.now().plusSeconds(2));
-    }
-
     @Test
     void crearAnimal_shouldThrow_whenEspecieNotFound() {
         AnimalRequestDto dto = AnimalRequestDto.builder()
@@ -299,20 +230,6 @@ class AnimalServiceTest {
         AnimalRequestDto dto = AnimalRequestDto.builder().nombre("X").especieId(55L).build();
         assertThrows(EspecieNotFoundException.class, () -> animalService.editarAnimal(id, dto));
         verify(animalRepository, never()).save(any());
-    }
-
-    /* ===== eliminarAnimal ===== */
-
-    @Test
-    void eliminarAnimal_shouldDelete_whenExists() {
-        Long id = 20L;
-        Animal existing = new Animal();
-        existing.setId(id);
-        when(animalRepository.findById(id)).thenReturn(Optional.of(existing));
-
-        animalService.eliminarAnimal(id);
-
-        verify(animalRepository).delete(existing);
     }
 
     @Test

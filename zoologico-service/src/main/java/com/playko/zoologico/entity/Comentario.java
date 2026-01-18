@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +27,9 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Comentario {
+@SQLDelete(sql = "UPDATE comentarios SET deleted = true, deleted_at = now() WHERE id = ?")
+@Where(clause = "deleted = false")
+public class Comentario extends Audit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,6 +53,6 @@ public class Comentario {
     @JoinColumn(name = "padre_id")
     private Comentario padre;
 
-    @OneToMany(mappedBy = "padre", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "padre", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Comentario> respuestas;
 }

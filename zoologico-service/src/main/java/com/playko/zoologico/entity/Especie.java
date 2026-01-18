@@ -14,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +26,9 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Especie {
+@SQLDelete(sql = "UPDATE especies SET deleted = true, deleted_at = now() WHERE id = ?")
+@Where(clause = "deleted = false")
+public class Especie extends Audit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
