@@ -1,0 +1,286 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  EC2 t3.micro instance that runs zoologico-service (8091) and messaging-service (8092)
+  as Docker containers pulled from ECR. Includes IAM role with least-privilege access
+  to ECR, S3, and SQS.
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Parameters
+# ──────────────────────────────────────────────────────────────────────────────
+Parameters:
+
+  # ── Networking ───────────────────────────────────────────────────────────────
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC where the instance will be deployed (reuse the one from rds-postgres stack).
+
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Public subnet inside that VPC (the instance needs internet access to pull images).
+
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: EC2 Key Pair for SSH access.
+
+  TrustedCIDR:
+    Type: String
+    Description: Your public IP in CIDR notation (e.g. 203.0.113.42/32). Only this IP can SSH.
+    AllowedPattern: "^(\\d{1,3}\\.){3}\\d{1,3}/\\d{1,2}$"
+
+  # ── Latest Amazon Linux 2023 AMI (resolved automatically via SSM) ────────────
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+  # ── zoologico-service env vars ────────────────────────────────────────────────
+  DBUrl:
+    Type: String
+    Description: "Full JDBC URL (e.g. jdbc:postgresql://host:5432/zoologicodb)"
+
+  DBUsername:
+    Type: String
+    Description: RDS master username.
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+    Description: RDS master password.
+
+  KeySecretSecurity:
+    Type: String
+    NoEcho: true
+    Description: JWT signing secret shared between both services.
+
+  ExpireMsSecurity:
+    Type: String
+    Default: "86400000"
+    Description: JWT expiration in milliseconds.
+
+  ExcelCron:
+    Type: String
+    Default: "0 0 8 * * MON"
+    Description: Cron expression for the Excel report scheduler.
+
+  PdfCron:
+    Type: String
+    Default: "0 0 8 * * MON"
+    Description: Cron expression for the PDF report scheduler.
+
+  # ── messaging-service env vars ────────────────────────────────────────────────
+  MongodbUri:
+    Type: String
+    NoEcho: true
+    Description: MongoDB connection URI for email logs.
+
+  S3BucketName:
+    Type: String
+    Description: Name of the S3 bucket used by both services.
+
+  ExcelQueueUrl:
+    Type: String
+    Description: SQS URL for the Excel queue.
+
+  ExcelDlqUrl:
+    Type: String
+    Description: SQS URL for the Excel dead-letter queue.
+
+  PdfQueueUrl:
+    Type: String
+    Description: SQS URL for the PDF queue.
+
+  PdfDlqUrl:
+    Type: String
+    Description: SQS URL for the PDF dead-letter queue.
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Resources
+# ──────────────────────────────────────────────────────────────────────────────
+Resources:
+
+  # ── 1. Security Group ─────────────────────────────────────────────────────────
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH from trusted IP and HTTP on app ports from anywhere.
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref TrustedCIDR
+          Description: SSH from developer IP
+        - IpProtocol: tcp
+          FromPort: 8091
+          ToPort: 8091
+          CidrIp: 0.0.0.0/0
+          Description: zoologico-service API
+        - IpProtocol: tcp
+          FromPort: 8092
+          ToPort: 8092
+          CidrIp: 0.0.0.0/0
+          Description: messaging-service API
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: zoologico-app-sg
+        - Key: Project
+          Value: gestion-zoologico
+
+  # ── 2. IAM Role ───────────────────────────────────────────────────────────────
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: zoologico-ec2-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ECRReadAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Resource:
+                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/gestion-zoologico/*"
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${S3BucketName}"
+                  - !Sub "arn:aws:s3:::${S3BucketName}/*"
+        - PolicyName: SQSAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                  - sqs:ChangeMessageVisibility
+                Resource: !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*"
+      Tags:
+        - Key: Project
+          Value: gestion-zoologico
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+
+  # ── 3. EC2 Instance ───────────────────────────────────────────────────────────
+  AppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: !Ref LatestAmiId
+      KeyName: !Ref KeyPairName
+      SubnetId: !Ref SubnetId
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      SecurityGroupIds:
+        - !GetAtt AppSecurityGroup.GroupId
+      # Public IP is assigned automatically because the subnet has MapPublicIpOnLaunch=true.
+      # If your subnet does not auto-assign, move SubnetId here into a NetworkInterface block.
+      Tags:
+        - Key: Name
+          Value: zoologico-app-server
+        - Key: Project
+          Value: gestion-zoologico
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -e
+          exec > /var/log/userdata.log 2>&1
+
+          # ── Install Docker ──────────────────────────────────────────────────
+          dnf update -y
+          dnf install -y docker
+          systemctl start docker
+          systemctl enable docker
+          usermod -aG docker ec2-user
+
+          # ── Login to ECR using the instance role ────────────────────────────
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          ECR_BASE="$ACCOUNT_ID.dkr.ecr.${AWS::Region}.amazonaws.com"
+
+          aws ecr get-login-password --region ${AWS::Region} | \
+            docker login --username AWS --password-stdin "$ECR_BASE"
+
+          # ── Pull images ─────────────────────────────────────────────────────
+          docker pull "$ECR_BASE/gestion-zoologico/zoologico-service:latest"
+          docker pull "$ECR_BASE/gestion-zoologico/messaging-service:latest"
+
+          # ── Run zoologico-service (port 8091) ───────────────────────────────
+          docker run -d \
+            --name zoologico-service \
+            --restart unless-stopped \
+            -p 8091:8091 \
+            -e DB_URL="${DBUrl}" \
+            -e USER="${DBUsername}" \
+            -e PASSWORD="${DBPassword}" \
+            -e KEYSECRET_SECURITY="${KeySecretSecurity}" \
+            -e EXPIRE_MS_SECURITY="${ExpireMsSecurity}" \
+            -e AWS_REGION="${AWS::Region}" \
+            -e EXCEL_CRON="${ExcelCron}" \
+            -e PDF_CRON="${PdfCron}" \
+            -e S3_BUCKET_NAME="${S3BucketName}" \
+            "$ECR_BASE/gestion-zoologico/zoologico-service:latest"
+
+          # ── Run messaging-service (port 8092) ───────────────────────────────
+          docker run -d \
+            --name messaging-service \
+            --restart unless-stopped \
+            -p 8092:8092 \
+            -e MONGODB_URI="${MongodbUri}" \
+            -e KEYSECRET_SECURITY="${KeySecretSecurity}" \
+            -e EXCEL_QUEUE_URL="${ExcelQueueUrl}" \
+            -e EXCEL_DLQ_URL="${ExcelDlqUrl}" \
+            -e PDF_QUEUE_URL="${PdfQueueUrl}" \
+            -e PDF_DLQ_URL="${PdfDlqUrl}" \
+            -e S3_BUCKET_NAME="${S3BucketName}" \
+            "$ECR_BASE/gestion-zoologico/messaging-service:latest"
+
+          echo "Startup complete."
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Outputs
+# ──────────────────────────────────────────────────────────────────────────────
+Outputs:
+
+  PublicIP:
+    Description: Public IP of the EC2 instance.
+    Value: !GetAtt AppInstance.PublicIp
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicIP"
+
+  ZoologicoServiceURL:
+    Description: Base URL for zoologico-service.
+    Value: !Sub "http://${AppInstance.PublicIp}:8091"
+
+  MessagingServiceURL:
+    Description: Base URL for messaging-service.
+    Value: !Sub "http://${AppInstance.PublicIp}:8092"

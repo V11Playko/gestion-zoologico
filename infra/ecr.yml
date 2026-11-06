@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  ECR private repositories for gestion-zoologico microservices.
+  Stores Docker images for zoologico-service and messaging-service.
+
+Resources:
+
+  ZoologicoServiceRepo:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: gestion-zoologico/zoologico-service
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: >
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 3 images only",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 3
+                },
+                "action": { "type": "expire" }
+              }
+            ]
+          }
+      Tags:
+        - Key: Project
+          Value: gestion-zoologico
+
+  MessagingServiceRepo:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: gestion-zoologico/messaging-service
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: >
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 3 images only",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 3
+                },
+                "action": { "type": "expire" }
+              }
+            ]
+          }
+      Tags:
+        - Key: Project
+          Value: gestion-zoologico
+
+Outputs:
+
+  ZoologicoServiceRepoURI:
+    Description: Full URI of the zoologico-service ECR repository.
+    Value: !GetAtt ZoologicoServiceRepo.RepositoryUri
+    Export:
+      Name: !Sub "${AWS::StackName}-ZoologicoServiceRepoURI"
+
+  MessagingServiceRepoURI:
+    Description: Full URI of the messaging-service ECR repository.
+    Value: !GetAtt MessagingServiceRepo.RepositoryUri
+    Export:
+      Name: !Sub "${AWS::StackName}-MessagingServiceRepoURI"
