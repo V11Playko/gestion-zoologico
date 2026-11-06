@@ -154,3 +154,15 @@ build/
 
 # Logs
 *.log
+
+# Variables de entorno — nunca commitear credenciales
+**/.env
+.env
+
+# Claude Code — archivos de planificación y flujo de trabajo IA
+CLAUDE.md
+CLAUDE-reglas.md
+prompt-generar-hu.md
+docs/historias/
+docs/auditoria/
+docs/contexto-evolucion.md
