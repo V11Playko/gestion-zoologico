@@ -1,0 +1,103 @@
+name: CD — prod
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag de imagen ECR a desplegar (ej: v1.0.0)'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-prod:
+    name: Build, push ECR y deploy en EC2 prod
+    runs-on: ubuntu-latest
+    # El environment "production" requiere aprobación manual en GitHub Settings
+    # → Settings > Environments > production > Required reviewers
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolver versión
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configurar credenciales AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-cicd-role
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login en Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build y push zoologico-service
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          VERSION: ${{ steps.version.outputs.tag }}
+        run: |
+          docker build -f zoologico-service/Dockerfile \
+            -t $REGISTRY/gestion-zoologico/zoologico-service:$VERSION \
+            -t $REGISTRY/gestion-zoologico/zoologico-service:latest \
+            .
+          docker push $REGISTRY/gestion-zoologico/zoologico-service:$VERSION
+          docker push $REGISTRY/gestion-zoologico/zoologico-service:latest
+
+      - name: Build y push messaging-service
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          VERSION: ${{ steps.version.outputs.tag }}
+        run: |
+          docker build -f messaging-service/Dockerfile \
+            -t $REGISTRY/gestion-zoologico/messaging-service:$VERSION \
+            -t $REGISTRY/gestion-zoologico/messaging-service:latest \
+            .
+          docker push $REGISTRY/gestion-zoologico/messaging-service:$VERSION
+          docker push $REGISTRY/gestion-zoologico/messaging-service:latest
+
+      - name: Deploy en EC2 prod
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_PROD_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            REGISTRY=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+            VERSION=${{ steps.version.outputs.tag }}
+
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+              | docker login --username AWS --password-stdin $REGISTRY
+
+            # zoologico-service
+            docker pull $REGISTRY/gestion-zoologico/zoologico-service:$VERSION
+            docker stop zoologico-service 2>/dev/null || true
+            docker rm   zoologico-service 2>/dev/null || true
+            docker run -d \
+              --name zoologico-service \
+              --env-file /home/${{ secrets.EC2_USER }}/.env \
+              -p 8091:8091 \
+              --restart unless-stopped \
+              $REGISTRY/gestion-zoologico/zoologico-service:$VERSION
+
+            # messaging-service
+            docker pull $REGISTRY/gestion-zoologico/messaging-service:$VERSION
+            docker stop messaging-service 2>/dev/null || true
+            docker rm   messaging-service 2>/dev/null || true
+            docker run -d \
+              --name messaging-service \
+              --env-file /home/${{ secrets.EC2_USER }}/.env \
+              -p 8092:8092 \
+              --restart unless-stopped \
+              $REGISTRY/gestion-zoologico/messaging-service:$VERSION

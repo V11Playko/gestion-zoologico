@@ -82,3 +82,20 @@ jacocoTestReport {
 	)
 }
 
+jacocoTestCoverageVerification {
+	dependsOn jacocoTestReport
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.92
+			}
+		}
+	}
+	classDirectories.setFrom(
+			files(classDirectories.files.collect { fileTree(dir: it, exclude: [
+					'com/playko/zoologico/dto/**',
+					'com/playko/zoologico/entity/**'
+			]) })
+	)
+}
+

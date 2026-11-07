@@ -1,0 +1,87 @@
+name: CD — dev
+
+on:
+  push:
+    branches: [dev]
+
+# Requerido para OIDC — sin esto AWS rechaza el token
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-dev:
+    name: Build, push ECR y deploy en EC2 dev
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar credenciales AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-cicd-role
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login en Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build y push zoologico-service
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          SHA: ${{ github.sha }}
+        run: |
+          docker build -f zoologico-service/Dockerfile \
+            -t $REGISTRY/gestion-zoologico/zoologico-service:dev \
+            -t $REGISTRY/gestion-zoologico/zoologico-service:sha-$SHA \
+            .
+          docker push $REGISTRY/gestion-zoologico/zoologico-service:dev
+          docker push $REGISTRY/gestion-zoologico/zoologico-service:sha-$SHA
+
+      - name: Build y push messaging-service
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          SHA: ${{ github.sha }}
+        run: |
+          docker build -f messaging-service/Dockerfile \
+            -t $REGISTRY/gestion-zoologico/messaging-service:dev \
+            -t $REGISTRY/gestion-zoologico/messaging-service:sha-$SHA \
+            .
+          docker push $REGISTRY/gestion-zoologico/messaging-service:dev
+          docker push $REGISTRY/gestion-zoologico/messaging-service:sha-$SHA
+
+      - name: Deploy en EC2 dev
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_DEV_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            REGISTRY=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+              | docker login --username AWS --password-stdin $REGISTRY
+
+            # zoologico-service
+            docker pull $REGISTRY/gestion-zoologico/zoologico-service:dev
+            docker stop zoologico-service 2>/dev/null || true
+            docker rm   zoologico-service 2>/dev/null || true
+            docker run -d \
+              --name zoologico-service \
+              --env-file /home/${{ secrets.EC2_USER }}/.env \
+              -p 8091:8091 \
+              --restart unless-stopped \
+              $REGISTRY/gestion-zoologico/zoologico-service:dev
+
+            # messaging-service
+            docker pull $REGISTRY/gestion-zoologico/messaging-service:dev
+            docker stop messaging-service 2>/dev/null || true
+            docker rm   messaging-service 2>/dev/null || true
+            docker run -d \
+              --name messaging-service \
+              --env-file /home/${{ secrets.EC2_USER }}/.env \
+              -p 8092:8092 \
+              --restart unless-stopped \
+              $REGISTRY/gestion-zoologico/messaging-service:dev

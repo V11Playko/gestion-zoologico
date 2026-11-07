@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: IAM OIDC Role para GitHub Actions — sin credenciales estaticas
+
+Parameters:
+  GitHubOrg:
+    Type: String
+    Default: V11Playko
+    Description: Nombre de la organizacion o usuario de GitHub
+  GitHubRepo:
+    Type: String
+    Default: gestion-zoologico
+    Description: Nombre del repositorio de GitHub
+  AwsAccountId:
+    Type: String
+    Description: ID de la cuenta AWS (12 digitos)
+  EcrRegion:
+    Type: String
+    Default: us-east-1
+    Description: Region donde viven los repositorios ECR
+
+Resources:
+
+  # Proveedor OIDC de GitHub — crea uno solo por cuenta AWS
+  # Si ya existe en la cuenta, comenta este recurso y pasa su ARN como parametro
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      # Thumbprint del certificado raiz de token.actions.githubusercontent.com
+      # Verificar en: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+
+  GitHubActionsCicdRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: github-actions-cicd-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !GetAtt GitHubOidcProvider.Arn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                # Permite solo dev branch y tags v*.*.* — no toda la repo
+                token.actions.githubusercontent.com:sub:
+                  - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/heads/dev'
+                  - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/tags/v*'
+                  - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:environment:*'
+
+      Policies:
+        - PolicyName: EcrPushPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # GetAuthorizationToken necesita Resource: * (limitacion de AWS)
+              - Sid: EcrAuthToken
+                Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: '*'
+              # Push restringido solo a los repositorios de este proyecto
+              - Sid: EcrPushImages
+                Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:PutImage
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                Resource:
+                  - !Sub 'arn:aws:ecr:${EcrRegion}:${AwsAccountId}:repository/gestion-zoologico/zoologico-service'
+                  - !Sub 'arn:aws:ecr:${EcrRegion}:${AwsAccountId}:repository/gestion-zoologico/messaging-service'
+
+Outputs:
+  RoleArn:
+    Value: !GetAtt GitHubActionsCicdRole.Arn
+    Description: ARN del Role — usarlo en el paso configure-aws-credentials de los workflows
+  OidcProviderArn:
+    Value: !GetAtt GitHubOidcProvider.Arn
+    Description: ARN del proveedor OIDC de GitHub
