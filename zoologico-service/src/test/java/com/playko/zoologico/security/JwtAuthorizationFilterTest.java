@@ -58,12 +58,11 @@ class JwtAuthorizationFilterTest {
         when(jwtUtils.getEmailFromJwtToken("valid.jwt.token")).thenReturn("user@zoo.com");
         when(userDetailsService.loadUserByUsername("user@zoo.com")).thenReturn(userDetails);
 
-        filter.doFilterInternal(request, response, chain);
+        filter.doFilter(request, response, chain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
         assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                 .isEqualTo(userDetails);
-        // El filtro debe dejar pasar la request al siguiente
         assertThat(chain.getRequest()).isNotNull();
     }
 
@@ -73,7 +72,7 @@ class JwtAuthorizationFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
-        filter.doFilterInternal(request, response, chain);
+        filter.doFilter(request, response, chain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verify(jwtUtils, never()).validateJwtToken(null);
@@ -87,7 +86,7 @@ class JwtAuthorizationFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
-        filter.doFilterInternal(request, response, chain);
+        filter.doFilter(request, response, chain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verify(jwtUtils, never()).validateJwtToken(null);
