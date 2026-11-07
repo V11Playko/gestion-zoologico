@@ -2,12 +2,8 @@ name: CD — prod
 
 on:
   push:
-    tags: ['v*.*.*']
+    branches: [master]
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag de imagen ECR a desplegar (ej: v1.0.0)'
-        required: true
 
 permissions:
   id-token: write
@@ -24,14 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolver versión
+      - name: Resolver versión desde SHA
         id: version
-        run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-          fi
+        run: echo "tag=sha-${{ github.sha }}" >> $GITHUB_OUTPUT
 
       - name: Configurar credenciales AWS via OIDC
         uses: aws-actions/configure-aws-credentials@v4
@@ -75,13 +66,12 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             REGISTRY=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-            VERSION=${{ steps.version.outputs.tag }}
 
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
               | docker login --username AWS --password-stdin $REGISTRY
 
             # zoologico-service
-            docker pull $REGISTRY/gestion-zoologico/zoologico-service:$VERSION
+            docker pull $REGISTRY/gestion-zoologico/zoologico-service:latest
             docker stop zoologico-service 2>/dev/null || true
             docker rm   zoologico-service 2>/dev/null || true
             docker run -d \
@@ -89,10 +79,10 @@ jobs:
               --env-file /home/${{ secrets.EC2_USER }}/.env \
               -p 8091:8091 \
               --restart unless-stopped \
-              $REGISTRY/gestion-zoologico/zoologico-service:$VERSION
+              $REGISTRY/gestion-zoologico/zoologico-service:latest
 
             # messaging-service
-            docker pull $REGISTRY/gestion-zoologico/messaging-service:$VERSION
+            docker pull $REGISTRY/gestion-zoologico/messaging-service:latest
             docker stop messaging-service 2>/dev/null || true
             docker rm   messaging-service 2>/dev/null || true
             docker run -d \
@@ -100,4 +90,4 @@ jobs:
               --env-file /home/${{ secrets.EC2_USER }}/.env \
               -p 8092:8092 \
               --restart unless-stopped \
-              $REGISTRY/gestion-zoologico/messaging-service:$VERSION
+              $REGISTRY/gestion-zoologico/messaging-service:latest

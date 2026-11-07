@@ -57,7 +57,7 @@ class AuthServiceTest {
         JwtTokenResponseDto result = authService.loginUser(request);
 
         assertThat(result).isNotNull();
-        assertThat(result.getToken()).isEqualTo("jwt-token-generado");
+        assertThat(result.getJwtToken()).isEqualTo("jwt-token-generado");
         assertThat(result.getEmail()).isEqualTo("admin@zoo.com");
         assertThat(result.getRoles()).containsExactly("ROLE_ADMIN");
 

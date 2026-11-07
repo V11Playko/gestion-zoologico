@@ -48,10 +48,10 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
-                # Permite solo dev branch y tags v*.*.* — no toda la repo
+                # Permite dev y master (CD), y environments (aprobación manual)
                 token.actions.githubusercontent.com:sub:
                   - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/heads/dev'
-                  - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/tags/v*'
+                  - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/heads/master'
                   - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:environment:*'
 
       Policies:
