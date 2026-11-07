@@ -191,6 +191,54 @@ class UsuarioServiceTest {
         verify(usuarioRepository, times(1)).findAll();
     }
 
+    // ====== crearUsuarioAdmin ======
+
+    @Test
+    void testCrearUsuarioAdmin_Success() {
+        UsuarioRequestDto request = new UsuarioRequestDto();
+        request.setNombre("Carlos Admin");
+        request.setEmail("admin@zoo.com");
+        request.setPassword("adminPass");
+
+        Role roleAdmin = new Role();
+        roleAdmin.setId(2L);
+        roleAdmin.setNombre("ROLE_ADMIN");
+
+        when(usuarioRepository.existsByEmailIgnoreCase("admin@zoo.com")).thenReturn(false);
+        when(roleRepository.findByNombreIgnoreCase("ROLE_ADMIN")).thenReturn(Optional.of(roleAdmin));
+        when(passwordEncoder.encode("adminPass")).thenReturn("hashedAdmin");
+
+        assertDoesNotThrow(() -> usuarioService.crearUsuarioAdmin(request));
+
+        verify(usuarioRepository).save(argThat(u ->
+                u.getEmail().equals("admin@zoo.com") && u.getRole().equals(roleAdmin)
+        ));
+    }
+
+    // ====== crearUsuarioCliente ======
+
+    @Test
+    void testCrearUsuarioCliente_Success() {
+        UsuarioRequestDto request = new UsuarioRequestDto();
+        request.setNombre("Luis Cliente");
+        request.setEmail("cliente@zoo.com");
+        request.setPassword("clientePass");
+
+        Role roleCliente = new Role();
+        roleCliente.setId(3L);
+        roleCliente.setNombre("ROLE_CLIENTE");
+
+        when(usuarioRepository.existsByEmailIgnoreCase("cliente@zoo.com")).thenReturn(false);
+        when(roleRepository.findByNombreIgnoreCase("ROLE_CLIENTE")).thenReturn(Optional.of(roleCliente));
+        when(passwordEncoder.encode("clientePass")).thenReturn("hashedCliente");
+
+        assertDoesNotThrow(() -> usuarioService.crearUsuarioCliente(request));
+
+        verify(usuarioRepository).save(argThat(u ->
+                u.getEmail().equals("cliente@zoo.com") && u.getRole().equals(roleCliente)
+        ));
+    }
+
     @Test
     void testListarUsuarios_NoData() {
         when(usuarioRepository.findAll())

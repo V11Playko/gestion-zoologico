@@ -302,4 +302,60 @@ class ComentarioServiceTest {
         assertThat(dto.getPorcentaje()).isEqualTo("0.0%");
     }
 
+    @Test
+    void obtenerPorcentajeComentariosConRespuestas_shouldCalculatePorcentaje_whenSomeHaveReplies() {
+        Comentario c1 = new Comentario();
+        c1.setId(1L);
+        c1.setContenido("Padre con respuesta");
+        c1.setFecha(LocalDateTime.now());
+        c1.setAutor(autor);
+
+        Comentario respuesta = new Comentario();
+        respuesta.setId(2L);
+        respuesta.setContenido("Respuesta");
+        c1.setRespuestas(List.of(respuesta));
+
+        Comentario c2 = new Comentario();
+        c2.setId(3L);
+        c2.setContenido("Padre sin respuesta");
+        c2.setFecha(LocalDateTime.now());
+        c2.setAutor(autor);
+        c2.setRespuestas(List.of());
+
+        when(comentarioRepository.findByPadreIsNull()).thenReturn(List.of(c1, c2));
+
+        PorcentajeComentariosConRespuestasDto dto = comentarioService.obtenerPorcentajeComentariosConRespuestas();
+
+        // 1 de 2 con respuesta = 50.0%
+        assertThat(dto.getPorcentaje()).isEqualTo("50.0%");
+    }
+
+    @Test
+    void obtenerMuroDeAnimal_shouldReturnNestedReplies_whenRespuestasNotNull() {
+        Comentario respuesta = new Comentario();
+        respuesta.setId(222L);
+        respuesta.setContenido("Respuesta hija");
+        respuesta.setFecha(LocalDateTime.now());
+        respuesta.setAutor(autor);
+        respuesta.setRespuestas(null);
+
+        Comentario padre = new Comentario();
+        padre.setId(111L);
+        padre.setContenido("Comentario raíz");
+        padre.setFecha(LocalDateTime.now().minusMinutes(5));
+        padre.setAutor(autor);
+        padre.setRespuestas(List.of(respuesta));
+
+        when(animalRepository.findById(animal.getId())).thenReturn(Optional.of(animal));
+        when(comentarioRepository.findByAnimalAndPadreIsNullOrderByFechaAsc(animal))
+                .thenReturn(List.of(padre));
+        when(comentarioRepository.existsByAnimal_Id(animal.getId())).thenReturn(true);
+
+        List<ComentarioResponseDto> res = comentarioService.obtenerMuroDeAnimal(animal.getId());
+
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getRespuestas()).hasSize(1);
+        assertThat(res.get(0).getRespuestas().get(0).getContenido()).isEqualTo("Respuesta hija");
+    }
+
 }

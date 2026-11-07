@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,6 +61,10 @@ class AnimalServiceTest {
 
     @Mock
     private IZonaRepository zonaRepository;
+
+    @Mock
+    @SuppressWarnings("unchecked")
+    private AuditorAware<Usuario> auditorProvider;
 
     @InjectMocks
     private AnimalService animalService;
@@ -294,6 +299,64 @@ class AnimalServiceTest {
 
         String email = animalService.obtenerCorreoDelToken();
         assertThat(email).isEqualTo("correo@user.com");
+    }
+
+    /* ===== crearAnimal ===== */
+
+    @Test
+    void crearAnimal_shouldSaveAnimal_withDefaultDateWhenFechaIngresoNull() {
+        AnimalRequestDto dto = AnimalRequestDto.builder()
+                .nombre("  Nemo  ")
+                .especieId(especie.getId())
+                .fechaIngreso(null)
+                .build();
+
+        when(especieRepository.findById(especie.getId())).thenReturn(Optional.of(especie));
+
+        animalService.crearAnimal(dto);
+
+        ArgumentCaptor<Animal> captor = ArgumentCaptor.forClass(Animal.class);
+        verify(animalRepository).save(captor.capture());
+        Animal saved = captor.getValue();
+
+        assertThat(saved.getNombre()).isEqualTo("Nemo");
+        assertThat(saved.getEspecie()).isEqualTo(especie);
+        assertThat(saved.getFechaIngreso()).isNotNull();
+    }
+
+    @Test
+    void crearAnimal_shouldSaveAnimal_withProvidedFechaIngreso() {
+        LocalDateTime fecha = LocalDateTime.of(2024, 3, 15, 10, 0);
+        AnimalRequestDto dto = AnimalRequestDto.builder()
+                .nombre("Rex")
+                .especieId(especie.getId())
+                .fechaIngreso(fecha)
+                .build();
+
+        when(especieRepository.findById(especie.getId())).thenReturn(Optional.of(especie));
+
+        animalService.crearAnimal(dto);
+
+        ArgumentCaptor<Animal> captor = ArgumentCaptor.forClass(Animal.class);
+        verify(animalRepository).save(captor.capture());
+        assertThat(captor.getValue().getFechaIngreso()).isEqualTo(fecha);
+    }
+
+    /* ===== eliminarAnimal ===== */
+
+    @Test
+    void eliminarAnimal_shouldDelete_whenFound() {
+        Animal animal = new Animal();
+        animal.setId(55L);
+        animal.setNombre("Mochi");
+
+        when(animalRepository.findById(55L)).thenReturn(Optional.of(animal));
+        when(auditorProvider.getCurrentAuditor()).thenReturn(Optional.of(usuario));
+
+        animalService.eliminarAnimal(55L);
+
+        verify(animalRepository).delete(animal);
+        assertThat(animal.getDeletedBy()).isEqualTo(usuario);
     }
 
     @Test
