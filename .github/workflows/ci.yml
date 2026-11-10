@@ -28,7 +28,7 @@ jobs:
       - name: Build y test
         run: chmod +x ./gradlew && ./gradlew :zoologico-service:build
 
-      - name: Gate JaCoCo (mínimo 92 %)
+      - name: Gate JaCoCo (mínimo 80 %)
         run: ./gradlew :zoologico-service:jacocoTestCoverageVerification
 
   build-messaging:
