@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -90,5 +91,21 @@ class JwtAuthorizationFilterTest {
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verify(jwtUtils, never()).validateJwtToken(null);
+    }
+
+    @Test
+    void doFilterInternal_shouldNotSetAuthentication_whenTokenIsInvalid() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer invalid.token");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+
+        when(jwtUtils.validateJwtToken("invalid.token")).thenReturn(false);
+
+        filter.doFilter(request, response, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verify(userDetailsService, never()).loadUserByUsername(any());
+        assertThat(chain.getRequest()).isNotNull();
     }
 }

@@ -110,4 +110,11 @@ class CustomUserDetailsTest {
 
         assertThat(a.hashCode()).isEqualTo(b.hashCode());
     }
+
+    @Test
+    void equals_shouldReturnFalse_forDifferentClass() {
+        CustomUserDetails a = CustomUserDetails.build(usuario, List.of(roleAdmin));
+        // getClass() != o.getClass() — branch no cubierto previamente
+        assertThat(a).isNotEqualTo("un-string");
+    }
 }

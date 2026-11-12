@@ -106,7 +106,6 @@ class JwtUtilsTest {
 
     @Test
     void validateJwtToken_shouldThrowJwtException_forExpiredToken() {
-        // Genera token que ya expiró
         JwtUtils expiredJwtUtils = new JwtUtils();
         ReflectionTestUtils.setField(expiredJwtUtils, "jwtSecret", SECRET);
         ReflectionTestUtils.setField(expiredJwtUtils, "jwtExpirationMillis", -1000);
@@ -114,5 +113,26 @@ class JwtUtilsTest {
         String expiredToken = expiredJwtUtils.generateJwtToken(buildAuth("exp@test.com", "ROLE_ADMIN"));
 
         assertThrows(JwtException.class, () -> jwtUtils.validateJwtToken(expiredToken));
+    }
+
+    @Test
+    void validateJwtToken_shouldThrowJwtException_forUnsupportedToken() {
+        // JWT sin firma (alg=none) — parseClaimsJws lanza UnsupportedJwtException
+        String unsignedJwt = "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ0ZXN0In0.";
+
+        assertThrows(JwtException.class, () -> jwtUtils.validateJwtToken(unsignedJwt));
+    }
+
+    @Test
+    void validateJwtToken_shouldThrowJwtException_forWrongSignature() {
+        // JWT firmado con una clave distinta — lanza SecurityException al verificar firma
+        JwtUtils otherUtils = new JwtUtils();
+        ReflectionTestUtils.setField(otherUtils, "jwtSecret",
+                "otra-clave-completamente-diferente-para-prueba-de-firma-invalida!!");
+        ReflectionTestUtils.setField(otherUtils, "jwtExpirationMillis", EXPIRATION_MS);
+
+        String wrongKeyToken = otherUtils.generateJwtToken(buildAuth("hacked@test.com", "ROLE_ADMIN"));
+
+        assertThrows(JwtException.class, () -> jwtUtils.validateJwtToken(wrongKeyToken));
     }
 }
