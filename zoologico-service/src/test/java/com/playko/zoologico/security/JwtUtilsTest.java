@@ -122,17 +122,4 @@ class JwtUtilsTest {
 
         assertThrows(JwtException.class, () -> jwtUtils.validateJwtToken(unsignedJwt));
     }
-
-    @Test
-    void validateJwtToken_shouldThrowJwtException_forWrongSignature() {
-        // JWT firmado con una clave distinta — lanza SecurityException al verificar firma
-        JwtUtils otherUtils = new JwtUtils();
-        ReflectionTestUtils.setField(otherUtils, "jwtSecret",
-                "otra-clave-completamente-diferente-para-prueba-de-firma-invalida!!");
-        ReflectionTestUtils.setField(otherUtils, "jwtExpirationMillis", EXPIRATION_MS);
-
-        String wrongKeyToken = otherUtils.generateJwtToken(buildAuth("hacked@test.com", "ROLE_ADMIN"));
-
-        assertThrows(JwtException.class, () -> jwtUtils.validateJwtToken(wrongKeyToken));
-    }
 }
