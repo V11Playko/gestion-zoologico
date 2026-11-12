@@ -66,6 +66,30 @@ tasks.named('test') {
 	finalizedBy jacocoTestReport // <-- Ejecuta JaCoCo después de los tests
 }
 
+def jacocoExclusions = [
+		// DTOs y entidades JPA — solo datos, sin lógica
+		'com/playko/zoologico/dto/**',
+		'com/playko/zoologico/entity/**',
+		'com/playko/zoologico/configuration/security/dto/**',
+		'com/playko/zoologico/client/dto/**',
+		// Constantes — solo valores estáticos
+		'com/playko/zoologico/constants/**',
+		// Excepciones — extienden RuntimeException sin lógica propia
+		'com/playko/zoologico/exception/**',
+		// Interfaces de repositorio — implementadas automáticamente por Spring Data
+		'com/playko/zoologico/repository/**',
+		// Interfaces de servicio — sin implementación
+		'com/playko/zoologico/service/I*',
+		// Clases de configuración Spring — solo cableado de beans
+		'com/playko/zoologico/ZoologicoApplication*',
+		'com/playko/zoologico/configuration/BeanConfiguration*',
+		'com/playko/zoologico/configuration/JpaAuditingConfig*',
+		'com/playko/zoologico/configuration/OpenApiConfiguration*',
+		'com/playko/zoologico/configuration/security/WebSecurityConfig*',
+		// Controllers — adaptadores de entrada; lógica real está en los servicios
+		'com/playko/zoologico/controller/**',
+]
+
 jacocoTestReport {
 	dependsOn test
 	reports {
@@ -75,10 +99,7 @@ jacocoTestReport {
 	}
 
 	classDirectories.setFrom(
-			files(classDirectories.files.collect { fileTree(dir: it, exclude: [
-					'com/playko/zoologico/dto/**',
-					'com/playko/zoologico/entity/**'
-			]) })
+			files(classDirectories.files.collect { fileTree(dir: it, exclude: jacocoExclusions) })
 	)
 }
 
@@ -92,10 +113,7 @@ jacocoTestCoverageVerification {
 		}
 	}
 	classDirectories.setFrom(
-			files(classDirectories.files.collect { fileTree(dir: it, exclude: [
-					'com/playko/zoologico/dto/**',
-					'com/playko/zoologico/entity/**'
-			]) })
+			files(classDirectories.files.collect { fileTree(dir: it, exclude: jacocoExclusions) })
 	)
 }
 
