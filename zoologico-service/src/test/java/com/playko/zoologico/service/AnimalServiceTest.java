@@ -360,6 +360,21 @@ class AnimalServiceTest {
     }
 
     @Test
+    void eliminarAnimal_shouldDelete_withoutSettingDeletedBy_whenAuditorEmpty() {
+        Animal animal = new Animal();
+        animal.setId(66L);
+        animal.setNombre("Mochi");
+
+        when(animalRepository.findById(66L)).thenReturn(Optional.of(animal));
+        when(auditorProvider.getCurrentAuditor()).thenReturn(Optional.empty());
+
+        animalService.eliminarAnimal(66L);
+
+        verify(animalRepository).delete(animal);
+        assertThat(animal.getDeletedBy()).isNull();
+    }
+
+    @Test
     void obtenerCorreoDelToken_shouldThrow_whenNoAuthOrWrongPrincipal() {
         // caso 1: auth null
         SecurityContext ctx1 = mock(SecurityContext.class);

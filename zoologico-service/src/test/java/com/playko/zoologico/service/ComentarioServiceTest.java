@@ -9,6 +9,7 @@ import com.playko.zoologico.dto.response.PorcentajeComentariosConRespuestasDto;
 import com.playko.zoologico.entity.Animal;
 import com.playko.zoologico.entity.Comentario;
 import com.playko.zoologico.entity.Usuario;
+import com.playko.zoologico.exception.ErrorGettingMailTokenException;
 import com.playko.zoologico.exception.animal.AnimalNotFoundException;
 import com.playko.zoologico.exception.animal.AnimalSinComentariosException;
 import com.playko.zoologico.exception.comentario.ComentarioAnimalMismatchException;
@@ -328,6 +329,24 @@ class ComentarioServiceTest {
 
         // 1 de 2 con respuesta = 50.0%
         assertThat(dto.getPorcentaje()).isEqualTo("50.0%");
+    }
+
+    /* ===== obtenerCorreoDelToken — camino de error ===== */
+
+    @Test
+    void agregarComentario_shouldThrow_whenNoAuthentication() {
+        SecurityContextHolder.clearContext(); // sin auth → obtenerCorreoDelToken lanza excepción
+
+        ComentarioRequestDto dto = ComentarioRequestDto.builder()
+                .padreId(null)
+                .animalId(animal.getId())
+                .contenido("Hola")
+                .build();
+
+        when(animalRepository.findById(animal.getId())).thenReturn(Optional.of(animal));
+
+        assertThrows(ErrorGettingMailTokenException.class,
+                () -> comentarioService.agregarComentario(dto));
     }
 
     @Test
